@@ -1,5 +1,6 @@
 package managers;
 
+import java.net.InetAddress;
 import java.util.ArrayList;
 
 public class SubtitlesPrinter {
@@ -22,6 +23,12 @@ public class SubtitlesPrinter {
             println(i+1 + ". " + clientList.get(i));
         }
     }
+
+    public void printLogSomeoneTriedToSendMessage(){println("Someone tried to send message.");}
+
+    public void printLogUsersListRequest(){println("Received users list request.");}
+
+    public void printLogClientRegistered(String nickname, InetAddress inetAddress, int port){println("Registered client " + nickname + " -- IP: " + inetAddress + ":" + port);}
 
     public void printMessage(String message,String receiver){println("Do: " + receiver + "> " + message);}
 
