@@ -1,10 +1,10 @@
 package managers;
 
 public class Temp {
-    public char[] key;
+    public String key;
     public ConnectionData connectionData;
 
-    public Temp(char[] key, ConnectionData connectionData) {
+    public Temp(String key, ConnectionData connectionData) {
         this.key = key;
         this.connectionData = connectionData;
     }

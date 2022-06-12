@@ -1,5 +1,6 @@
 package managers;
 
+import helpers.InputHandler;
 import helpers.PacketInformation;
 
 import java.io.IOException;
@@ -11,89 +12,120 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class CommandHandler {
-    DatagramSocket socket;
     private boolean running;
-    private byte[] bufToReceive = new byte[256];
+    private final byte[] bufToReceive = new byte[256];
     private byte[] bufToSend;
-    private ArrayList<String> clientList = new ArrayList<>();
-    Map<String, ConnectionData> clients = new LinkedHashMap<>();
+    private final ArrayList<String> clientList = new ArrayList<>();
+    Map<String, ConnectionData> clients = new HashMap<>();
+    InputHandler inputHandler = new InputHandler();
     List<Temp> list = new ArrayList<>();
     InetAddress inetAddress;
     int port;
     SubtitlesPrinter subtitlesPrinter;
-    DatagramPacket packetToSend;
-    DatagramSocket datagramSocket;
+    String receiver;
 
-    public CommandHandler(DatagramSocket socket) throws SocketException {
-        this.socket = socket;
+    public CommandHandler(SubtitlesPrinter subtitlesPrinter) {
+        this.subtitlesPrinter = subtitlesPrinter;
     }
 
 
     public PacketInformation commands(DatagramPacket receivedPacket) {
         String input = new String(receivedPacket.getData());
-
+        input.replaceAll("[\\s\u0000]+", "");
         if (input.contains("/register")) {
-            String nickname = defineWhoWantsToRegister(input).replaceAll("[\\s\u0000]+", "");
-            ;
+            String nickname = inputHandler.defineWhoWantsToRegister(input).replaceAll("[\\s\u0000]+", "");
             if (!checkIfNicknameIsAlreadyUsed(nickname)) {
                 overrideAddresses(receivedPacket.getAddress(), receivedPacket.getPort());
                 addClientToDataBase(nickname);
-
-                stringToSendHandler("Registered Successfully");
+                stringToSendHandler("Registered Successfully", receivedPacket,false);
                 subtitlesPrinter.printLogClientRegistered(nickname, inetAddress, port);
                 return new PacketInformation(bufToSend, new ConnectionData(inetAddress, port));
             } else {
-                stringToSendHandler("Nickname is already in use.");
+                stringToSendHandler("Nickname is already in use.", receivedPacket,false);
                 return new PacketInformation(bufToSend, new ConnectionData(inetAddress, port));
             }
 
         } else if (input.contains("/allUsers") || input.contains("/allusers") || input.contains("/users")) {
             subtitlesPrinter.printLogUsersListRequest();
             overrideAddresses(receivedPacket.getAddress(), receivedPacket.getPort());
-            String clientListInString = clientList.toString();
-            bufToSend = clientListInString.getBytes(StandardCharsets.UTF_8);
+
+            stringToSendHandler(clientList.toString(),receivedPacket,false);
             return new PacketInformation(bufToSend, new ConnectionData(inetAddress, port));
         } else if (input.contains("/msg")) {
-            subtitlesPrinter.printLogSomeoneTriedToSendMessage(); //todo define who tried
-            String receiver = defineReceiver(input).replaceAll("[\\s\u0000]+", "");
-            char[] receiverInCharArray = receiver.toCharArray();
+            subtitlesPrinter.printLogSomeoneTriedToSendMessage();
+            receiver = inputHandler.defineReceiver(input).replaceAll("[\\s\u0000]+", "");
+            if (checkIfReceiverIsOnTheList(receiver.toLowerCase(Locale.ROOT))) {
+                ConnectionData senderConnectionData = new ConnectionData(receivedPacket.getAddress(),receivedPacket.getPort());
+                String sender = getSender(senderConnectionData);
+                stringToSendHandler(InputHandler.defineMessageFromInput(input), receivedPacket,true);
+               // ConnectionData receiverData = temp(receiver);
+                ConnectionData receiverData = clients.get(receiver);
+                System.out.println("Client: " + sender + " successfully sent message to:  " + receiver);
+                return new PacketInformation(bufToSend, receiverData);
+            } else {
+                System.out.println("Message wasn't sent");
+            }
+        } else if (receiver != null) {
+            subtitlesPrinter.printLogSomeoneTriedToSendMessage();
+            if (checkIfReceiverIsOnTheList(receiver.toLowerCase(Locale.ROOT))) {
+                ConnectionData senderConnectionData = new ConnectionData(receivedPacket.getAddress(),receivedPacket.getPort());
+                String sender = getSender(senderConnectionData);
 
-            stringToSendHandler(defineMessageFromInput(input));
-            ConnectionData receiverData = temp(receiverInCharArray);
-
-         /*       packetToSend = new DatagramPacket(
-                        bufToSend,
-                        bufToSend.length,
-                        receiverData.inetAddress,
-                        receiverData.port
-                );
-                socket.send(packetToSend);
-*/
+                stringToSendHandler(input, receivedPacket,true);
+                ConnectionData receiverData = temp(receiver);
+                System.out.println("Client: " + sender + " successfully sent message to:  " + receiver);
+                return new PacketInformation(bufToSend, receiverData);
+            } else {
+                System.out.println("Message wasn't sent");
+            }
         }
         overrideAddresses(receivedPacket.getAddress(), receivedPacket.getPort());
-        stringToSendHandler("Something went wrong.");
+        stringToSendHandler("Something went wrong.", receivedPacket, false);
         return new PacketInformation(bufToSend, new ConnectionData(inetAddress, port));
     }
 
 
-    private String defineWhoWantsToRegister(String input) {
-        String[] words = input.split(" ");
-        return words[1];
-    }
-
     private void addClientToDataBase(String nickname) {
-        list.add(new Temp(nickname.toCharArray(), new ConnectionData(inetAddress, port)));
+        clients.put(nickname, new ConnectionData(inetAddress, port));
+        //list.add(new Temp(nickname, new ConnectionData(inetAddress, port)));
         clientList.add(nickname);
         clients.put(nickname, new ConnectionData(inetAddress, port));
     }
 
-    private void stringToSendHandler(String text) {
-        bufToSend = text.getBytes(StandardCharsets.UTF_8);
+    private String getSender(ConnectionData senderConnectionData) {
+        for (Map.Entry<String, ConnectionData> entry : clients.entrySet()) {
+            if (entry.getValue() == senderConnectionData) {
+                return entry.getKey();
+            }
+        }
+        return "UNKNOWN";
     }
 
-    private ConnectionData temp(char[] key) {
+    /*   private String getSender(InetAddress senderAddress, int senderPort){
+
+           for(int i = 0; i < list.size(); i++){
+               if(senderAddress == list.get(i).connectionData.inetAddress){
+                   if(senderPort == list.get(i).connectionData.port)
+                       return list.get(i).key;
+               }
+           }
+
+           return null;
+       }
+   */
+    private void stringToSendHandler(String text, DatagramPacket receivedPacket, boolean senderRequired) {
+        if (senderRequired) {
+            String sender = getSender(new ConnectionData(receivedPacket.getAddress(),receivedPacket.getPort()));
+            String textToSend = sender + ": " + text;
+            bufToSend = textToSend.getBytes(StandardCharsets.UTF_8);
+        } else {
+            bufToSend = text.getBytes(StandardCharsets.UTF_8);
+        }
+    }
+
+    private ConnectionData temp(String key) {
         for (Temp temp : list) {
-            if (Arrays.equals(key, temp.key)) {
+            if (Objects.equals(key, temp.key)) {
                 return temp.connectionData;
             }
         }
@@ -114,15 +146,6 @@ public class CommandHandler {
         return false;
     }
 
-    private String defineReceiver(String input) {
-        String[] words = input.split(" ");
-        return words[1];
-    }
-
-    private static String defineMessageFromInput(String input) {
-        String[] words = input.split(" ", 3);
-        return words[2];
-    }
 
     private boolean checkIfReceiverIsOnTheList(String receiver) {
         for (int i = 0; i < clientList.size(); i++) {

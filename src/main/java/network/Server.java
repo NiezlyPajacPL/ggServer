@@ -6,6 +6,7 @@ import managers.ConnectionData;
 import managers.SubtitlesPrinter;
 import managers.Temp;
 
+import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
@@ -14,20 +15,15 @@ import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
-public class Server extends Thread {
+public class Server extends Thread implements PacketHandler{
     private DatagramSocket socket;
     private boolean running;
-    private byte[] bufToReceive = new byte[256];
-  //  private byte[] bufToSend;
+    //  private byte[] bufToSend;
     private ArrayList<String> clientList = new ArrayList<>();
-    Map<String, ConnectionData> clients = new LinkedHashMap<>();
+    Map<String, ConnectionData> clients = new HashMap<>();
     List<Temp> list = new ArrayList<>();
-    InetAddress inetAddress;
-    int port;
     SubtitlesPrinter subtitlesPrinter;
-  //  DatagramPacket receivedPacket;
- //   DatagramPacket packetToSend;
-    CommandHandler commandHandler = new CommandHandler(socket);
+
 
     public Server(SubtitlesPrinter subtitlesPrinter) throws SocketException {
         socket = new DatagramSocket(4445);
@@ -36,28 +32,44 @@ public class Server extends Thread {
 
     public void run() {
         running = true;
+        CommandHandler commandHandler = null;
+        commandHandler = new CommandHandler(subtitlesPrinter);
 
         while (running) {
-            try {
-            DatagramPacket receivedPacket
-                    = new DatagramPacket(bufToReceive, bufToReceive.length);
-                DatagramPacket packetToSend;
-                socket.receive(receivedPacket);
-                PacketInformation packetToSendInfo = commandHandler.commands(receivedPacket);;
-                packetToSend = new DatagramPacket(packetToSendInfo.bufToSend,
-                        packetToSendInfo.bufToSend.length,
-                        packetToSendInfo.connectionData.inetAddress,
-                        packetToSendInfo.connectionData.port
-                );
-                socket.send(packetToSend);
+            DatagramPacket receivedPacket = receivePacket();
 
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            //
+            PacketInformation packetToSendInfo = commandHandler.commands(receivedPacket);
+            sendPacket(packetToSendInfo);
         }
         socket.close();
     }
 
+    @Override
+    public void sendPacket(PacketInformation packetToSendInformation) {
+      DatagramPacket packetToSend = new DatagramPacket(packetToSendInformation.bufToSend,
+                packetToSendInformation.bufToSend.length,
+                packetToSendInformation.connectionData.inetAddress,
+                packetToSendInformation.connectionData.port
+        );
+        try {
+            socket.send(packetToSend);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    @Override
+    public DatagramPacket receivePacket() {
+        byte[] bufToReceive = new byte[256];
+        DatagramPacket receivedPacket
+                = new DatagramPacket(bufToReceive, bufToReceive.length);
+
+        try {
+            socket.receive(receivedPacket);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return receivedPacket;
+    }
 }
 
