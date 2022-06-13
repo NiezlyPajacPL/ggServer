@@ -3,11 +3,8 @@ package managers;
 import helpers.InputHandler;
 import helpers.PacketInformation;
 
-import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
 import java.net.InetAddress;
-import java.net.SocketException;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
@@ -54,16 +51,17 @@ public class CommandHandler {
         } else if (input.contains("/msg")) {
             subtitlesPrinter.printLogSomeoneTriedToSendMessage();
             receiver = inputHandler.defineReceiver(input).replaceAll("[\\s\u0000]+", "");
+
             if (checkIfReceiverIsOnTheList(receiver.toLowerCase(Locale.ROOT))) {
                 ConnectionData senderConnectionData = new ConnectionData(receivedPacket.getAddress(),receivedPacket.getPort());
                 String sender = getSender(senderConnectionData);
                 stringToSendHandler(InputHandler.defineMessageFromInput(input), receivedPacket,true);
-               // ConnectionData receiverData = temp(receiver);
                 ConnectionData receiverData = clients.get(receiver);
-                System.out.println("Client: " + sender + " successfully sent message to:  " + receiver);
+
+                subtitlesPrinter.printLogSuccessfullySentMessage(sender,receiver);
                 return new PacketInformation(bufToSend, receiverData);
             } else {
-                System.out.println("Message wasn't sent");
+                subtitlesPrinter.printLogMessageWasNotSent();
             }
         } else if (receiver != null) {
             subtitlesPrinter.printLogSomeoneTriedToSendMessage();
@@ -73,10 +71,10 @@ public class CommandHandler {
 
                 stringToSendHandler(input, receivedPacket,true);
                 ConnectionData receiverData = temp(receiver);
-                System.out.println("Client: " + sender + " successfully sent message to:  " + receiver);
+                subtitlesPrinter.printLogSuccessfullySentMessage(sender,receiver);
                 return new PacketInformation(bufToSend, receiverData);
             } else {
-                System.out.println("Message wasn't sent");
+                subtitlesPrinter.printLogMessageWasNotSent();
             }
         }
         overrideAddresses(receivedPacket.getAddress(), receivedPacket.getPort());

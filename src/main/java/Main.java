@@ -16,6 +16,7 @@ public class Main {
             try {
 
                 server = new Server(subtitlesPrinter);
+                subtitlesPrinter.printLogServerStarted();
                 server.start();
 
 

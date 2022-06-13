@@ -1,9 +1,13 @@
 package managers;
 
+import helpers.DateAndTime;
+
 import java.net.InetAddress;
 import java.util.ArrayList;
 
 public class SubtitlesPrinter {
+
+    DateAndTime dateAndTime = new DateAndTime();
 
     public void printEnter(int enterCount){
         for(int i = 0; i < enterCount; i++){
@@ -24,23 +28,17 @@ public class SubtitlesPrinter {
         }
     }
 
-    public void printLogSomeoneTriedToSendMessage(){println("Someone tried to send message.");}
+    public void printLogServerStarted(){println(dateAndTime.getCurrentTime() + ": SERVER HAS STARTED.");}
 
-    public void printLogUsersListRequest(){println("Received users list request.");}
+    public void printLogSomeoneTriedToSendMessage(){println(dateAndTime.getCurrentTime() + ": Someone tried to send message.");}
 
-    public void printLogClientRegistered(String nickname, InetAddress inetAddress, int port){println("Registered client " + nickname + " -- IP: " + inetAddress + ":" + port);}
+    public void printLogUsersListRequest(){println(dateAndTime.getCurrentTime() + ": Received users list request.");}
 
-    public void printMessage(String message,String receiver){println("Do: " + receiver + "> " + message);}
+    public void printLogClientRegistered(String nickname, InetAddress inetAddress, int port){println(dateAndTime.getCurrentTime() + ": Registered client " + nickname + " -- IP: " + inetAddress + ":" + port);}
 
-    public void printIsHelpNeeded(){println("Jesli potrzebujesz pomocy wpisz '/help'");}
+    public void printLogSuccessfullySentMessage(String sender, String receiver){println(dateAndTime.getCurrentTime() + ": Client: " + sender + " successfully sent message to:  " + receiver);}
 
-    public void printHello(String nickname){println("Hello, " + nickname + "! ");}
-
-    public void askForNickname(){print("Prosze podac swoj nick: ");}
-
-    public void printSomethingWentWrong(){println("Cos poszlo nie tak, lub nie zdefiniowales do kogo probujesz wyslac wiadomosc. Uzyj '/help'");}
-
-    public void goodBye(){println("Nara");}
+    public void printLogMessageWasNotSent(){println(dateAndTime.getCurrentTime() + ": Message wasn't sent.");}
 
     private void println(String text){System.out.println(text);}
 
