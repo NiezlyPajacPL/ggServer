@@ -15,7 +15,6 @@ public class CommandHandler {
     private final ArrayList<String> clientList = new ArrayList<>();
     Map<String, ConnectionData> clients = new HashMap<>();
     InputHandler inputHandler = new InputHandler();
-    List<Temp> list = new ArrayList<>();
     InetAddress inetAddress;
     int port;
     SubtitlesPrinter subtitlesPrinter;
@@ -70,7 +69,7 @@ public class CommandHandler {
                 String sender = getSender(senderConnectionData);
 
                 stringToSendHandler(input, receivedPacket,true);
-                ConnectionData receiverData = temp(receiver);
+                ConnectionData receiverData = clients.get(receiver);
                 subtitlesPrinter.printLogSuccessfullySentMessage(sender,receiver);
                 return new PacketInformation(bufToSend, receiverData);
             } else {
@@ -85,7 +84,6 @@ public class CommandHandler {
 
     private void addClientToDataBase(String nickname) {
         clients.put(nickname, new ConnectionData(inetAddress, port));
-        //list.add(new Temp(nickname, new ConnectionData(inetAddress, port)));
         clientList.add(nickname);
         clients.put(nickname, new ConnectionData(inetAddress, port));
     }
@@ -119,15 +117,6 @@ public class CommandHandler {
         } else {
             bufToSend = text.getBytes(StandardCharsets.UTF_8);
         }
-    }
-
-    private ConnectionData temp(String key) {
-        for (Temp temp : list) {
-            if (Objects.equals(key, temp.key)) {
-                return temp.connectionData;
-            }
-        }
-        return null;
     }
 
     private void overrideAddresses(InetAddress inetAddress, int port) {

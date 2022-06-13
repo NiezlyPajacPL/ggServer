@@ -4,24 +4,17 @@ import helpers.PacketInformation;
 import managers.CommandHandler;
 import managers.ConnectionData;
 import managers.SubtitlesPrinter;
-import managers.Temp;
 
-import javax.xml.crypto.Data;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
-import java.net.InetAddress;
 import java.net.SocketException;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class Server extends Thread implements PacketHandler{
     private DatagramSocket socket;
     private boolean running;
     //  private byte[] bufToSend;
-    private ArrayList<String> clientList = new ArrayList<>();
-    Map<String, ConnectionData> clients = new HashMap<>();
-    List<Temp> list = new ArrayList<>();
     SubtitlesPrinter subtitlesPrinter;
 
 
