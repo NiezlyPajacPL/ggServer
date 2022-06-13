@@ -2,19 +2,16 @@ package network;
 
 import helpers.PacketInformation;
 import managers.CommandHandler;
-import managers.ConnectionData;
 import managers.SubtitlesPrinter;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
-import java.util.*;
 
-public class Server extends Thread implements PacketHandler{
+public class Server extends Thread implements PacketHandler {
     private DatagramSocket socket;
     private boolean running;
-    //  private byte[] bufToSend;
     SubtitlesPrinter subtitlesPrinter;
 
 
@@ -39,7 +36,7 @@ public class Server extends Thread implements PacketHandler{
 
     @Override
     public void sendPacket(PacketInformation packetToSendInformation) {
-      DatagramPacket packetToSend = new DatagramPacket(packetToSendInformation.bufToSend,
+        DatagramPacket packetToSend = new DatagramPacket(packetToSendInformation.bufToSend,
                 packetToSendInformation.bufToSend.length,
                 packetToSendInformation.connectionData.inetAddress,
                 packetToSendInformation.connectionData.port

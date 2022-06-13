@@ -33,11 +33,11 @@ public class CommandHandler {
             if (!checkIfNicknameIsAlreadyUsed(nickname)) {
                 overrideAddresses(receivedPacket.getAddress(), receivedPacket.getPort());
                 addClientToDataBase(nickname);
-                stringToSendHandler("Registered Successfully", receivedPacket,false);
+                stringToSendHandler("Registered Successfully", receivedPacket, false);
                 subtitlesPrinter.printLogClientRegistered(nickname, inetAddress, port);
                 return new PacketInformation(bufToSend, new ConnectionData(inetAddress, port));
             } else {
-                stringToSendHandler("Nickname is already in use.", receivedPacket,false);
+                stringToSendHandler("Nickname is already in use.", receivedPacket, false);
                 return new PacketInformation(bufToSend, new ConnectionData(inetAddress, port));
             }
 
@@ -45,19 +45,19 @@ public class CommandHandler {
             subtitlesPrinter.printLogUsersListRequest();
             overrideAddresses(receivedPacket.getAddress(), receivedPacket.getPort());
 
-            stringToSendHandler(clientList.toString(),receivedPacket,false);
+            stringToSendHandler(clientList.toString(), receivedPacket, false);
             return new PacketInformation(bufToSend, new ConnectionData(inetAddress, port));
         } else if (input.contains("/msg")) {
             subtitlesPrinter.printLogSomeoneTriedToSendMessage();
             receiver = inputHandler.defineReceiver(input).replaceAll("[\\s\u0000]+", "");
 
             if (checkIfReceiverIsOnTheList(receiver.toLowerCase(Locale.ROOT))) {
-                ConnectionData senderConnectionData = new ConnectionData(receivedPacket.getAddress(),receivedPacket.getPort());
+                ConnectionData senderConnectionData = new ConnectionData(receivedPacket.getAddress(), receivedPacket.getPort());
                 String sender = getSender(senderConnectionData);
-                stringToSendHandler(InputHandler.defineMessageFromInput(input), receivedPacket,true);
+                stringToSendHandler(InputHandler.defineMessageFromInput(input), receivedPacket, true);
                 ConnectionData receiverData = clients.get(receiver);
 
-                subtitlesPrinter.printLogSuccessfullySentMessage(sender,receiver);
+                subtitlesPrinter.printLogSuccessfullySentMessage(sender, receiver);
                 return new PacketInformation(bufToSend, receiverData);
             } else {
                 subtitlesPrinter.printLogMessageWasNotSent();
@@ -65,12 +65,12 @@ public class CommandHandler {
         } else if (receiver != null) {
             subtitlesPrinter.printLogSomeoneTriedToSendMessage();
             if (checkIfReceiverIsOnTheList(receiver.toLowerCase(Locale.ROOT))) {
-                ConnectionData senderConnectionData = new ConnectionData(receivedPacket.getAddress(),receivedPacket.getPort());
+                ConnectionData senderConnectionData = new ConnectionData(receivedPacket.getAddress(), receivedPacket.getPort());
                 String sender = getSender(senderConnectionData);
 
-                stringToSendHandler(input, receivedPacket,true);
+                stringToSendHandler(input, receivedPacket, true);
                 ConnectionData receiverData = clients.get(receiver);
-                subtitlesPrinter.printLogSuccessfullySentMessage(sender,receiver);
+                subtitlesPrinter.printLogSuccessfullySentMessage(sender, receiver);
                 return new PacketInformation(bufToSend, receiverData);
             } else {
                 subtitlesPrinter.printLogMessageWasNotSent();
@@ -90,28 +90,16 @@ public class CommandHandler {
 
     private String getSender(ConnectionData senderConnectionData) {
         for (Map.Entry<String, ConnectionData> entry : clients.entrySet()) {
-            if (entry.getValue() == senderConnectionData) {
+            if ((Objects.equals(entry.getValue().inetAddress, senderConnectionData.inetAddress)) && Objects.equals(entry.getValue().port, senderConnectionData.port)) {
                 return entry.getKey();
             }
         }
         return "UNKNOWN";
     }
 
-    /*   private String getSender(InetAddress senderAddress, int senderPort){
-
-           for(int i = 0; i < list.size(); i++){
-               if(senderAddress == list.get(i).connectionData.inetAddress){
-                   if(senderPort == list.get(i).connectionData.port)
-                       return list.get(i).key;
-               }
-           }
-
-           return null;
-       }
-   */
     private void stringToSendHandler(String text, DatagramPacket receivedPacket, boolean senderRequired) {
         if (senderRequired) {
-            String sender = getSender(new ConnectionData(receivedPacket.getAddress(),receivedPacket.getPort()));
+            String sender = getSender(new ConnectionData(receivedPacket.getAddress(), receivedPacket.getPort()));
             String textToSend = sender + ": " + text;
             bufToSend = textToSend.getBytes(StandardCharsets.UTF_8);
         } else {

@@ -1,32 +1,12 @@
 package managers;
 
 import helpers.DateAndTime;
-
 import java.net.InetAddress;
-import java.util.ArrayList;
+
 
 public class SubtitlesPrinter {
 
     DateAndTime dateAndTime = new DateAndTime();
-
-    public void printEnter(int enterCount){
-        for(int i = 0; i < enterCount; i++){
-            println("");
-        }
-    }
-
-    public void printHelper(){
-        println("////////////POMOC////////////");
-        println("Lista wszystkich uzytkownikow: /allUsers");
-        println("Wysylanie wiadomosci do danego uzytownika: /msg <nick uzytkownika> <twoja wiadomosc>");
-        println("Wysylanie wiadomosci do poprzedniego uzytkownika: /r <twoja wiadomosc>");
-        println("Wyjscie: /end");
-    }
-    public void printClientList(ArrayList<String> clientList){
-        for(int i = 0; i < clientList.size(); i++) {
-            println(i+1 + ". " + clientList.get(i));
-        }
-    }
 
     public void printLogServerStarted(){println(dateAndTime.getCurrentTime() + ": SERVER HAS STARTED.");}
 
