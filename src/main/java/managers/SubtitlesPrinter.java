@@ -14,6 +14,8 @@ public class SubtitlesPrinter {
 
     public void printLogUsersListRequest(){println(dateAndTime.getCurrentTime() + ": Received users list request.");}
 
+    public void printLogClientLoggedIn(String nickname){println(dateAndTime.getCurrentTime() + ": Client - " + nickname + " successfully logged in." );}
+
     public void printLogClientRegistered(String nickname, InetAddress inetAddress, int port){println(dateAndTime.getCurrentTime() + ": Registered client " + nickname + " -- IP: " + inetAddress + ":" + port);}
 
     public void printLogSuccessfullySentMessage(String sender, String receiver){println(dateAndTime.getCurrentTime() + ": Client: " + sender + " successfully sent message to:  " + receiver);}

@@ -1,65 +1,12 @@
 package network;
 
-import helpers.PacketInformation;
-import managers.CommandHandler;
-import managers.SubtitlesPrinter;
+import helpers.Packet;
 
-import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.DatagramSocket;
-import java.net.SocketException;
 
-public class Server extends Thread implements PacketHandler {
-    private DatagramSocket socket;
-    private boolean running;
-    SubtitlesPrinter subtitlesPrinter;
+public interface Server extends Runnable {
 
+    void sendPacket(Packet packetToSend);
 
-    public Server(SubtitlesPrinter subtitlesPrinter) throws SocketException {
-        socket = new DatagramSocket(4445);
-        this.subtitlesPrinter = subtitlesPrinter;
-    }
-
-    public void run() {
-        running = true;
-        CommandHandler commandHandler = null;
-        commandHandler = new CommandHandler(subtitlesPrinter);
-
-        while (running) {
-            DatagramPacket receivedPacket = receivePacket();
-
-            PacketInformation packetToSendInfo = commandHandler.commands(receivedPacket);
-            sendPacket(packetToSendInfo);
-        }
-        socket.close();
-    }
-
-    @Override
-    public void sendPacket(PacketInformation packetToSendInformation) {
-        DatagramPacket packetToSend = new DatagramPacket(packetToSendInformation.bufToSend,
-                packetToSendInformation.bufToSend.length,
-                packetToSendInformation.connectionData.inetAddress,
-                packetToSendInformation.connectionData.port
-        );
-        try {
-            socket.send(packetToSend);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    @Override
-    public DatagramPacket receivePacket() {
-        byte[] bufToReceive = new byte[256];
-        DatagramPacket receivedPacket
-                = new DatagramPacket(bufToReceive, bufToReceive.length);
-
-        try {
-            socket.receive(receivedPacket);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return receivedPacket;
-    }
+    DatagramPacket receivePacket();
 }
-

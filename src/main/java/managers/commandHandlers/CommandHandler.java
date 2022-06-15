@@ -1,64 +1,97 @@
-package managers;
+package managers.commandHandlers;
 
-import helpers.InputHandler;
-import helpers.PacketInformation;
+import helpers.FileHandler;
+import helpers.InputHelper;
+import helpers.Packet;
+import managers.ConnectionData;
+import managers.SubtitlesPrinter;
 
+import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.InetAddress;
 import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 public class CommandHandler {
-    private boolean running;
-    private final byte[] bufToReceive = new byte[256];
     private byte[] bufToSend;
     private final ArrayList<String> clientList = new ArrayList<>();
     Map<String, ConnectionData> clients = new HashMap<>();
-    InputHandler inputHandler = new InputHandler();
+    InputHelper inputHandler = new InputHelper();
     InetAddress inetAddress;
     int port;
     SubtitlesPrinter subtitlesPrinter;
     String receiver;
+    FileHandler fileHandler;
+
+    {
+        try {
+            fileHandler = new FileHandler();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 
     public CommandHandler(SubtitlesPrinter subtitlesPrinter) {
         this.subtitlesPrinter = subtitlesPrinter;
     }
 
 
-    public PacketInformation commands(DatagramPacket receivedPacket) {
+    public Packet commands(DatagramPacket receivedPacket) {
         String input = new String(receivedPacket.getData());
-        input.replaceAll("[\\s\u0000]+", "");
+
         if (input.contains("/register")) {
-            String nickname = inputHandler.defineWhoWantsToRegister(input).replaceAll("[\\s\u0000]+", "");
-            if (!checkIfNicknameIsAlreadyUsed(nickname)) {
+            String nickname = inputHandler.defineWhoWantsToRegister(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
+            String password = inputHandler.definePassword(input).replaceAll("[\\s\u0000]+", "");
+            if (!isUserRegistered(nickname)) {
                 overrideAddresses(receivedPacket.getAddress(), receivedPacket.getPort());
-                addClientToDataBase(nickname);
+                addClientToDataBase(nickname,password);
+
                 stringToSendHandler("Registered Successfully", receivedPacket, false);
                 subtitlesPrinter.printLogClientRegistered(nickname, inetAddress, port);
-                return new PacketInformation(bufToSend, new ConnectionData(inetAddress, port));
             } else {
                 stringToSendHandler("Nickname is already in use.", receivedPacket, false);
-                return new PacketInformation(bufToSend, new ConnectionData(inetAddress, port));
+                System.out.println("Failed registration.");
             }
+            return new Packet(bufToSend, new ConnectionData(inetAddress, port));
 
-        } else if (input.contains("/allUsers") || input.contains("/allusers") || input.contains("/users")) {
+        } else if(input.contains("/login")){
+            String nickname = inputHandler.defineWhoWantsToRegister(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
+            String password = inputHandler.definePassword(input).replaceAll("[\\s\u0000]+", "");
+
+            if(fileHandler.doesClientExistInDataBase(nickname)){
+                if(fileHandler.doesPasswordMatch(password)){
+                    overrideAddresses(receivedPacket.getAddress(), receivedPacket.getPort());
+                    updateDataBase(nickname);
+                    stringToSendHandler("Hello again " + nickname + "!", receivedPacket, false);
+                    subtitlesPrinter.printLogClientLoggedIn(nickname);
+
+                }else{
+                    stringToSendHandler("Password does not match.", receivedPacket, false);
+                }
+            }else{
+                stringToSendHandler("Client does not exist in data base.", receivedPacket, false);
+            }
+            return new Packet(bufToSend, new ConnectionData(inetAddress, port));
+        }
+
+        else if (input.contains("/allUsers") || input.contains("/allusers") || input.contains("/users")) {
             subtitlesPrinter.printLogUsersListRequest();
             overrideAddresses(receivedPacket.getAddress(), receivedPacket.getPort());
 
             stringToSendHandler(clientList.toString(), receivedPacket, false);
-            return new PacketInformation(bufToSend, new ConnectionData(inetAddress, port));
+            return new Packet(bufToSend, new ConnectionData(inetAddress, port));
         } else if (input.contains("/msg")) {
             subtitlesPrinter.printLogSomeoneTriedToSendMessage();
-            receiver = inputHandler.defineReceiver(input).replaceAll("[\\s\u0000]+", "");
+            receiver = inputHandler.defineReceiver(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
 
             if (checkIfReceiverIsOnTheList(receiver.toLowerCase(Locale.ROOT))) {
                 ConnectionData senderConnectionData = new ConnectionData(receivedPacket.getAddress(), receivedPacket.getPort());
                 String sender = getSender(senderConnectionData);
-                stringToSendHandler(InputHandler.defineMessageFromInput(input), receivedPacket, true);
+                stringToSendHandler(InputHelper.defineMessageFromInput(input), receivedPacket, true);
                 ConnectionData receiverData = clients.get(receiver);
 
                 subtitlesPrinter.printLogSuccessfullySentMessage(sender, receiver);
-                return new PacketInformation(bufToSend, receiverData);
+                return new Packet(bufToSend, receiverData);
             } else {
                 subtitlesPrinter.printLogMessageWasNotSent();
             }
@@ -71,26 +104,36 @@ public class CommandHandler {
                 stringToSendHandler(input, receivedPacket, true);
                 ConnectionData receiverData = clients.get(receiver);
                 subtitlesPrinter.printLogSuccessfullySentMessage(sender, receiver);
-                return new PacketInformation(bufToSend, receiverData);
+                return new Packet(bufToSend, receiverData);
             } else {
                 subtitlesPrinter.printLogMessageWasNotSent();
             }
         }
         overrideAddresses(receivedPacket.getAddress(), receivedPacket.getPort());
         stringToSendHandler("Something went wrong.", receivedPacket, false);
-        return new PacketInformation(bufToSend, new ConnectionData(inetAddress, port));
+        return new Packet(bufToSend, new ConnectionData(inetAddress, port));
     }
 
 
-    private void addClientToDataBase(String nickname) {
+    private void addClientToDataBase(String nickname,String password) {
         clients.put(nickname, new ConnectionData(inetAddress, port));
         clientList.add(nickname);
-        clients.put(nickname, new ConnectionData(inetAddress, port));
+        try {
+            FileHandler fileHandler = new FileHandler();
+            fileHandler.overrideDataBase(nickname + " " + password);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateDataBase(String nickname){
+        clients.put(nickname, new ConnectionData(inetAddress,port));
+        clientList.add(nickname);
     }
 
     private String getSender(ConnectionData senderConnectionData) {
         for (Map.Entry<String, ConnectionData> entry : clients.entrySet()) {
-            if ((Objects.equals(entry.getValue().inetAddress, senderConnectionData.inetAddress)) && Objects.equals(entry.getValue().port, senderConnectionData.port)) {
+            if ((Objects.equals(entry.getValue().getInetAddress(), senderConnectionData.getInetAddress())) && Objects.equals(entry.getValue().getPort(), senderConnectionData.getPort())) {
                 return entry.getKey();
             }
         }
@@ -112,7 +155,7 @@ public class CommandHandler {
         this.port = port;
     }
 
-    private boolean checkIfNicknameIsAlreadyUsed(String nickname) {
+    private boolean isUserRegistered(String nickname) {
         for (int i = 0; i < clientList.size(); i++) {
             if (Objects.equals(clientList.get(i), nickname)) {
                 return true;
