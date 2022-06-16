@@ -28,7 +28,7 @@ public class FileHandler {
     public boolean doesClientExistInDataBase(String nickname){
         while(scanner.hasNextLine()) {
             String string = scanner.nextLine();
-            String nicknameFromString = inputHelper.defineNickname(string);
+            String nicknameFromString = inputHelper.dataBaseDefineNickname(string);
             if(nicknameFromString.equals(nickname))
 
                 System.out.println("Client " +nickname + " found in data base");
@@ -41,7 +41,7 @@ public class FileHandler {
     public boolean doesPasswordMatch(String password){
         while(scanner.hasNextLine()) {
             String string = scanner.nextLine();
-            String passwordFromString = inputHelper.definePassword(string);
+            String passwordFromString = inputHelper.dataBaseDefinePassword(string);
             if(passwordFromString.equals(password))
 
                 System.out.println("Password  matches");

@@ -11,19 +11,23 @@ public class InputHelper {
         String[] words = input.split(" ");
         return words[1];
     }
+    public static String defineMessageFromInput(String input) {
+        String[] words = input.split(" ", 3);
+        return words[2];
+    }
 
-    public String definePassword(String input){
+    public String definePasswordFromInput(String input){
+        String[] words = input.split(" ");
+        return words[2];
+    }
+
+    public String dataBaseDefinePassword(String input){
         String[] words = input.split(" ");
         return words[1];
     }
 
-    public String defineNickname(String input){
+    public String dataBaseDefineNickname(String input){
         String[] words = input.split(" ");
         return words[0];
-    }
-
-    public static String defineMessageFromInput(String input) {
-        String[] words = input.split(" ", 3);
-        return words[2];
     }
 }

@@ -1,5 +1,6 @@
 package managers.commandHandlers;
 
+import helpers.CommandData;
 import helpers.FileHandler;
 import helpers.InputHelper;
 import helpers.Packet;
@@ -15,13 +16,13 @@ import java.util.*;
 public class CommandHandler {
     private byte[] bufToSend;
     private final ArrayList<String> clientList = new ArrayList<>();
-    Map<String, ConnectionData> clients = new HashMap<>();
+    Map<String, ConnectionData> clients;
     InputHelper inputHandler = new InputHelper();
     InetAddress inetAddress;
     int port;
     SubtitlesPrinter subtitlesPrinter;
-    String receiver;
     FileHandler fileHandler;
+    private String receiver;
 
     {
         try {
@@ -31,17 +32,93 @@ public class CommandHandler {
         }
     }
 
-    public CommandHandler(SubtitlesPrinter subtitlesPrinter) {
+    public CommandHandler(SubtitlesPrinter subtitlesPrinter,Map<String, ConnectionData> clients) {
         this.subtitlesPrinter = subtitlesPrinter;
+        this.clients = clients;
+    }
+
+    public CommandData commandss(DatagramPacket receivedPacket) {
+        String input = new String(receivedPacket.getData());;
+        if (input.contains("/register")) {
+
+            return new CommandData("registration",
+                    inputHandler.defineWhoWantsToRegister(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT),
+                    receivedPacket,clients);
+
+        }else if(input.contains("/allUsers") || input.contains("/allusers") || input.contains("/users")){
+        }
+
+        return new CommandData("UNKNOWN",
+                inputHandler.defineWhoWantsToRegister(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT),
+             receivedPacket,clients);
     }
 
 
-    public Packet commands(DatagramPacket receivedPacket) {
+
+    private void addClientToDataBase(String nickname,String password) {
+        clients.put(nickname, new ConnectionData(inetAddress, port));
+        clientList.add(nickname);
+        try {
+            FileHandler fileHandler = new FileHandler();
+            fileHandler.overrideDataBase(nickname + " " + password);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    private void updateDataBase(String nickname){
+        clients.put(nickname, new ConnectionData(inetAddress,port));
+        clientList.add(nickname);
+    }
+
+    private String getSender(ConnectionData senderConnectionData) {
+        for (Map.Entry<String, ConnectionData> entry : clients.entrySet()) {
+            if ((Objects.equals(entry.getValue().getInetAddress(), senderConnectionData.getInetAddress())) && Objects.equals(entry.getValue().getPort(), senderConnectionData.getPort())) {
+                return entry.getKey();
+            }
+        }
+        return "UNKNOWN";
+    }
+
+    private void stringToSendHandler(String text, DatagramPacket receivedPacket, boolean senderRequired) {
+        if (senderRequired) {
+            String sender = getSender(new ConnectionData(receivedPacket.getAddress(), receivedPacket.getPort()));
+            String textToSend = sender + ": " + text;
+            bufToSend = textToSend.getBytes(StandardCharsets.UTF_8);
+        } else {
+            bufToSend = text.getBytes(StandardCharsets.UTF_8);
+        }
+    }
+
+    private void overrideAddresses(InetAddress inetAddress, int port) {
+        this.inetAddress = inetAddress;
+        this.port = port;
+    }
+
+    private boolean isUserRegistered(String nickname) {
+        for (int i = 0; i < clientList.size(); i++) {
+            if (Objects.equals(clientList.get(i), nickname)) {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private boolean checkIfReceiverIsOnTheList(String receiver) {
+        for (int i = 0; i < clientList.size(); i++) {
+            if (clients.containsKey(receiver)) {
+                return true;
+            }
+        }
+        return false;
+    }
+}
+  /*  public Packet commands(DatagramPacket receivedPacket) {
         String input = new String(receivedPacket.getData());
 
         if (input.contains("/register")) {
             String nickname = inputHandler.defineWhoWantsToRegister(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
-            String password = inputHandler.definePassword(input).replaceAll("[\\s\u0000]+", "");
+            String password = inputHandler.definePasswordFromInput(input).replaceAll("[\\s\u0000]+", "");
             if (!isUserRegistered(nickname)) {
                 overrideAddresses(receivedPacket.getAddress(), receivedPacket.getPort());
                 addClientToDataBase(nickname,password);
@@ -54,9 +131,11 @@ public class CommandHandler {
             }
             return new Packet(bufToSend, new ConnectionData(inetAddress, port));
 
+
+
         } else if(input.contains("/login")){
             String nickname = inputHandler.defineWhoWantsToRegister(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
-            String password = inputHandler.definePassword(input).replaceAll("[\\s\u0000]+", "");
+            String password = inputHandler.dataBaseDefinePassword(input).replaceAll("[\\s\u0000]+", "");
 
             if(fileHandler.doesClientExistInDataBase(nickname)){
                 if(fileHandler.doesPasswordMatch(password)){
@@ -112,65 +191,7 @@ public class CommandHandler {
         overrideAddresses(receivedPacket.getAddress(), receivedPacket.getPort());
         stringToSendHandler("Something went wrong.", receivedPacket, false);
         return new Packet(bufToSend, new ConnectionData(inetAddress, port));
+
+
     }
-
-
-    private void addClientToDataBase(String nickname,String password) {
-        clients.put(nickname, new ConnectionData(inetAddress, port));
-        clientList.add(nickname);
-        try {
-            FileHandler fileHandler = new FileHandler();
-            fileHandler.overrideDataBase(nickname + " " + password);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-
-    private void updateDataBase(String nickname){
-        clients.put(nickname, new ConnectionData(inetAddress,port));
-        clientList.add(nickname);
-    }
-
-    private String getSender(ConnectionData senderConnectionData) {
-        for (Map.Entry<String, ConnectionData> entry : clients.entrySet()) {
-            if ((Objects.equals(entry.getValue().getInetAddress(), senderConnectionData.getInetAddress())) && Objects.equals(entry.getValue().getPort(), senderConnectionData.getPort())) {
-                return entry.getKey();
-            }
-        }
-        return "UNKNOWN";
-    }
-
-    private void stringToSendHandler(String text, DatagramPacket receivedPacket, boolean senderRequired) {
-        if (senderRequired) {
-            String sender = getSender(new ConnectionData(receivedPacket.getAddress(), receivedPacket.getPort()));
-            String textToSend = sender + ": " + text;
-            bufToSend = textToSend.getBytes(StandardCharsets.UTF_8);
-        } else {
-            bufToSend = text.getBytes(StandardCharsets.UTF_8);
-        }
-    }
-
-    private void overrideAddresses(InetAddress inetAddress, int port) {
-        this.inetAddress = inetAddress;
-        this.port = port;
-    }
-
-    private boolean isUserRegistered(String nickname) {
-        for (int i = 0; i < clientList.size(); i++) {
-            if (Objects.equals(clientList.get(i), nickname)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
-
-    private boolean checkIfReceiverIsOnTheList(String receiver) {
-        for (int i = 0; i < clientList.size(); i++) {
-            if (clients.containsKey(receiver)) {
-                return true;
-            }
-        }
-        return false;
-    }
-}
+*/

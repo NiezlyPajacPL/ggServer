@@ -1,6 +1,7 @@
 package network;
 
 import helpers.Packet;
+import managers.ConnectionData;
 import managers.commandHandlers.CommandHandler;
 import managers.SubtitlesPrinter;
 
@@ -8,12 +9,14 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.util.HashMap;
+import java.util.Map;
 
 public class UdpServer implements Server {
     private DatagramSocket socket;
 
     SubtitlesPrinter subtitlesPrinter;
-
+    Map<String, ConnectionData> clients = new HashMap<>();
 
     public UdpServer(SubtitlesPrinter subtitlesPrinter,int port) throws SocketException {
         socket = new DatagramSocket(port);
@@ -21,7 +24,7 @@ public class UdpServer implements Server {
     }
 
     public void run() {
-       CommandHandler commandHandler = new CommandHandler(subtitlesPrinter);
+       CommandHandler commandHandler = new CommandHandler(subtitlesPrinter,clients);
 
         while (true) {
             DatagramPacket receivedPacket = receivePacket();
