@@ -15,12 +15,9 @@ import java.util.*;
 
 public class CommandHandler {
     private byte[] bufToSend;
-    private final ArrayList<String> clientList = new ArrayList<>();
-    Map<String, ConnectionData> clients;
     InputHelper inputHandler = new InputHelper();
     InetAddress inetAddress;
     int port;
-    SubtitlesPrinter subtitlesPrinter;
     FileHandler fileHandler;
     private String receiver;
 
@@ -32,28 +29,22 @@ public class CommandHandler {
         }
     }
 
-    public CommandHandler(SubtitlesPrinter subtitlesPrinter,Map<String, ConnectionData> clients) {
-        this.subtitlesPrinter = subtitlesPrinter;
-        this.clients = clients;
-    }
+    public CommandData commands(DatagramPacket receivedPacket) {
+        String input = new String(receivedPacket.getData());
 
-    public CommandData commandss(DatagramPacket receivedPacket) {
-        String input = new String(receivedPacket.getData());;
         if (input.contains("/register")) {
 
-            return new CommandData("registration",
-                    inputHandler.defineWhoWantsToRegister(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT),
-                    receivedPacket,clients);
+            return new CommandData("registration", receivedPacket);
 
-        }else if(input.contains("/allUsers") || input.contains("/allusers") || input.contains("/users")){
+        } else if (input.contains("/allUsers") || input.contains("/allusers") || input.contains("/users")) {
+
+            return new CommandData("usersRequest", receivedPacket);
         }
 
-        return new CommandData("UNKNOWN",
-                inputHandler.defineWhoWantsToRegister(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT),
-             receivedPacket,clients);
+        return new CommandData("UNKNOWN", receivedPacket);
     }
-
-
+}
+/*
 
     private void addClientToDataBase(String nickname,String password) {
         clients.put(nickname, new ConnectionData(inetAddress, port));

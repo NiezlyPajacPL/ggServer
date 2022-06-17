@@ -4,6 +4,7 @@ import helpers.Packet;
 import managers.ConnectionData;
 import managers.commandHandlers.CommandHandler;
 import managers.SubtitlesPrinter;
+import managers.commandHandlers.CommandUser;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -14,7 +15,6 @@ import java.util.Map;
 
 public class UdpServer implements Server {
     private DatagramSocket socket;
-
     SubtitlesPrinter subtitlesPrinter;
     Map<String, ConnectionData> clients = new HashMap<>();
 
@@ -24,13 +24,11 @@ public class UdpServer implements Server {
     }
 
     public void run() {
-       CommandHandler commandHandler = new CommandHandler(subtitlesPrinter,clients);
-
+        CommandUser commandUser = new CommandUser(clients,subtitlesPrinter);
         while (true) {
             DatagramPacket receivedPacket = receivePacket();
-
-            Packet packetToSendInfo = commandHandler.commands(receivedPacket);
-            sendPacket(packetToSendInfo);
+            Packet packetToSend = commandUser.useCommand(receivedPacket);
+            sendPacket(packetToSend);
         }
     }
 

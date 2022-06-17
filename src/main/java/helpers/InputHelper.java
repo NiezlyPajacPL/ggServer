@@ -7,7 +7,7 @@ public class InputHelper {
         return words[1];
     }
 
-    public String defineWhoWantsToRegister(String input) {
+    public static String defineWhoWantsToRegister(String input) {
         String[] words = input.split(" ");
         return words[1];
     }

@@ -3,6 +3,7 @@ package managers.commandHandlers;
 import helpers.CommandData;
 import helpers.FileHandler;
 import helpers.Packet;
+import helpers.StringToSendHelper;
 import managers.ConnectionData;
 
 import javax.xml.crypto.Data;
@@ -26,22 +27,13 @@ public class RegisterUser {
         this.packet = packet;
         this.clients = clients;
     }
-    private byte[] bufToSend;
 
     public Packet register(){
         addClientToDataBase();
-        stringToSendHandler("Registered Successfully", receivedPacket, false);
+        return new Packet(StringToSendHelper.stringToSendHandler("Registered Successfully",nickname, false),
+                new ConnectionData(packet.getAddress(), packet.getPort()));
     }
 
-    private void stringToSendHandler(String text, DatagramPacket receivedPacket, boolean senderRequired) {
-        if (senderRequired) {
-            String sender = getSender(new ConnectionData(receivedPacket.getAddress(), receivedPacket.getPort()));
-            String textToSend = sender + ": " + text;
-            bufToSend = textToSend.getBytes(StandardCharsets.UTF_8);
-        } else {
-            bufToSend = text.getBytes(StandardCharsets.UTF_8);
-        }
-    }
     private void addClientToDataBase() {
         clients.put(nickname, new ConnectionData(packet.getAddress(), packet.getPort()));
      //   clientList.add(nickname);
@@ -74,4 +66,4 @@ public class RegisterUser {
             }
             return new Packet(bufToSend, new ConnectionData(inetAddress, port));
 
-
+*/
