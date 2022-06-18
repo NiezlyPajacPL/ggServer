@@ -33,14 +33,12 @@ public class CommandHandler {
         String input = new String(receivedPacket.getData());
 
         if (input.contains("/register")) {
-
             return new CommandData("registration", receivedPacket);
 
         } else if (input.contains("/allUsers") || input.contains("/allusers") || input.contains("/users")) {
 
             return new CommandData("usersRequest", receivedPacket);
         }
-
         return new CommandData("UNKNOWN", receivedPacket);
     }
 }

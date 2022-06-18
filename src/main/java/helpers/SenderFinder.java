@@ -8,7 +8,7 @@ import java.util.Map;
 import java.util.Objects;
 
 public class SenderFinder {
-    public static String getSender(boolean senderWantsToRegister, DatagramPacket packet, Map<String, ConnectionData> clients) {
+    public String getSender(boolean senderWantsToRegister, DatagramPacket packet, Map<String, ConnectionData> clients) {
         if(senderWantsToRegister) {
             return InputHelper.defineWhoWantsToRegister(new String(packet.getData()));
         }

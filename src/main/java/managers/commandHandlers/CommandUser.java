@@ -21,12 +21,14 @@ public class CommandUser {
         this.subtitlesPrinter = subtitlesPrinter;
     }
     CommandHandler commandHandler = new CommandHandler();
+    SenderFinder senderFinder = new SenderFinder();
+    StringToSendHelper stringToSendHelper = new StringToSendHelper();
 
     public Packet useCommand(DatagramPacket receivedPacket) {
         CommandData commandData = commandHandler.commands(receivedPacket);
 
         if (Objects.equals(commandData.getType(), "registration")) {
-            String sender = SenderFinder.getSender(true,receivedPacket,clients);
+            String sender = senderFinder.getSender(true,receivedPacket,clients);
             subtitlesPrinter.printLogClientRegistered(sender, commandData.packet.getAddress(), commandHandler.port);
 
             return new RegisterUser(sender, commandData.packet, clients).register();
@@ -34,7 +36,7 @@ public class CommandUser {
 
         }
 
-        return new Packet(StringToSendHelper.stringToSendHandler("Something went wrong", null, false),
+        return new Packet(stringToSendHelper.stringToSendHandler("Something went wrong", null, false),
                 new ConnectionData(commandData.packet.getAddress(), commandData.packet.getPort()));
     }
 }

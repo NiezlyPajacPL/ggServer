@@ -1,20 +1,15 @@
 package managers.commandHandlers;
 
 import helpers.CommandData;
-import helpers.FileHandler;
 import helpers.Packet;
 import helpers.StringToSendHelper;
 import managers.ConnectionData;
+import managers.refactor.MessageType;
 
-import javax.xml.crypto.Data;
-import java.io.IOException;
 import java.net.DatagramPacket;
-import java.net.InetAddress;
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 
-public class RegisterUser {
+public class RegisterUser extends MessageType {
 
 
     CommandData commandData;
@@ -28,9 +23,11 @@ public class RegisterUser {
         this.clients = clients;
     }
 
+    StringToSendHelper stringToSendHelper;
+
     public Packet register(){
         addClientToDataBase();
-        return new Packet(StringToSendHelper.stringToSendHandler("Registered Successfully",nickname, false),
+        return new Packet(stringToSendHelper.stringToSendHandler("Registered Successfully",nickname, false),
                 new ConnectionData(packet.getAddress(), packet.getPort()));
     }
 
