@@ -10,13 +10,14 @@ public class FileHandler {
 
     ArrayList<String> fileDataInList = new ArrayList<>();
     BufferedReader bufferedReader = new BufferedReader(new FileReader(registeredUsers));
-    FileWriter fileWriter = new FileWriter(registeredUsers.getAbsoluteFile(),true);
+    FileWriter fileWriter = new FileWriter(registeredUsers.getAbsoluteFile(), true);
     BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
     InputHelper inputHelper = new InputHelper();
 
-    public FileHandler() throws IOException {}
+    public FileHandler() throws IOException {
+    }
 
-    public ArrayList<String> getUsersDataBase(){
+    public ArrayList<String> getUsersDataBase() {
         while (scanner.hasNextLine()) {
             String data = scanner.nextLine();
             fileDataInList.add(data);
@@ -25,24 +26,24 @@ public class FileHandler {
         return fileDataInList;
     }
 
-    public boolean doesClientExistInDataBase(String nickname){
-        while(scanner.hasNextLine()) {
+    public boolean doesClientExistInDataBase(String nickname) {
+        while (scanner.hasNextLine()) {
             String string = scanner.nextLine();
             String nicknameFromString = inputHelper.dataBaseDefineNickname(string);
-            if(nicknameFromString.equals(nickname))
+            if (nicknameFromString.equals(nickname))
 
-                System.out.println("Client " +nickname + " found in data base");
-                return true;
+                System.out.println("Client " + nickname + " found in data base");
+            return true;
 
         }
         return false;
     }
 
-    public boolean doesPasswordMatch(String password){
-        while(scanner.hasNextLine()) {
+    public boolean doesPasswordMatch(String password) {
+        while (scanner.hasNextLine()) {
             String string = scanner.nextLine();
             String passwordFromString = inputHelper.dataBaseDefinePassword(string);
-            if(passwordFromString.equals(password))
+            if (passwordFromString.equals(password))
 
                 System.out.println("Password  matches");
             return true;
@@ -51,7 +52,7 @@ public class FileHandler {
         return false;
     }
 
-    public void overrideDataBase(String data){
+    public void overrideDataBase(String data) {
         try {
             bufferedWriter.write(data);
             bufferedWriter.newLine();

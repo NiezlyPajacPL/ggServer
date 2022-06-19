@@ -1,4 +1,6 @@
-package managers.refactor;
+package managers.commands;
+
+import managers.commands.messageTypes.MessageType;
 
 import java.net.DatagramPacket;
 

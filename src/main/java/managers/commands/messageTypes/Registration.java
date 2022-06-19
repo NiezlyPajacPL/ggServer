@@ -1,15 +1,10 @@
-package managers.refactor;
+package managers.commands.messageTypes;
 
-import helpers.InputHelper;
-import helpers.Packet;
-import helpers.StringToSendHelper;
-import managers.ConnectionData;
+import managers.commands.messageTypes.MessageType;
 
-import java.net.DatagramPacket;
 import java.net.InetAddress;
-import java.util.Map;
 
-public class Registration extends MessageType{
+public class Registration extends MessageType {
 
     public String name;
     public InetAddress inetAddress;
@@ -20,6 +15,8 @@ public class Registration extends MessageType{
         this.inetAddress = inetAddress;
         this.port = port;
     }
+
+
 
     private void addClientToDataBase() {
       //  clients.put(nickname, new ConnectionData(packet.getAddress(), packet.getPort()));

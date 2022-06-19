@@ -1,4 +1,6 @@
-package managers.refactor;
+package managers.commands.messageTypes;
+
+import managers.commands.messageTypes.MessageType;
 
 import java.net.InetAddress;
 

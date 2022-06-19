@@ -4,14 +4,17 @@ import helpers.Packet;
 import helpers.StringToSendHelper;
 import managers.ConnectionData;
 import managers.SubtitlesPrinter;
-import managers.refactor.*;
+import managers.commands.*;
+import managers.commands.messageTypes.MessageType;
+import managers.commands.messageTypes.Messenger;
+import managers.commands.messageTypes.Registration;
+import managers.commands.messageTypes.UsersListSender;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.HashMap;
-import java.util.Locale;
 import java.util.Map;
 
 public class UdpServer implements Server {
@@ -46,8 +49,6 @@ public class UdpServer implements Server {
                 sendMessage((Messenger) messageType);
 
             }
-            //   Packet packetToSend = commandUser.useCommand(receivedPacket);
-            //   sendPacket(packetToSend);
         }
     }
 
@@ -79,7 +80,7 @@ public class UdpServer implements Server {
 
     private void registerUser(Registration registration) {
         ConnectionData connectionData = new ConnectionData(registration.inetAddress, registration.port);
-        String nickname = registration.name.replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
+        String nickname = registration.name;
         clients.put(nickname, connectionData);
         subtitlesPrinter.printLogClientRegistered(registration.name, connectionData.getInetAddress(), connectionData.getPort());
         byte[] bufToSend = stringToSendHelper.stringToSendHandler("Registered Successfully!", "", false);

@@ -1,11 +1,7 @@
 package helpers;
 
-import managers.ConnectionData;
-
-import java.net.DatagramPacket;
 import java.nio.charset.StandardCharsets;
-import java.util.Map;
-import java.util.Objects;
+
 
 public class StringToSendHelper {
 
