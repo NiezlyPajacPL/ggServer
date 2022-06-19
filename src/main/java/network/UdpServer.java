@@ -4,7 +4,6 @@ import helpers.Packet;
 import helpers.StringToSendHelper;
 import managers.ConnectionData;
 import managers.SubtitlesPrinter;
-import managers.commandHandlers.CommandUser;
 import managers.refactor.*;
 
 import java.io.IOException;
@@ -26,7 +25,7 @@ public class UdpServer implements Server {
     }
     StringToSendHelper stringToSendHelper = new StringToSendHelper();
     public void run() {
-        CommandUser commandUser = new CommandUser(clients, subtitlesPrinter);
+
         while (true) {
             DatagramPacket receivedPacket = receivePacket();
 
