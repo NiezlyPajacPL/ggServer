@@ -7,11 +7,13 @@ import java.net.InetAddress;
 public class Registration extends MessageType {
 
     public String name;
+    public String password;
     public InetAddress inetAddress;
     public int port;
 
-    public Registration(String name, InetAddress inetAddress, int port) {
+    public Registration(String name,String password ,InetAddress inetAddress, int port) {
         this.name = name;
+        this.password = password;
         this.inetAddress = inetAddress;
         this.port = port;
     }

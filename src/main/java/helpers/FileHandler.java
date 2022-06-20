@@ -5,7 +5,7 @@ import java.util.ArrayList;
 import java.util.Scanner;
 
 public class FileHandler {
-    File registeredUsers = new File("src\\main\\java\\managers\\commandHandlers\\RegisteredClients.txt");
+    File registeredUsers = new File("src/main/java/managers/commands/RegisteredClients.txt");
     Scanner scanner = new Scanner(registeredUsers);
 
     ArrayList<String> fileDataInList = new ArrayList<>();
@@ -50,6 +50,10 @@ public class FileHandler {
 
         }
         return false;
+    }
+
+    public void readDataBase(){
+
     }
 
     public void overrideDataBase(String data) {
