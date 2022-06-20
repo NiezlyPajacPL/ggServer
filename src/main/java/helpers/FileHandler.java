@@ -26,15 +26,27 @@ public class FileHandler {
         return fileDataInList;
     }
 
+    public boolean doesInputMatchDataBase(String input) {
+        while (scanner.hasNextLine()) {
+            String string = scanner.nextLine();
+       //     String logAndPasswordFromInput = inputHelper.dataBaseDefineLogAndPass(input);
+
+            if (input.equals(string)) {
+                System.out.println("Client matches data base");
+                return true;
+            }
+        }
+        return false;
+    }
+/*
     public boolean doesClientExistInDataBase(String nickname) {
         while (scanner.hasNextLine()) {
             String string = scanner.nextLine();
             String nicknameFromString = inputHelper.dataBaseDefineNickname(string);
-            if (nicknameFromString.equals(nickname))
-
+            if (nicknameFromString.equals(nickname)) {
                 System.out.println("Client " + nickname + " found in data base");
-            return true;
-
+                return true;
+            }
         }
         return false;
     }
@@ -49,10 +61,11 @@ public class FileHandler {
             return true;
 
         }
+        System.out.println("Password does not match");
         return false;
     }
-
-    public void readDataBase(){
+*/
+    public void readDataBase() {
 
     }
 

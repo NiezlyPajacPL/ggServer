@@ -116,13 +116,11 @@ public class UdpServer implements Server {
         ConnectionData connectionData = new ConnectionData(login.inetAddress, login.port);
         try {
             FileHandler fileHandler = new FileHandler();
-            if(fileHandler.doesClientExistInDataBase(login.name)){
-                System.out.println(login.name + " exists in DB");
-                if(fileHandler.doesPasswordMatch(login.password)){
-                    System.out.println("Password does match!");
+            if(fileHandler.doesInputMatchDataBase(login.name + " " + login.password)){
                     clients.put(login.name, connectionData);
                     byte[] bufToSend = stringToSendHelper.stringToSendHandler("Hello again " + login.name + "!", "", false);
-                }
+                    Packet packetToSend = new Packet(bufToSend, connectionData);
+                    sendPacket(packetToSend);
             }else{
                 System.out.println(login.name + " does NOT exist in DB");
             }
