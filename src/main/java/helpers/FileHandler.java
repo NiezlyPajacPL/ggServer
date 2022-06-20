@@ -29,10 +29,7 @@ public class FileHandler {
     public boolean doesInputMatchDataBase(String input) {
         while (scanner.hasNextLine()) {
             String string = scanner.nextLine();
-       //     String logAndPasswordFromInput = inputHelper.dataBaseDefineLogAndPass(input);
-
             if (input.equals(string)) {
-                System.out.println("Client matches data base");
                 return true;
             }
         }
@@ -44,7 +41,6 @@ public class FileHandler {
             String string = scanner.nextLine();
             String nicknameFromString = inputHelper.dataBaseDefineNickname(string);
             if (nicknameFromString.equals(nickname)) {
-                System.out.println("Client " + nickname + " found in data base");
                 return true;
             }
         }

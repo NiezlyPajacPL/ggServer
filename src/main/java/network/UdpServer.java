@@ -86,15 +86,14 @@ public class UdpServer implements Server {
         try {
             FileHandler fileHandler = new FileHandler();
             if (!fileHandler.clientExistInDataBase(registration.name)) {
+                subtitlesPrinter.printLogClientFoundInDB(registration.name);
                 fileHandler.overrideDataBase(registration.name + " " + registration.password);
                 clients.put(registration.name, connectionData);
                 subtitlesPrinter.printLogClientRegistered(registration.name, connectionData.getInetAddress(), connectionData.getPort());
-                byte[] bufToSend = stringToSendHelper("Registered Successfully!", "", false);
-                Packet packetToSend = new Packet(bufToSend, connectionData);
+                Packet packetToSend = new Packet(registration.messageSuccessfullyRegistered, connectionData);
                 sendPacket(packetToSend);
-            }else{
-                byte[] bufToSend = stringToSendHelper("Nickname is already taken. :(", "", false);
-                Packet packetToSend = new Packet(bufToSend, connectionData);
+            } else {
+                Packet packetToSend = new Packet(registration.messageFailedRegistration, connectionData);
                 sendPacket(packetToSend);
             }
         } catch (IOException e) {
@@ -105,16 +104,15 @@ public class UdpServer implements Server {
 
 
     private void sendUsersList(UsersListSender usersListSender) {
-        byte[] bufToSend = stringToSendHelper(clients.toString(), "", false);
         subtitlesPrinter.printLogUsersListRequest();
 
-        Packet packetToSend = new Packet(bufToSend, new ConnectionData(usersListSender.inetAddress, usersListSender.port));
+        Packet packetToSend = new Packet(usersListSender.message, new ConnectionData(usersListSender.inetAddress, usersListSender.port));
         sendPacket(packetToSend);
     }
 
     private void sendMessage(Messenger messenger) {
-        byte[] bufToSend = stringToSendHelper(messenger.message, messenger.sender, true);
-        subtitlesPrinter.printLogSuccessfullySentMessage(messenger.sender, messenger.receiver);
+        byte[] bufToSend = stringToSendHelper(messenger.message, messenger.sender);
+        subtitlesPrinter.printLogSuccessfullySentMessage(messenger.sender, messenger.receiver, messenger.message);
 
         Packet packetToSend = new Packet(bufToSend, new ConnectionData(messenger.destinationInetAddress, messenger.destinationPort));
         sendPacket(packetToSend);
@@ -125,12 +123,14 @@ public class UdpServer implements Server {
         try {
             FileHandler fileHandler = new FileHandler();
             if (fileHandler.doesInputMatchDataBase(login.name + " " + login.password)) {
+                subtitlesPrinter.printLogClientMatchesDB();
                 clients.put(login.name, connectionData);
-                byte[] bufToSend = stringToSendHelper("Hello again " + login.name + "!", "", false);
-                Packet packetToSend = new Packet(bufToSend, connectionData);
+                Packet packetToSend = new Packet(login.messageSuccessfullyLogged, connectionData);
                 sendPacket(packetToSend);
             } else {
-                System.out.println(login.name + " does NOT exist in DB");
+                Packet packetToSend = new Packet(login.messageFailedLogin, connectionData);
+                sendPacket(packetToSend);
+                subtitlesPrinter.printLogClientDoesNotExist(login.name);
             }
 
 
@@ -138,12 +138,10 @@ public class UdpServer implements Server {
             e.printStackTrace();
         }
     }
-    public byte[] stringToSendHelper(String text, String sender, boolean senderPrinted) {
-        if (senderPrinted) {
-            String textToSend = sender + ": " + text;
-            return textToSend.getBytes(StandardCharsets.UTF_8);
-        }
-        return text.getBytes(StandardCharsets.UTF_8);
+
+    public byte[] stringToSendHelper(String text, String sender) {
+        String textToSend = sender + ": " + text;
+        return textToSend.getBytes(StandardCharsets.UTF_8);
     }
 }
 

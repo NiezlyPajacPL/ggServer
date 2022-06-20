@@ -8,10 +8,12 @@ public class UsersListSender extends MessageType {
 
     public InetAddress inetAddress;
     public int port;
+    public byte[] message;
 
-    public UsersListSender(InetAddress inetAddress, int port) {
+    public UsersListSender(InetAddress inetAddress, int port,byte[] message) {
         this.inetAddress = inetAddress;
         this.port = port;
+        this.message = message;
     }
 
 }

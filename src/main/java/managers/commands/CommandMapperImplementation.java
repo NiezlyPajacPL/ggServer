@@ -6,6 +6,7 @@ import managers.commands.messageTypes.*;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
+import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -27,10 +28,15 @@ public class CommandMapperImplementation implements CommandMapper {
         if (input.contains("/register")) {
             String name = inputHelper.defineWhoWantsToRegister(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
             String password = inputHelper.definePasswordFromInput(input).replaceAll("[\\s\u0000]+", "");
-            return new Registration(name, password, receivedPacket.getAddress(), receivedPacket.getPort());
+            return new Registration(name,
+                    password,
+                    receivedPacket.getAddress(),
+                    receivedPacket.getPort(),
+                    "Registered Successfully!".getBytes(StandardCharsets.UTF_8),
+                    "Nickname is already taken. :(".getBytes(StandardCharsets.UTF_8));
 
         } else if (input.contains("/allUsers") || input.contains("/allusers") || input.contains("/users")) {
-            return new UsersListSender(receivedPacket.getAddress(), receivedPacket.getPort());
+            return new UsersListSender(receivedPacket.getAddress(), receivedPacket.getPort(), clients.toString().getBytes(StandardCharsets.UTF_8));
         } else if (input.contains("/msg")) {
             String sender = getSender(receivedPacket, clients);
             String receiver = inputHelper.defineReceiver(input);
@@ -41,9 +47,14 @@ public class CommandMapperImplementation implements CommandMapper {
         } else if (input.contains("/login")) {
             String name = inputHelper.defineWhoWantsToRegister(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
             String password = inputHelper.definePasswordFromInput(input).replaceAll("[\\s\u0000]+", "");
-
+            String message = "Hello again " + name + "!";
             try {
-                return new Login(name, password, receivedPacket.getAddress(), receivedPacket.getPort());
+                return new Login(name,
+                        password,
+                        receivedPacket.getAddress(),
+                        receivedPacket.getPort(),
+                        message.getBytes(StandardCharsets.UTF_8),
+                        "Something went wrong. Try again".getBytes(StandardCharsets.UTF_8));
             } catch (IOException e) {
                 e.printStackTrace();
             }

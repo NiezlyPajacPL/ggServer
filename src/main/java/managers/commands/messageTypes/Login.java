@@ -1,8 +1,5 @@
 package managers.commands.messageTypes;
 
-import helpers.FileHandler;
-import managers.ConnectionData;
-
 import java.io.IOException;
 import java.net.InetAddress;
 
@@ -12,12 +9,16 @@ public class Login extends MessageType {
     public String password;
     public InetAddress inetAddress;
     public int port;
+    public byte[] messageSuccessfullyLogged;
+    public byte[] messageFailedLogin;
 
-    public Login(String name,String password ,InetAddress inetAddress, int port) throws IOException {
+    public Login(String name,String password ,InetAddress inetAddress, int port, byte[] message,byte[] messageFailedLogin) throws IOException {
         this.name = name;
         this.password = password;
         this.inetAddress = inetAddress;
         this.port = port;
+        this.messageSuccessfullyLogged = message;
+        this.messageFailedLogin = messageFailedLogin;
     }
 
 }
