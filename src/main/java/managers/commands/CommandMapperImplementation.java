@@ -17,6 +17,7 @@ public class CommandMapperImplementation implements CommandMapper {
     public CommandMapperImplementation(Map<String, ConnectionData> clients) {
         this.clients = clients;
     }
+
     @Override
     public MessageType mapCommand(DatagramPacket receivedPacket) {
 
@@ -26,28 +27,28 @@ public class CommandMapperImplementation implements CommandMapper {
         if (input.contains("/register")) {
             String name = inputHelper.defineWhoWantsToRegister(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
             String password = inputHelper.definePasswordFromInput(input).replaceAll("[\\s\u0000]+", "");
-            return  new Registration(name,password,receivedPacket.getAddress(),receivedPacket.getPort());
+            return new Registration(name, password, receivedPacket.getAddress(), receivedPacket.getPort());
 
         } else if (input.contains("/allUsers") || input.contains("/allusers") || input.contains("/users")) {
-           return new UsersListSender(receivedPacket.getAddress(),receivedPacket.getPort());
-        } else if(input.contains("/msg")){
-            String sender = getSender(receivedPacket,clients);
+            return new UsersListSender(receivedPacket.getAddress(), receivedPacket.getPort());
+        } else if (input.contains("/msg")) {
+            String sender = getSender(receivedPacket, clients);
             String receiver = inputHelper.defineReceiver(input);
             String message = inputHelper.defineMessageFromInput(input);
             ConnectionData receiverData = clients.get(receiver);
 
-            return new Messenger(sender,receiver,message,receiverData.getInetAddress(),receiverData.getPort());
-        }else if(input.contains("/login")){
+            return new Messenger(sender, receiver, message, receiverData.getInetAddress(), receiverData.getPort());
+        } else if (input.contains("/login")) {
             String name = inputHelper.defineWhoWantsToRegister(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
             String password = inputHelper.definePasswordFromInput(input).replaceAll("[\\s\u0000]+", "");
 
             try {
-                return new Login(name,password,receivedPacket.getAddress(),receivedPacket.getPort());
+                return new Login(name, password, receivedPacket.getAddress(), receivedPacket.getPort());
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        return  null;
+        return null;
     }
 
     public String getSender(DatagramPacket packet, Map<String, ConnectionData> clients) {

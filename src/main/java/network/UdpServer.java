@@ -2,7 +2,6 @@ package network;
 
 import helpers.FileHandler;
 import helpers.Packet;
-import helpers.StringToSendHelper;
 import managers.ConnectionData;
 import managers.SubtitlesPrinter;
 import managers.commands.*;
@@ -12,6 +11,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -24,7 +24,7 @@ public class UdpServer implements Server {
         socket = new DatagramSocket(port);
         this.subtitlesPrinter = subtitlesPrinter;
     }
-    StringToSendHelper stringToSendHelper = new StringToSendHelper();
+
     public void run() {
 
 
@@ -47,7 +47,7 @@ public class UdpServer implements Server {
 
                 sendMessage((Messenger) messageType);
 
-            }else if (messageType instanceof Login) {
+            } else if (messageType instanceof Login) {
 
                 loginUser((Login) messageType);
 
@@ -85,19 +85,27 @@ public class UdpServer implements Server {
         ConnectionData connectionData = new ConnectionData(registration.inetAddress, registration.port);
         try {
             FileHandler fileHandler = new FileHandler();
-            fileHandler.overrideDataBase(registration.name + " " + registration.password);
+            if (!fileHandler.clientExistInDataBase(registration.name)) {
+                fileHandler.overrideDataBase(registration.name + " " + registration.password);
+                clients.put(registration.name, connectionData);
+                subtitlesPrinter.printLogClientRegistered(registration.name, connectionData.getInetAddress(), connectionData.getPort());
+                byte[] bufToSend = stringToSendHelper("Registered Successfully!", "", false);
+                Packet packetToSend = new Packet(bufToSend, connectionData);
+                sendPacket(packetToSend);
+            }else{
+                byte[] bufToSend = stringToSendHelper("Nickname is already taken. :(", "", false);
+                Packet packetToSend = new Packet(bufToSend, connectionData);
+                sendPacket(packetToSend);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        clients.put(registration.name, connectionData);
-        subtitlesPrinter.printLogClientRegistered(registration.name, connectionData.getInetAddress(), connectionData.getPort());
-        byte[] bufToSend = stringToSendHelper.stringToSendHandler("Registered Successfully!", "", false);
-        Packet packetToSend = new Packet(bufToSend, connectionData);
-        sendPacket(packetToSend);
+
     }
 
+
     private void sendUsersList(UsersListSender usersListSender) {
-        byte[] bufToSend = stringToSendHelper.stringToSendHandler(clients.toString(), "", false);
+        byte[] bufToSend = stringToSendHelper(clients.toString(), "", false);
         subtitlesPrinter.printLogUsersListRequest();
 
         Packet packetToSend = new Packet(bufToSend, new ConnectionData(usersListSender.inetAddress, usersListSender.port));
@@ -105,7 +113,7 @@ public class UdpServer implements Server {
     }
 
     private void sendMessage(Messenger messenger) {
-        byte[] bufToSend = stringToSendHelper.stringToSendHandler(messenger.message, messenger.sender, true);
+        byte[] bufToSend = stringToSendHelper(messenger.message, messenger.sender, true);
         subtitlesPrinter.printLogSuccessfullySentMessage(messenger.sender, messenger.receiver);
 
         Packet packetToSend = new Packet(bufToSend, new ConnectionData(messenger.destinationInetAddress, messenger.destinationPort));
@@ -116,12 +124,12 @@ public class UdpServer implements Server {
         ConnectionData connectionData = new ConnectionData(login.inetAddress, login.port);
         try {
             FileHandler fileHandler = new FileHandler();
-            if(fileHandler.doesInputMatchDataBase(login.name + " " + login.password)){
-                    clients.put(login.name, connectionData);
-                    byte[] bufToSend = stringToSendHelper.stringToSendHandler("Hello again " + login.name + "!", "", false);
-                    Packet packetToSend = new Packet(bufToSend, connectionData);
-                    sendPacket(packetToSend);
-            }else{
+            if (fileHandler.doesInputMatchDataBase(login.name + " " + login.password)) {
+                clients.put(login.name, connectionData);
+                byte[] bufToSend = stringToSendHelper("Hello again " + login.name + "!", "", false);
+                Packet packetToSend = new Packet(bufToSend, connectionData);
+                sendPacket(packetToSend);
+            } else {
                 System.out.println(login.name + " does NOT exist in DB");
             }
 
@@ -129,7 +137,13 @@ public class UdpServer implements Server {
         } catch (IOException e) {
             e.printStackTrace();
         }
-
+    }
+    public byte[] stringToSendHelper(String text, String sender, boolean senderPrinted) {
+        if (senderPrinted) {
+            String textToSend = sender + ": " + text;
+            return textToSend.getBytes(StandardCharsets.UTF_8);
+        }
+        return text.getBytes(StandardCharsets.UTF_8);
     }
 }
 

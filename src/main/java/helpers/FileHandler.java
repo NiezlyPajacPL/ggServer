@@ -38,8 +38,8 @@ public class FileHandler {
         }
         return false;
     }
-/*
-    public boolean doesClientExistInDataBase(String nickname) {
+
+    public boolean clientExistInDataBase(String nickname) {
         while (scanner.hasNextLine()) {
             String string = scanner.nextLine();
             String nicknameFromString = inputHelper.dataBaseDefineNickname(string);
@@ -64,7 +64,7 @@ public class FileHandler {
         System.out.println("Password does not match");
         return false;
     }
-*/
+
     public void readDataBase() {
 
     }
