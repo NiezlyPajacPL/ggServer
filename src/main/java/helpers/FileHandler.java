@@ -61,8 +61,15 @@ public class FileHandler {
         return false;
     }
 
-    public void readDataBase() {
-
+    public String getHashedPassword(String nickname){
+        while (scanner.hasNextLine()) {
+            String string = scanner.nextLine();
+            String nicknameFromString = inputHelper.dataBaseDefineNickname(string);
+            if (nicknameFromString.equals(nickname)) {
+                return inputHelper.dataBaseDefinePassword(string);
+            }
+        }
+        return "UNKNOWN";
     }
 
     public void overrideDataBase(String data) {

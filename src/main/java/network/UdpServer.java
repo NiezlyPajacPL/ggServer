@@ -1,6 +1,7 @@
 package network;
 
 import helpers.FileHandler;
+import helpers.HashPassword;
 import helpers.Packet;
 import managers.ConnectionData;
 import managers.SubtitlesPrinter;
@@ -24,6 +25,7 @@ public class UdpServer implements Server {
         socket = new DatagramSocket(port);
         this.subtitlesPrinter = subtitlesPrinter;
     }
+    HashPassword hashPassword = new HashPassword();
 
     public void run() {
 
@@ -122,7 +124,9 @@ public class UdpServer implements Server {
         ConnectionData connectionData = new ConnectionData(login.inetAddress, login.port);
         try {
             FileHandler fileHandler = new FileHandler();
-            if (fileHandler.doesInputMatchDataBase(login.name + " " + login.password)) {
+            //fileHandler.doesInputMatchDataBase(login.name + " " + login.password
+            //if(fileHandler.doesInputMatchDataBase(login.name + " " + hashPassword
+            if (hashPassword.checkIfPasswordMatches(login.name, login.password)) {
                 subtitlesPrinter.printLogClientMatchesDB();
                 clients.put(login.name, connectionData);
                 Packet packetToSend = new Packet(login.messageSuccessfullyLogged, connectionData);

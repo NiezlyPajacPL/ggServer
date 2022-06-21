@@ -1,5 +1,3 @@
-login haslo
-debil 123
-123 123
-debbbb 123
-koks siema
+siema $2a$12$EzwkIaw94pVW4aa4b9qmI.YhqMEHYu9PJyq/NeLAnHpsm5Zs08qKK
+login $2a$12$mIlE6dgxUV7DZEg/vMIYk.WQmaXmxVnaM/1h1vCa3fuQg4V3h62IO
+koks $2a$12$nYFhI93yG.Cj/wqyvZjhb.qTTtWRyb2CI53F4nSUzRLanWOcv7lBC
