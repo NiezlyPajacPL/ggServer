@@ -1,76 +1,86 @@
 package helpers;
 
-import javax.crypto.SecretKeyFactory;
-import javax.crypto.spec.PBEKeySpec;
 import java.io.IOException;
-import java.math.BigInteger;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
-import java.security.spec.InvalidKeySpecException;
+import java.util.Arrays;
+import java.util.Objects;
 
 public class HashPassword {
 
     public HashPassword() {
     }
 
-    public String generateSecuredPassword(String password) {
-        return BCrypt.hashpw(password,BCrypt.gensalt(12));
-    }
+    public SecuredPassword generateSecuredPassword(String passwordToHash) {
+        String salt = getSalt();
+        String securePassword = getSecurePassword(passwordToHash, salt);
+        System.out.println(securePassword);
+        String regeneratedPasswordToVerify = getSecurePassword(passwordToHash, salt);
+        System.out.println(regeneratedPasswordToVerify);
 
+        return new SecuredPassword(securePassword, salt);
+    }
 
     public boolean checkIfPasswordMatches(String nickname,String password){
         try {
             FileHandler fileHandler = new FileHandler();
-            if(BCrypt.checkpw(password,fileHandler.getHashedPassword(nickname))){
-                return  true;
+            SecuredPassword passwordFromDB = fileHandler.getHashedPassword(nickname);
+
+            if(Objects.equals(getSecurePassword(password, passwordFromDB.salt), passwordFromDB.password)){
+                return true;
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return  false;
+        return false;
     }
 
-   /* public String generateSecuredPassword() {
-        char[] passwordInCharArray = password.toCharArray();
-        byte[] salt = getSalt();
-
-
-        PBEKeySpec pbeKeySpec = new PBEKeySpec(passwordInCharArray, salt, 1000, 64 * 8);
-        SecretKeyFactory secretKeyFactory = null;
+    private static String getSecurePassword(String passwordToHash, String salt) {
+        String generatedPassword = null;
         try {
-            secretKeyFactory = SecretKeyFactory.getInstance("PBKDF2WithHmacSHA1");
-            byte[] hash = secretKeyFactory.generateSecret(pbeKeySpec).getEncoded();
-            return 1000 + ":" + toHex(salt) + ":" + toHex(hash);
-        } catch (NoSuchAlgorithmException | InvalidKeySpecException e) {
-            e.printStackTrace();
-        }
+            // Create MessageDigest instance for MD5
+            MessageDigest messageDigest = MessageDigest.getInstance("MD5");
 
-    }
+            // Add password bytes to digest
+            messageDigest.update(salt.getBytes());
 
-    private byte[] getSalt() {
-        SecureRandom sr = null;
-        try {
-            sr = SecureRandom.getInstance("SHA1PRNG");
+            // Get the hash's bytes
+            byte[] bytes = messageDigest.digest(passwordToHash.getBytes());
+
+            // This bytes[] has bytes in decimal format;
+            // Convert it to hexadecimal format
+            StringBuilder stringBuilder = new StringBuilder();
+
+            for (int i = 0; i < bytes.length; i++) {
+                stringBuilder.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
+            }
+
+            // Get complete hashed password in hex format
+            generatedPassword = stringBuilder.toString();
         } catch (NoSuchAlgorithmException e) {
             e.printStackTrace();
         }
-
-        byte[] salt = new byte[16];
-        sr.nextBytes(salt);
-        return salt;
+        return generatedPassword;
     }
 
-    private static String toHex(byte[] array) {
-        BigInteger bigInteger = new BigInteger(1, array);
-        String hex = bigInteger.toString(16);
-
-        int paddingLength = (array.length * 2) - hex.length();
-        if (paddingLength > 0) {
-            return String.format("%0" + paddingLength + "d", 0) + hex;
-        } else {
-            return hex;
+    private String getSalt() {
+        try {
+            SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG", "SUN");
+            // Create array for salt
+            byte[] salt = new byte[16];
+            // Get a random salt
+            secureRandom.nextBytes(salt);
+            // return salt
+            return Arrays.toString(salt);
+        } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+            e.printStackTrace();
         }
+        return "UNKNOWN";
     }
 
-    */
+    private static int randomPosition() {
+        return (int) ((Math.random() * 2) + 1);
+    }
 }

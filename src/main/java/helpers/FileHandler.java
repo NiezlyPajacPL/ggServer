@@ -61,15 +61,15 @@ public class FileHandler {
         return false;
     }
 
-    public String getHashedPassword(String nickname){
+    public SecuredPassword getHashedPassword(String nickname){
         while (scanner.hasNextLine()) {
             String string = scanner.nextLine();
             String nicknameFromString = inputHelper.dataBaseDefineNickname(string);
             if (nicknameFromString.equals(nickname)) {
-                return inputHelper.dataBaseDefinePassword(string);
+                return new SecuredPassword(inputHelper.dataBaseDefinePassword(string),inputHelper.getSaltFromDataBase(string));
             }
         }
-        return "UNKNOWN";
+        return null;
     }
 
     public void overrideDataBase(String data) {

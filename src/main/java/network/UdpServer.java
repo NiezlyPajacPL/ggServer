@@ -89,7 +89,7 @@ public class UdpServer implements Server {
             FileHandler fileHandler = new FileHandler();
             if (!fileHandler.clientExistInDataBase(registration.name)) {
                 subtitlesPrinter.printLogClientFoundInDB(registration.name);
-                fileHandler.overrideDataBase(registration.name + " " + registration.password);
+                fileHandler.overrideDataBase(registration.name + " " + registration.securedPassword.password + " " + registration.securedPassword.salt);
                 clients.put(registration.name, connectionData);
                 subtitlesPrinter.printLogClientRegistered(registration.name, connectionData.getInetAddress(), connectionData.getPort());
                 Packet packetToSend = new Packet(registration.messageSuccessfullyRegistered, connectionData);
@@ -124,20 +124,21 @@ public class UdpServer implements Server {
         ConnectionData connectionData = new ConnectionData(login.inetAddress, login.port);
         try {
             FileHandler fileHandler = new FileHandler();
-            //fileHandler.doesInputMatchDataBase(login.name + " " + login.password
-            //if(fileHandler.doesInputMatchDataBase(login.name + " " + hashPassword
-            if (hashPassword.checkIfPasswordMatches(login.name, login.password)) {
-                subtitlesPrinter.printLogClientMatchesDB();
-                clients.put(login.name, connectionData);
-                Packet packetToSend = new Packet(login.messageSuccessfullyLogged, connectionData);
-                sendPacket(packetToSend);
-            } else {
-                Packet packetToSend = new Packet(login.messageFailedLogin, connectionData);
-                sendPacket(packetToSend);
-                subtitlesPrinter.printLogClientDoesNotExist(login.name);
+            if(fileHandler.clientExistInDataBase(login.name)) {
+
+                subtitlesPrinter.printLogClientFoundInDB(login.name);
+                if (hashPassword.checkIfPasswordMatches(login.name, login.password)) {
+                    subtitlesPrinter.printLogClientMatchesDB();
+                    clients.put(login.name, connectionData);
+                    Packet packetToSend = new Packet(login.messageSuccessfullyLogged, connectionData);
+                    sendPacket(packetToSend);
+                } else {
+                    Packet packetToSend = new Packet(login.messageFailedLogin, connectionData);
+                    sendPacket(packetToSend);
+                    subtitlesPrinter.printLogClientDoesNotExist(login.name);
+                }
+
             }
-
-
         } catch (IOException e) {
             e.printStackTrace();
         }

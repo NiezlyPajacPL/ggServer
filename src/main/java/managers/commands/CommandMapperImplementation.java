@@ -2,6 +2,7 @@ package managers.commands;
 
 import helpers.HashPassword;
 import helpers.InputHelper;
+import helpers.SecuredPassword;
 import managers.ConnectionData;
 import managers.commands.messageTypes.*;
 
@@ -30,10 +31,10 @@ public class CommandMapperImplementation implements CommandMapper {
         if (input.contains("/register")) {
             String name = inputHelper.defineWhoWantsToRegister(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
             String password = inputHelper.definePasswordFromInput(input).replaceAll("[\\s\u0000]+", "");
-            String hashedPassword = hashPassword.generateSecuredPassword(password);
+            SecuredPassword securedPassword = hashPassword.generateSecuredPassword(password);
 
             return new Registration(name,
-                    hashedPassword,
+                    securedPassword,
                     receivedPacket.getAddress(),
                     receivedPacket.getPort(),
                     "Registered Successfully!".getBytes(StandardCharsets.UTF_8),
