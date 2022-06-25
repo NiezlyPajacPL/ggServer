@@ -6,6 +6,7 @@ import helpers.SecuredPassword;
 import managers.ConnectionData;
 import managers.commands.messageTypes.*;
 
+import javax.xml.namespace.QName;
 import java.io.IOException;
 import java.net.DatagramPacket;
 import java.nio.charset.StandardCharsets;
@@ -35,16 +36,24 @@ public class CommandMapperImplementation implements CommandMapper {
         HashPassword hashPassword = new HashPassword();
 
         if (input.contains(REGISTER)) {
-            String name = inputHelper.defineWhoWantsToRegister(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
-            String password = inputHelper.definePasswordFromInput(input).replaceAll("[\\s\u0000]+", "");
-            SecuredPassword securedPassword = hashPassword.generateSecuredPassword(password);
-
+            String name;
+            String password;
+            SecuredPassword securedPassword;
+            if(inputHelper.checkIfInputLengthMatchesExpected(3,input)) {
+                name = inputHelper.defineWhoWantsToRegister(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
+                password = inputHelper.definePasswordFromInput(input).replaceAll("[\\s\u0000]+", "");
+                securedPassword = hashPassword.generateSecuredPassword(password);
+            }else{
+                name = null;
+                password = null;
+                securedPassword = null;
+            }
             return new Registration(name,
                     securedPassword,
                     receivedPacket.getAddress(),
                     receivedPacket.getPort(),
                     "Registered Successfully!".getBytes(StandardCharsets.UTF_8),
-                    "Nickname is already taken. :(".getBytes(StandardCharsets.UTF_8));
+                    "Something went wrong or nickname is already taken. :(".getBytes(StandardCharsets.UTF_8));
 
         } else if (input.contains(ALLUSERS)) {
 

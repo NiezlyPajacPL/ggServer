@@ -91,7 +91,7 @@ public class UdpServer implements Server {
         ConnectionData connectionData = new ConnectionData(registration.inetAddress, registration.port);
         try {
             FileHandler fileHandler = new FileHandler();
-            if (!fileHandler.clientExistInDataBase(registration.name)) {
+            if (!fileHandler.clientExistInDataBase(registration.name) && registration.name != null) {
                 fileHandler.overrideDataBase(registration.name + " " + registration.securedPassword.password + " " + registration.securedPassword.salt);
                 clients.put(registration.name, connectionData);
                 subtitlesPrinter.printLogGeneratedPassword();
@@ -100,7 +100,11 @@ public class UdpServer implements Server {
                 sendPacket(packetToSend);
 
             } else {
-                subtitlesPrinter.printLogClientFailedRegistration(registration.name, connectionData.getInetAddress(), connectionData.getPort());
+                if(registration.name == null){
+                    subtitlesPrinter.printLogClientRegistrationFailedCommand(registration.inetAddress, registration.port);
+                }else {
+                    subtitlesPrinter.printLogClientFailedRegistration(registration.name, connectionData.getInetAddress(), connectionData.getPort());
+                }
                 Packet packetToSend = new Packet(registration.messageFailedRegistration, connectionData);
                 sendPacket(packetToSend);
             }

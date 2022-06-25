@@ -41,4 +41,14 @@ public class InputHelper {
         String[] words = input.split(" ");
         return words[0];
     }
+
+    public boolean checkIfInputLengthMatchesExpected(int expectedNumberOfWords, String input){
+        String[] words = input.split("\\s+");
+
+        if(words.length == expectedNumberOfWords){
+            return  true;
+        }else {
+            return false;
+        }
+    }
 }
