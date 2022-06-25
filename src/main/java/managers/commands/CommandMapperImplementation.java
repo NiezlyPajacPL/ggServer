@@ -36,18 +36,9 @@ public class CommandMapperImplementation implements CommandMapper {
         HashPassword hashPassword = new HashPassword();
 
         if (input.contains(REGISTER)) {
-            String name;
-            String password;
-            SecuredPassword securedPassword;
-            if(inputHelper.checkIfInputLengthMatchesExpected(3,input)) {
-                name = inputHelper.defineWhoWantsToRegister(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
-                password = inputHelper.definePasswordFromInput(input).replaceAll("[\\s\u0000]+", "");
-                securedPassword = hashPassword.generateSecuredPassword(password);
-            }else{
-                name = null;
-                password = null;
-                securedPassword = null;
-            }
+            String name = inputHelper.defineWhoWantsToRegister(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
+            String password = inputHelper.definePasswordFromInput(input).replaceAll("[\\s\u0000]+", "");
+            SecuredPassword securedPassword = hashPassword.generateSecuredPassword(password);
             return new Registration(name,
                     securedPassword,
                     receivedPacket.getAddress(),
@@ -57,7 +48,7 @@ public class CommandMapperImplementation implements CommandMapper {
 
         } else if (input.contains(ALLUSERS)) {
 
-          return new UsersListSender(receivedPacket.getAddress(), receivedPacket.getPort(), clients.toString().getBytes(StandardCharsets.UTF_8));
+            return new UsersListSender(receivedPacket.getAddress(), receivedPacket.getPort(), clients.toString().getBytes(StandardCharsets.UTF_8));
         } else if (input.contains(MESSAGE)) {
             String sender = getSender(receivedPacket, clients);
             String receiver = inputHelper.defineReceiver(input);
@@ -71,18 +62,9 @@ public class CommandMapperImplementation implements CommandMapper {
                     receiverData.getPort(),
                     "Message wasn't sent. The user you are trying to reach is offline or does not exist.".getBytes(StandardCharsets.UTF_8));
         } else if (input.contains(LOGIN)) {
-            String name;
-            String password;
-            String message;
-            if(inputHelper.checkIfInputLengthMatchesExpected(3,input)) {
-                name = inputHelper.defineWhoWantsToRegister(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
-                password = inputHelper.definePasswordFromInput(input).replaceAll("[\\s\u0000]+", "");
-                message = "Hello again " + name + "!";
-            }else{
-                name = null;
-                password = null;
-                message = "You wrongly used command!";
-            }
+            String name = inputHelper.defineWhoWantsToRegister(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
+            String password = inputHelper.definePasswordFromInput(input).replaceAll("[\\s\u0000]+", "");
+            String message = "Hello again " + name + "!";
             try {
                 return new Login(name,
                         password,
@@ -93,8 +75,8 @@ public class CommandMapperImplementation implements CommandMapper {
             } catch (IOException e) {
                 e.printStackTrace();
             }
-        }else if(input.contains(LOGOUT)){
-            return new Logout(getSender(receivedPacket,clients),
+        } else if (input.contains(LOGOUT)) {
+            return new Logout(getSender(receivedPacket, clients),
                     receivedPacket.getAddress(),
                     receivedPacket.getPort(),
                     "Successfully logged out. See you soon!".getBytes(StandardCharsets.UTF_8));

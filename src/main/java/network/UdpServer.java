@@ -126,6 +126,7 @@ public class UdpServer implements Server {
 
         try {
             FileHandler fileHandler = new FileHandler();
+
             if(fileHandler.clientExistInDataBase(messenger.receiver)){
             byte[] messageToSend = stringToSendHelper(messenger.message, messenger.sender);
             subtitlesPrinter.printLogSuccessfullySentMessage(messenger.sender, messenger.receiver, messenger.message);
