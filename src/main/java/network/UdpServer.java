@@ -127,14 +127,13 @@ public class UdpServer implements Server {
         try {
             FileHandler fileHandler = new FileHandler();
             if(fileHandler.clientExistInDataBase(messenger.receiver)){
-            byte[] bufToSend = stringToSendHelper(messenger.message, messenger.sender);
+            byte[] messageToSend = stringToSendHelper(messenger.message, messenger.sender);
             subtitlesPrinter.printLogSuccessfullySentMessage(messenger.sender, messenger.receiver, messenger.message);
-            Packet packetToSend = new Packet(bufToSend, new ConnectionData(messenger.destinationInetAddress, messenger.destinationPort));
+            Packet packetToSend = new Packet(messageToSend, new ConnectionData(messenger.destinationInetAddress, messenger.destinationPort));
             sendPacket(packetToSend);
             }else{
                 subtitlesPrinter.printLogMessageNotSent(messenger.sender, messenger.receiver);
-                Packet packetToSend = new Packet(messenger.failedToSendMessage, new ConnectionData(messenger.destinationInetAddress, messenger.destinationPort));
-                sendPacket(packetToSend);
+                sendPacket(new Packet(messenger.failedToSendMessage, new ConnectionData(messenger.destinationInetAddress, messenger.destinationPort)));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -147,17 +146,17 @@ public class UdpServer implements Server {
             FileHandler fileHandler = new FileHandler();
             if(fileHandler.clientExistInDataBase(login.name)) {
                 subtitlesPrinter.printLogClientFoundInDB(login.name);
-                if (hashPassword.checkIfPasswordMatches(login.name, login.password)) {
+                if (hashPassword.checkIfPasswordMatches(login.name, login.password) && login.name != null ) {
                     subtitlesPrinter.printLogClientLoggedIn(login.name);
                     clients.put(login.name, connectionData);
                     Packet packetToSend = new Packet(login.messageSuccessfullyLogged, connectionData);
                     sendPacket(packetToSend);
-                } else {
-                    Packet packetToSend = new Packet(login.messageFailedLogin, connectionData);
-                    sendPacket(packetToSend);
-                    subtitlesPrinter.printLogClientDoesNotExist(login.name);
+                }else{
+                    sendPacket(new Packet(login.messageFailedLogin,connectionData));
                 }
-
+            } else {
+                sendPacket(new Packet(login.messageFailedLogin,connectionData));
+                subtitlesPrinter.printLogClientDoesNotExist(login.name);
             }
         } catch (IOException e) {
             e.printStackTrace();

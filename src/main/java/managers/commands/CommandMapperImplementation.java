@@ -71,9 +71,18 @@ public class CommandMapperImplementation implements CommandMapper {
                     receiverData.getPort(),
                     "Message wasn't sent. The user you are trying to reach is offline or does not exist.".getBytes(StandardCharsets.UTF_8));
         } else if (input.contains(LOGIN)) {
-            String name = inputHelper.defineWhoWantsToRegister(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
-            String password = inputHelper.definePasswordFromInput(input).replaceAll("[\\s\u0000]+", "");
-            String message = "Hello again " + name + "!";
+            String name;
+            String password;
+            String message;
+            if(inputHelper.checkIfInputLengthMatchesExpected(3,input)) {
+                name = inputHelper.defineWhoWantsToRegister(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
+                password = inputHelper.definePasswordFromInput(input).replaceAll("[\\s\u0000]+", "");
+                message = "Hello again " + name + "!";
+            }else{
+                name = null;
+                password = null;
+                message = "You wrongly used command!";
+            }
             try {
                 return new Login(name,
                         password,
