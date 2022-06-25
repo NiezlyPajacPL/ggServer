@@ -1,5 +1,7 @@
 package helpers;
 
+import managers.SubtitlesPrinter;
+
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
@@ -16,10 +18,6 @@ public class HashPassword {
     public SecuredPassword generateSecuredPassword(String passwordToHash) {
         String salt = getSalt();
         String securePassword = getSecurePassword(passwordToHash, salt);
-        System.out.println(securePassword);
-        String regeneratedPasswordToVerify = getSecurePassword(passwordToHash, salt);
-        System.out.println(regeneratedPasswordToVerify);
-
         return new SecuredPassword(securePassword, salt);
     }
 

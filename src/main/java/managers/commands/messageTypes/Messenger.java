@@ -11,13 +11,15 @@ public class Messenger extends MessageType {
     public String message;
     public InetAddress destinationInetAddress;
     public int destinationPort;
+    public byte[] failedToSendMessage;
 
-    public Messenger(String sender, String receiver, String message, InetAddress destinationInetAddress, int destinationPort){
+    public Messenger(String sender, String receiver, String message, InetAddress destinationInetAddress, int destinationPort,byte[] failedToSendMessage){
         this.sender = sender;
         this.receiver = receiver;
         this.message = message;
         this.destinationInetAddress = destinationInetAddress;
         this.destinationPort = destinationPort;
+        this.failedToSendMessage = failedToSendMessage;
     }
 
 }

@@ -17,25 +17,6 @@ public class FileHandler {
     public FileHandler() throws IOException {
     }
 
-    public ArrayList<String> getUsersDataBase() {
-        while (scanner.hasNextLine()) {
-            String data = scanner.nextLine();
-            fileDataInList.add(data);
-        }
-        System.out.println(fileDataInList);
-        return fileDataInList;
-    }
-
-    public boolean doesInputMatchDataBase(String input) {
-        while (scanner.hasNextLine()) {
-            String string = scanner.nextLine();
-            if (input.equals(string)) {
-                return true;
-            }
-        }
-        return false;
-    }
-
     public boolean clientExistInDataBase(String nickname) {
         while (scanner.hasNextLine()) {
             String string = scanner.nextLine();
@@ -44,20 +25,6 @@ public class FileHandler {
                 return true;
             }
         }
-        return false;
-    }
-
-    public boolean doesPasswordMatch(String password) {
-        while (scanner.hasNextLine()) {
-            String string = scanner.nextLine();
-            String passwordFromString = inputHelper.dataBaseDefinePassword(string);
-            if (passwordFromString.equals(password))
-
-                System.out.println("Password  matches");
-            return true;
-
-        }
-        System.out.println("Password does not match");
         return false;
     }
 
