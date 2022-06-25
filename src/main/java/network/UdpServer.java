@@ -53,6 +53,10 @@ public class UdpServer implements Server {
 
                 loginUser((Login) messageType);
 
+            }else if(messageType instanceof Logout){
+
+                logoutUser((Logout) messageType);
+
             }
         }
     }
@@ -125,7 +129,6 @@ public class UdpServer implements Server {
         try {
             FileHandler fileHandler = new FileHandler();
             if(fileHandler.clientExistInDataBase(login.name)) {
-
                 subtitlesPrinter.printLogClientFoundInDB(login.name);
                 if (hashPassword.checkIfPasswordMatches(login.name, login.password)) {
                     subtitlesPrinter.printLogClientMatchesDB();
@@ -144,7 +147,13 @@ public class UdpServer implements Server {
         }
     }
 
-    public byte[] stringToSendHelper(String text, String sender) {
+    public void logoutUser(Logout logout){
+        clients.remove(logout.name);
+        Packet packetToSend = new Packet(logout.message, new ConnectionData(logout.inetAddress, logout.port));
+        sendPacket(packetToSend);
+    }
+
+    private byte[] stringToSendHelper(String text, String sender) {
         String textToSend = sender + ": " + text;
         return textToSend.getBytes(StandardCharsets.UTF_8);
     }

@@ -41,6 +41,7 @@ public class CommandMapperImplementation implements CommandMapper {
                     "Nickname is already taken. :(".getBytes(StandardCharsets.UTF_8));
 
         } else if (input.contains("/allUsers") || input.contains("/allusers") || input.contains("/users")) {
+
             return new UsersListSender(receivedPacket.getAddress(), receivedPacket.getPort(), clients.toString().getBytes(StandardCharsets.UTF_8));
         } else if (input.contains("/msg")) {
             String sender = getSender(receivedPacket, clients);
@@ -63,6 +64,11 @@ public class CommandMapperImplementation implements CommandMapper {
             } catch (IOException e) {
                 e.printStackTrace();
             }
+        }else if(input.contains("/logout")){
+            return new Logout(getSender(receivedPacket,clients),
+                    receivedPacket.getAddress(),
+                    receivedPacket.getPort(),
+                    "Successfully logged out. See you soon!".getBytes(StandardCharsets.UTF_8));
         }
         return null;
     }
