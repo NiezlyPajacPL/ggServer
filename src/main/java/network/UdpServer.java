@@ -29,7 +29,6 @@ public class UdpServer implements Server {
 
     public void run() {
 
-
         while (true) {
             DatagramPacket receivedPacket = receivePacket();
 

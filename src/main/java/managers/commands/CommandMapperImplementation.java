@@ -8,8 +8,10 @@ import managers.commands.messageTypes.*;
 
 import javax.xml.namespace.QName;
 import java.io.IOException;
+import java.lang.reflect.Array;
 import java.net.DatagramPacket;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -47,8 +49,8 @@ public class CommandMapperImplementation implements CommandMapper {
                     "Something went wrong or nickname is already taken. :(".getBytes(StandardCharsets.UTF_8));
 
         } else if (input.contains(ALLUSERS)) {
+            return new UsersListSender(receivedPacket.getAddress(), receivedPacket.getPort(), clients.keySet().toString().getBytes(StandardCharsets.UTF_8));
 
-            return new UsersListSender(receivedPacket.getAddress(), receivedPacket.getPort(), clients.toString().getBytes(StandardCharsets.UTF_8));
         } else if (input.contains(MESSAGE)) {
             String sender = getSender(receivedPacket, clients);
             String receiver = inputHelper.defineReceiver(input);
@@ -84,7 +86,7 @@ public class CommandMapperImplementation implements CommandMapper {
         return null;
     }
 
-    public String getSender(DatagramPacket packet, Map<String, ConnectionData> clients) {
+    private String getSender(DatagramPacket packet, Map<String, ConnectionData> clients) {
         for (Map.Entry<String, ConnectionData> entry : clients.entrySet()) {
             if ((Objects.equals(entry.getValue().getInetAddress(), packet.getAddress())) && Objects.equals(entry.getValue().getPort(), packet.getPort())) {
                 return entry.getKey();
@@ -92,6 +94,7 @@ public class CommandMapperImplementation implements CommandMapper {
         }
         return UNKNOWN;
     }
+
 }
 
 

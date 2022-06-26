@@ -21,19 +21,4 @@ public class Registration extends MessageType {
         this.messageSuccessfullyRegistered = message;
         this.messageFailedRegistration = messageFailedRegistration;
     }
-
-
-    private void addClientToDataBase() {
-        //  clients.put(nickname, new ConnectionData(packet.getAddress(), packet.getPort()));
-        //   clientList.add(nickname);
-       /*
-        try {
-            FileHandler fileHandler = new FileHandler();
-            fileHandler.overrideDataBase(nickname + " " + password);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-
-        */
-    }
 }
