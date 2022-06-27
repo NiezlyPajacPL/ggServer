@@ -17,7 +17,7 @@ public class FileHandler {
     public FileHandler() throws IOException {
     }
 
-    public boolean clientExistInDataBase(String nickname) {
+    public boolean clientExistInDB(String nickname) {
         while (scanner.hasNextLine()) {
             String string = scanner.nextLine();
             String nicknameFromString = inputHelper.dataBaseDefineNickname(string);
@@ -39,7 +39,7 @@ public class FileHandler {
         return null;
     }
 
-    public void overrideDataBase(String data) {
+    public void overrideDB(String data) {
         try {
             bufferedWriter.write(data);
             bufferedWriter.newLine();

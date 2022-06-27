@@ -19,7 +19,7 @@ import java.util.Map;
 public class UdpServer implements Server {
     private DatagramSocket socket;
     SubtitlesPrinter subtitlesPrinter;
-    Map<String, ConnectionData> clients = new HashMap<>();
+    Map<String, ConnectionData> users = new HashMap<>();
 
     public UdpServer(SubtitlesPrinter subtitlesPrinter, int port) throws SocketException {
         socket = new DatagramSocket(port);
@@ -32,30 +32,20 @@ public class UdpServer implements Server {
         while (true) {
             DatagramPacket receivedPacket = receivePacket();
 
-            CommandMapperImplementation commandMapperImplementation = new CommandMapperImplementation(clients);
+            CommandMapperImpl commandMapper = new CommandMapperImpl(users);
             MessageType messageType;
-            messageType = commandMapperImplementation.mapCommand(receivedPacket);
+            messageType = commandMapper.mapCommand(receivedPacket);
 
             if (messageType instanceof Registration) {
-
                 registerUser((Registration) messageType);
-
             } else if (messageType instanceof UsersListSender) {
-
                 sendUsersList((UsersListSender) messageType);
-
             } else if (messageType instanceof Messenger) {
-
                 sendMessage((Messenger) messageType);
-
             } else if (messageType instanceof Login) {
-
                 loginUser((Login) messageType);
-
             }else if(messageType instanceof Logout){
-
                 logoutUser((Logout) messageType);
-
             }
         }
     }
@@ -90,9 +80,9 @@ public class UdpServer implements Server {
         ConnectionData connectionData = new ConnectionData(registration.inetAddress, registration.port);
         try {
             FileHandler fileHandler = new FileHandler();
-            if (!fileHandler.clientExistInDataBase(registration.name) && registration.name != null) {
-                fileHandler.overrideDataBase(registration.name + " " + registration.securedPassword.password + " " + registration.securedPassword.salt);
-                clients.put(registration.name, connectionData);
+            if (!fileHandler.clientExistInDB(registration.name) && registration.name != null) {
+                fileHandler.overrideDB(registration.name + " " + registration.securedPassword.password + " " + registration.securedPassword.salt);
+                users.put(registration.name, connectionData);
                 subtitlesPrinter.printLogGeneratedPassword();
                 subtitlesPrinter.printLogClientRegistered(registration.name, connectionData.getInetAddress(), connectionData.getPort());
                 Packet packetToSend = new Packet(registration.messageSuccessfullyRegistered, connectionData);
@@ -126,7 +116,7 @@ public class UdpServer implements Server {
         try {
             FileHandler fileHandler = new FileHandler();
 
-            if(fileHandler.clientExistInDataBase(messenger.receiver)){
+            if(fileHandler.clientExistInDB(messenger.receiver)){
             byte[] messageToSend = stringToSendHelper(messenger.message, messenger.sender);
             subtitlesPrinter.printLogSuccessfullySentMessage(messenger.sender, messenger.receiver, messenger.message);
             Packet packetToSend = new Packet(messageToSend, new ConnectionData(messenger.destinationInetAddress, messenger.destinationPort));
@@ -140,15 +130,15 @@ public class UdpServer implements Server {
         }
     }
 
-    public void loginUser(Login login) {
+    private void loginUser(Login login) {
         ConnectionData connectionData = new ConnectionData(login.inetAddress, login.port);
         try {
             FileHandler fileHandler = new FileHandler();
-            if(fileHandler.clientExistInDataBase(login.name)) {
+            if(fileHandler.clientExistInDB(login.name)) {
                 subtitlesPrinter.printLogClientFoundInDB(login.name);
                 if (hashPassword.checkIfPasswordMatches(login.name, login.password) && login.name != null ) {
                     subtitlesPrinter.printLogClientLoggedIn(login.name);
-                    clients.put(login.name, connectionData);
+                    users.put(login.name, connectionData);
                     Packet packetToSend = new Packet(login.messageSuccessfullyLogged, connectionData);
                     sendPacket(packetToSend);
                 }else{
@@ -163,11 +153,16 @@ public class UdpServer implements Server {
         }
     }
 
-    public void logoutUser(Logout logout){
+    private void logoutUser(Logout logout){
         subtitlesPrinter.printLogClientLoggedOut(logout.name);
-        clients.remove(logout.name);
+        users.remove(logout.name);
         Packet packetToSend = new Packet(logout.message, new ConnectionData(logout.inetAddress, logout.port));
         sendPacket(packetToSend);
+    }
+
+    private void somethingWentWrong(){
+
+  //      Packet packetToSend = new Packet("Something", new ConnectionData(logout.inetAddress, logout.port));
     }
 
     private byte[] stringToSendHelper(String text, String sender) {

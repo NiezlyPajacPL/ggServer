@@ -6,17 +6,14 @@ import helpers.SecuredPassword;
 import managers.ConnectionData;
 import managers.commands.messageTypes.*;
 
-import javax.xml.namespace.QName;
 import java.io.IOException;
-import java.lang.reflect.Array;
 import java.net.DatagramPacket;
 import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
 
-public class CommandMapperImplementation implements CommandMapper {
+public class CommandMapperImpl implements CommandMapper {
 
     Map<String, ConnectionData> clients;
     private final String REGISTER = "/register";
@@ -26,7 +23,7 @@ public class CommandMapperImplementation implements CommandMapper {
     private final String LOGOUT = "/logout";
     private final String UNKNOWN = "UNKNOWN";
 
-    public CommandMapperImplementation(Map<String, ConnectionData> clients) {
+    public CommandMapperImpl(Map<String, ConnectionData> clients) {
         this.clients = clients;
     }
 
