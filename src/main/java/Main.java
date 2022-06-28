@@ -10,9 +10,10 @@ public class Main {
         SubtitlesPrinter subtitlesPrinter = new SubtitlesPrinter();
         {
             try {
-                TcpServer tcpServer = new TcpServer();
-                tcpServer.start(6666);
-
+         /*       TcpServer tcpServer = new TcpServer();
+            subtitlesPrinter.printLogServerStarted();
+                tcpServer.start(5000);
+            */
                 server = new UdpServer(subtitlesPrinter, 4445);
                 subtitlesPrinter.printLogServerStarted();
                 Thread thread = new Thread(server);

@@ -18,6 +18,7 @@ public class TcpServer {
         try {
             serverSocket = new ServerSocket(port);
             clientSocket = serverSocket.accept();
+            System.out.println("Client connected");
             output = new PrintWriter(clientSocket.getOutputStream(), true);
             input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             String greeting = input.readLine();
