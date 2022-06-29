@@ -71,8 +71,7 @@ public class HashPassword {
             // Get a random salt
             secureRandom.nextBytes(salt);
             // return salt
-            String saltInString = new String(salt);
-            return saltInString;
+            return new String(salt);
         } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
             e.printStackTrace();
         }
