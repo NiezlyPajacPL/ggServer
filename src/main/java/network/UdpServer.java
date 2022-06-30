@@ -1,7 +1,7 @@
 package network;
 
 import helpers.FileHandler;
-import helpers.HashPassword;
+import helpers.PasswordHasher;
 import helpers.Packet;
 import managers.ConnectionData;
 import managers.SubtitlesPrinter;
@@ -12,9 +12,7 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
-import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -27,7 +25,7 @@ public class UdpServer implements Server {
         socket = new DatagramSocket(port);
         this.subtitlesPrinter = subtitlesPrinter;
     }
-    HashPassword hashPassword = new HashPassword();
+    PasswordHasher passwordHasher = new PasswordHasher();
 
     public void run() {
         while (true) {
@@ -137,7 +135,7 @@ public class UdpServer implements Server {
             FileHandler fileHandler = new FileHandler();
             if(fileHandler.clientExistInDB(login.name)) {
                 subtitlesPrinter.printLogClientFoundInDB(login.name);
-                if (hashPassword.checkIfPasswordMatches(login.name, login.password) && login.name != null ) {
+                if (passwordHasher.checkIfPasswordMatches(login.name, login.password) && login.name != null ) {
                     subtitlesPrinter.printLogClientLoggedIn(login.name);
                     users.put(login.name, connectionData);
                     Packet packetToSend = new Packet(login.messageSuccessfullyLogged, connectionData);

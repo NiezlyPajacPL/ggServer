@@ -10,9 +10,9 @@ import java.security.SecureRandom;
 import java.util.Arrays;
 import java.util.Objects;
 
-public class HashPassword {
+public class PasswordHasher {
 
-    public HashPassword() {
+    public PasswordHasher() {
     }
 
     public SecuredPassword generateSecuredPassword(String passwordToHash) {

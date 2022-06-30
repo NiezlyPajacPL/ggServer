@@ -1,6 +1,6 @@
 package managers.commands;
 
-import helpers.HashPassword;
+import helpers.PasswordHasher;
 import helpers.InputHelper;
 import helpers.SecuredPassword;
 import managers.ConnectionData;
@@ -32,12 +32,12 @@ public class CommandMapperImpl implements CommandMapper {
 
         String input = new String(receivedPacket.getData());
         InputHelper inputHelper = new InputHelper();
-        HashPassword hashPassword = new HashPassword();
+        PasswordHasher passwordHasher = new PasswordHasher();
 
         if (input.contains(REGISTER)) {
             String name = inputHelper.defineSecondWord(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
             String password = inputHelper.definePasswordFromInput(input).replaceAll("[\\s\u0000]+", "");
-            SecuredPassword securedPassword = hashPassword.generateSecuredPassword(password);
+            SecuredPassword securedPassword = passwordHasher.generateSecuredPassword(password);
             return new Registration(name,
                     securedPassword,
                     receivedPacket.getAddress(),
