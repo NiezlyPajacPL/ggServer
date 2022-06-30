@@ -30,7 +30,6 @@ public class UdpServer implements Server {
     HashPassword hashPassword = new HashPassword();
 
     public void run() {
-
         while (true) {
             DatagramPacket receivedPacket = receivePacket();
 

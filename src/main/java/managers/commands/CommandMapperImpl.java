@@ -35,7 +35,7 @@ public class CommandMapperImpl implements CommandMapper {
         HashPassword hashPassword = new HashPassword();
 
         if (input.contains(REGISTER)) {
-            String name = inputHelper.defineWhoWantsToRegister(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
+            String name = inputHelper.defineSecondWord(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
             String password = inputHelper.definePasswordFromInput(input).replaceAll("[\\s\u0000]+", "");
             SecuredPassword securedPassword = hashPassword.generateSecuredPassword(password);
             return new Registration(name,
@@ -50,7 +50,7 @@ public class CommandMapperImpl implements CommandMapper {
 
         } else if (input.contains(MESSAGE)) {
             String sender = getSender(receivedPacket, clients);
-            String receiver = inputHelper.defineReceiver(input);
+            String receiver = inputHelper.defineSecondWord(input);
             String message = inputHelper.defineMessageFromInput(input);
             ConnectionData receiverData = clients.get(receiver);
 
@@ -61,7 +61,7 @@ public class CommandMapperImpl implements CommandMapper {
                     receiverData.getPort(),
                     "Message wasn't sent. The user you are trying to reach is offline or does not exist.".getBytes(StandardCharsets.UTF_8));
         } else if (input.contains(LOGIN)) {
-            String name = inputHelper.defineWhoWantsToRegister(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
+            String name = inputHelper.defineSecondWord(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
             String password = inputHelper.definePasswordFromInput(input).replaceAll("[\\s\u0000]+", "");
             String message = "Hello again " + name + "!";
             try {

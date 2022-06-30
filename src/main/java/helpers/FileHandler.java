@@ -1,6 +1,10 @@
 package helpers;
 
+import managers.ConnectionData;
+
 import java.io.*;
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Scanner;
@@ -9,8 +13,6 @@ public class FileHandler {
     File registeredUsers = new File("src/main/java/managers/commands/RegisteredClients.txt");
     Scanner scanner = new Scanner(registeredUsers);
 
-    ArrayList<String> fileDataInList = new ArrayList<>();
-    BufferedReader bufferedReader = new BufferedReader(new FileReader(registeredUsers));
     FileWriter fileWriter = new FileWriter(registeredUsers.getAbsoluteFile(), true);
     BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
     InputHelper inputHelper = new InputHelper();
@@ -29,12 +31,12 @@ public class FileHandler {
         return false;
     }
 
-    public SecuredPassword getHashedPassword(String nickname){
+    public SecuredPassword getHashedPassword(String nickname) {
         while (scanner.hasNextLine()) {
             String string = scanner.nextLine();
             String nicknameFromString = inputHelper.dataBaseDefineNickname(string);
             if (nicknameFromString.equals(nickname)) {
-                return new SecuredPassword(inputHelper.dataBaseDefinePassword(string),inputHelper.getSaltFromDataBase(string));
+                return new SecuredPassword(inputHelper.dataBaseDefinePassword(string), inputHelper.getSaltFromDataBase(string));
             }
         }
         return null;
@@ -49,4 +51,5 @@ public class FileHandler {
             e.printStackTrace();
         }
     }
+
 }
