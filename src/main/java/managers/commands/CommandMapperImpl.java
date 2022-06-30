@@ -41,12 +41,10 @@ public class CommandMapperImpl implements CommandMapper {
             return new Registration(name,
                     securedPassword,
                     receivedPacket.getAddress(),
-                    receivedPacket.getPort(),
-                    "Registered Successfully!".getBytes(StandardCharsets.UTF_8),
-                    "Something went wrong or nickname is already taken. :(".getBytes(StandardCharsets.UTF_8));
+                    receivedPacket.getPort());
 
         } else if (input.contains(ALLUSERS)) {
-            return new UsersListSender(receivedPacket.getAddress(), receivedPacket.getPort(), clients.keySet().toString().getBytes(StandardCharsets.UTF_8));
+            return new UsersListSender(receivedPacket.getAddress(), receivedPacket.getPort());
 
         } else if (input.contains(MESSAGE)) {
             String sender = getSender(receivedPacket, clients);
@@ -58,27 +56,22 @@ public class CommandMapperImpl implements CommandMapper {
                     receiver,
                     message,
                     receiverData.getInetAddress(),
-                    receiverData.getPort(),
-                    "Message wasn't sent. The user you are trying to reach is offline or does not exist.".getBytes(StandardCharsets.UTF_8));
+                    receiverData.getPort());
         } else if (input.contains(LOGIN)) {
             String name = inputHelper.defineSecondWord(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
             String password = inputHelper.definePasswordFromInput(input).replaceAll("[\\s\u0000]+", "");
-            String message = "Hello again " + name + "!";
             try {
                 return new Login(name,
                         password,
                         receivedPacket.getAddress(),
-                        receivedPacket.getPort(),
-                        message.getBytes(StandardCharsets.UTF_8),
-                        "Something went wrong. Try again".getBytes(StandardCharsets.UTF_8));
+                        receivedPacket.getPort());
             } catch (IOException e) {
                 e.printStackTrace();
             }
         } else if (input.contains(LOGOUT)) {
             return new Logout(getSender(receivedPacket, clients),
                     receivedPacket.getAddress(),
-                    receivedPacket.getPort(),
-                    "Successfully logged out. See you soon!".getBytes(StandardCharsets.UTF_8));
+                    receivedPacket.getPort());
         }
         return null;
     }

@@ -1,6 +1,7 @@
 package network;
 
 import helpers.DataBaseManager;
+import helpers.MessageHelper;
 import helpers.PasswordHasher;
 import helpers.Packet;
 import managers.ConnectionData;
@@ -20,7 +21,7 @@ public class UdpServer implements Server {
     private DatagramSocket socket;
     SubtitlesPrinter subtitlesPrinter;
     Map<String, ConnectionData> users = new HashMap<>();
-
+    MessageHelper messageHelper = new MessageHelper(users);
     public UdpServer(SubtitlesPrinter subtitlesPrinter, int port) throws SocketException {
         socket = new DatagramSocket(port);
         this.subtitlesPrinter = subtitlesPrinter;
@@ -85,7 +86,7 @@ public class UdpServer implements Server {
                 users.put(registration.name, connectionData);
                 subtitlesPrinter.printLogGeneratedPassword();
                 subtitlesPrinter.printLogClientRegistered(registration.name, connectionData.getInetAddress(), connectionData.getPort());
-                Packet packetToSend = new Packet(registration.messageSuccessfullyRegistered, connectionData);
+                Packet packetToSend = new Packet(messageHelper.registeredSuccessfully, connectionData);
                 sendPacket(packetToSend);
 
             } else {
@@ -94,7 +95,7 @@ public class UdpServer implements Server {
                 } else {
                     subtitlesPrinter.printLogClientFailedRegistration(registration.name, connectionData.getInetAddress(), connectionData.getPort());
                 }
-                Packet packetToSend = new Packet(registration.messageFailedRegistration, connectionData);
+                Packet packetToSend = new Packet(messageHelper.nicknameAlreadyTaken, connectionData);
                 sendPacket(packetToSend);
             }
         } catch (IOException e) {
@@ -106,7 +107,7 @@ public class UdpServer implements Server {
     private void sendUsersList(UsersListSender usersListSender) {
         subtitlesPrinter.printLogUsersListRequest();
 
-        Packet packetToSend = new Packet(usersListSender.message, new ConnectionData(usersListSender.inetAddress, usersListSender.port));
+        Packet packetToSend = new Packet(messageHelper.clientList(), new ConnectionData(usersListSender.inetAddress, usersListSender.port));
         sendPacket(packetToSend);
     }
 
@@ -121,7 +122,7 @@ public class UdpServer implements Server {
                 sendPacket(packetToSend);
             } else {
                 subtitlesPrinter.printLogMessageNotSent(messenger.sender, messenger.receiver);
-                sendPacket(new Packet(messenger.failedToSendMessage, new ConnectionData(messenger.destinationInetAddress, messenger.destinationPort)));
+                sendPacket(new Packet(messageHelper.failedToSendMessage, new ConnectionData(messenger.destinationInetAddress, messenger.destinationPort)));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -137,13 +138,13 @@ public class UdpServer implements Server {
                 if (passwordHasher.checkIfPasswordMatches(login.name, login.password) && login.name != null) {
                     subtitlesPrinter.printLogClientLoggedIn(login.name);
                     users.put(login.name, connectionData);
-                    Packet packetToSend = new Packet(login.messageSuccessfullyLogged, connectionData);
+                    Packet packetToSend = new Packet(messageHelper.successfullyLoggedIn(login.name), connectionData);
                     sendPacket(packetToSend);
                 } else {
-                    sendPacket(new Packet(login.messageFailedLogin, connectionData));
+                    sendPacket(new Packet(messageHelper.failedLogin, connectionData));
                 }
             } else {
-                sendPacket(new Packet(login.messageFailedLogin, connectionData));
+                sendPacket(new Packet(messageHelper.failedLogin, connectionData));
                 subtitlesPrinter.printLogClientDoesNotExist(login.name);
             }
         } catch (IOException e) {
@@ -154,13 +155,8 @@ public class UdpServer implements Server {
     private void logoutUser(Logout logout) {
         subtitlesPrinter.printLogClientLoggedOut(logout.name);
         users.remove(logout.name);
-        Packet packetToSend = new Packet(logout.message, new ConnectionData(logout.inetAddress, logout.port));
+        Packet packetToSend = new Packet(messageHelper.loggedOut,new ConnectionData(logout.inetAddress, logout.port));
         sendPacket(packetToSend);
-    }
-
-    private void somethingWentWrong() {
-
-        //      Packet packetToSend = new Packet("Something", new ConnectionData(logout.inetAddress, logout.port));
     }
 
     private byte[] stringToSendHelper(String text, String sender) {
