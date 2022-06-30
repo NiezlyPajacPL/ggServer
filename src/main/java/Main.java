@@ -1,11 +1,8 @@
-import helpers.FileHandler;
-import managers.ConnectionData;
 import managers.SubtitlesPrinter;
 import network.TcpServer;
 import network.UdpServer;
 
 import java.io.IOException;
-import java.net.SocketException;
 
 public class Main {
     public static void main(String[] args) {

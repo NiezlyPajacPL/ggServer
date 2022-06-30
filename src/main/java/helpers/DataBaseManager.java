@@ -9,7 +9,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.Scanner;
 
-public class FileHandler {
+public class DataBaseManager {
     File registeredUsers = new File("src/main/java/managers/commands/RegisteredClients.txt");
     Scanner scanner = new Scanner(registeredUsers);
 
@@ -17,7 +17,12 @@ public class FileHandler {
     BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
     InputHelper inputHelper = new InputHelper();
 
-    public FileHandler() throws IOException {
+    public DataBaseManager() throws IOException {
+    }
+
+    public void saveClient(String nickname, SecuredPassword securedPassword){
+        String data = nickname + " " + securedPassword.password + " " + securedPassword.salt;
+        overrideDB(data);
     }
 
     public boolean clientExistInDB(String nickname) {
@@ -42,7 +47,7 @@ public class FileHandler {
         return null;
     }
 
-    public void overrideDB(String data) {
+    private void overrideDB(String data) {
         try {
             bufferedWriter.write(data);
             bufferedWriter.newLine();

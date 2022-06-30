@@ -1,13 +1,10 @@
 package helpers;
 
-import managers.SubtitlesPrinter;
-
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
-import java.util.Arrays;
 import java.util.Objects;
 
 public class PasswordHasher {
@@ -23,8 +20,8 @@ public class PasswordHasher {
 
     public boolean checkIfPasswordMatches(String nickname,String password){
         try {
-            FileHandler fileHandler = new FileHandler();
-            SecuredPassword passwordFromDB = fileHandler.getHashedPassword(nickname);
+            DataBaseManager dataBaseManager = new DataBaseManager();
+            SecuredPassword passwordFromDB = dataBaseManager.getHashedPassword(nickname);
 
             if(Objects.equals(getSecurePassword(password, passwordFromDB.salt), passwordFromDB.password)){
                 return true;
