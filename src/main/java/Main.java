@@ -12,19 +12,21 @@ public class Main {
 
 
             try {
+            /*
                 TcpServer tcpServer = new TcpServer(subtitlesPrinter, 5000);
                 subtitlesPrinter.printLogServerStarted();
                 Thread thread = new Thread(tcpServer);
                 thread.start();
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
-            /*    server = new UdpServer(subtitlesPrinter, 4445);
+
+             */
+                server = new UdpServer(subtitlesPrinter, 4445);
                 subtitlesPrinter.printLogServerStarted();
                 Thread thread = new Thread(server);
                 thread.start();
 
-             */
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
     }
 }
