@@ -10,7 +10,7 @@ public class Main {
         SubtitlesPrinter subtitlesPrinter = new SubtitlesPrinter();
         {
 
-
+            //checking if github ignores gradle build
             try {
             /*
                 TcpServer tcpServer = new TcpServer(subtitlesPrinter, 5000);
