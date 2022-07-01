@@ -19,10 +19,10 @@ public class TcpServer implements Server {
     private SubtitlesPrinter subtitlesPrinter;
     private int port;
 
-    public TcpServer(SubtitlesPrinter subtitlesPrinter,int port) throws IOException {
-     this.subtitlesPrinter = subtitlesPrinter;
-     this.port = port;
-     serverSocket = new ServerSocket(port);
+    public TcpServer(SubtitlesPrinter subtitlesPrinter, int port) throws IOException {
+        this.subtitlesPrinter = subtitlesPrinter;
+        this.port = port;
+        serverSocket = new ServerSocket(port);
     }
 
     @Override
@@ -30,24 +30,28 @@ public class TcpServer implements Server {
         try {
             clientSocket = serverSocket.accept();
             System.out.println("Client connected");
-            output = new PrintWriter(clientSocket.getOutputStream(), true);
-            input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-
-            while (true){
-                String message = input.readLine();
-                System.out.println(message);
-                output.println(message);
-                if(input.readLine().equals("asd")){
-                    output.println("AHA");
-                }else if(input.readLine().contains("/msg")){
-                    output.println(clientSocket.getInetAddress() + ":" + clientSocket.getPort() + " said: " + message);
-                }
+            while (true) {
+                String message = receiveMessage();
+                sendMsg(message);
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-
     }
+
+    private String receiveMessage() throws IOException {
+        input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+        String message = input.readLine();
+        System.out.println(message);
+        //     output.println(message);
+        return message;
+    }
+
+    private void sendMsg(String message) throws IOException {
+        output = new PrintWriter(clientSocket.getOutputStream(), true);
+        output.println(message);//
+    }
+
     public void start(int port) {
         try {
             serverSocket = new ServerSocket(port);
@@ -58,8 +62,7 @@ public class TcpServer implements Server {
             String greeting = input.readLine();
             if ("hello server".equals(greeting)) {
                 output.println("hello client");
-            }
-            else {
+            } else {
                 output.println("unrecognised greeting");
             }
         } catch (IOException e) {

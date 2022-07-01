@@ -10,20 +10,19 @@ public class Main {
         SubtitlesPrinter subtitlesPrinter = new SubtitlesPrinter();
         {
 
-            //checking if github ignores gradle build
             try {
-            /*
+
                 TcpServer tcpServer = new TcpServer(subtitlesPrinter, 5000);
                 subtitlesPrinter.printLogServerStarted();
                 Thread thread = new Thread(tcpServer);
                 thread.start();
 
-             */
+             /*
                 server = new UdpServer(subtitlesPrinter, 4445);
                 subtitlesPrinter.printLogServerStarted();
                 Thread thread = new Thread(server);
                 thread.start();
-
+            */
             } catch (IOException e) {
                 e.printStackTrace();
             }
