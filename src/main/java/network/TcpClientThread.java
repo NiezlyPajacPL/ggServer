@@ -14,28 +14,20 @@ public class TcpClientThread extends Thread{
     public void run(){
         try {
             input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            output = new PrintWriter(clientSocket.getOutputStream(), true);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        BufferedReader brinp = null;
-        DataOutputStream out = null;
-        try {
-            InputStream input = clientSocket.getInputStream();
-            brinp = new BufferedReader(new InputStreamReader(input));
-            out = new DataOutputStream(clientSocket.getOutputStream());
-        } catch (IOException e) {
-            return;
-        }
-        String line;
+        String message;
         while (true) {
             try {
-                line = brinp.readLine();
-                if ((line == null) || line.equalsIgnoreCase("QUIT")) {
+                message = input.readLine();
+                if ((message == null) || message.equalsIgnoreCase("QUIT")) {
                     clientSocket.close();
                     return;
                 } else {
-                    out.writeBytes(line + "\n\r");
-                    out.flush();
+                    output.println(message + "\n\r");
+                    output.flush();
                 }
             } catch (IOException e) {
                 e.printStackTrace();

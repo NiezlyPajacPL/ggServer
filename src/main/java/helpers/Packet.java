@@ -2,6 +2,8 @@ package helpers;
 
 import managers.ConnectionData;
 
+import java.net.InetAddress;
+
 public class Packet {
     private byte[] data;
     private ConnectionData connectionData;
@@ -17,6 +19,14 @@ public class Packet {
 
     public ConnectionData getConnectionData(){
         return connectionData;
+    }
+
+    public InetAddress getAddress(){
+        return connectionData.getInetAddress();
+    }
+
+    public int getPort(){
+        return connectionData.getPort();
     }
 
 }

@@ -8,5 +8,5 @@ public interface Server extends Runnable {
 
     void sendPacket(Packet packetToSend);
 
-    DatagramPacket receivePacket();
+    Packet receivePacket();
 }

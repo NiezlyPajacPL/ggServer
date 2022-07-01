@@ -1,5 +1,6 @@
 package managers.commands;
 
+import helpers.Packet;
 import helpers.PasswordHasher;
 import helpers.InputHelper;
 import helpers.SecuredPassword;
@@ -28,7 +29,7 @@ public class CommandMapperImpl implements CommandMapper {
     }
 
     @Override
-    public MessageType mapCommand(DatagramPacket receivedPacket) {
+    public MessageType mapCommand(Packet receivedPacket) {
 
         String input = new String(receivedPacket.getData());
         InputHelper inputHelper = new InputHelper();
@@ -47,7 +48,7 @@ public class CommandMapperImpl implements CommandMapper {
             return new UsersListSender(receivedPacket.getAddress(), receivedPacket.getPort());
 
         } else if (input.contains(MESSAGE)) {
-            String sender = getSender(receivedPacket, clients);
+            String sender = getSender(receivedPacket.getConnectionData(), clients);
             String receiver = inputHelper.defineSecondWord(input);
             String message = inputHelper.defineMessageFromInput(input);
             ConnectionData receiverData = clients.get(receiver);
@@ -69,16 +70,16 @@ public class CommandMapperImpl implements CommandMapper {
                 e.printStackTrace();
             }
         } else if (input.contains(LOGOUT)) {
-            return new Logout(getSender(receivedPacket, clients),
+            return new Logout(getSender(receivedPacket.getConnectionData(), clients),
                     receivedPacket.getAddress(),
                     receivedPacket.getPort());
         }
         return null;
     }
 
-    private String getSender(DatagramPacket packet, Map<String, ConnectionData> clients) {
+    private String getSender(ConnectionData senderConnectionData, Map<String, ConnectionData> clients) {
         for (Map.Entry<String, ConnectionData> entry : clients.entrySet()) {
-            if ((Objects.equals(entry.getValue().getInetAddress(), packet.getAddress())) && Objects.equals(entry.getValue().getPort(), packet.getPort())) {
+            if ((Objects.equals(entry.getValue().getInetAddress(), senderConnectionData.getInetAddress())) && Objects.equals(entry.getValue().getPort(), senderConnectionData.getPort())) {
                 return entry.getKey();
             }
         }

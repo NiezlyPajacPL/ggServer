@@ -14,10 +14,9 @@ import java.net.Socket;
 public class TcpServer implements Server {
     private ServerSocket serverSocket;
     private Socket clientSocket;
-    private PrintWriter output;
-    private BufferedReader input;
     private SubtitlesPrinter subtitlesPrinter;
     private int port;
+    Socket socket;
 
     public TcpServer(SubtitlesPrinter subtitlesPrinter, int port) throws IOException {
         this.subtitlesPrinter = subtitlesPrinter;
@@ -28,17 +27,27 @@ public class TcpServer implements Server {
     @Override
     public void run() {
         try {
-            clientSocket = serverSocket.accept();
-            System.out.println("Client connected");
             while (true) {
-                String message = receiveMessage();
-                sendMsg(message);
+                socket = serverSocket.accept();
+                new TcpClientThread(socket).start();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
+    @Override
+    public void sendPacket(Packet packetToSend) {
+
+    }
+
+    @Override
+    public Packet receivePacket() {
+        return null;
+    }
+
+
+/*
     private String receiveMessage() throws IOException {
         input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
         String message = input.readLine();
@@ -90,16 +99,6 @@ public class TcpServer implements Server {
             e.printStackTrace();
         }
     }
-
-    @Override
-    public void sendPacket(Packet packetToSend) {
-
-    }
-
-    @Override
-    public DatagramPacket receivePacket() {
-        return null;
-    }
-
+*/
 }
 

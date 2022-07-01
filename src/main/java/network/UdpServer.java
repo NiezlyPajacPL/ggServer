@@ -31,10 +31,9 @@ public class UdpServer implements Server {
 
     public void run() {
         while (true) {
-            DatagramPacket receivedPacket = receivePacket();
-
             CommandMapperImpl commandMapper = new CommandMapperImpl(users);
             MessageType messageType;
+            Packet receivedPacket = receivePacket();
             messageType = commandMapper.mapCommand(receivedPacket);
 
             if (messageType instanceof Registration) {
@@ -66,15 +65,15 @@ public class UdpServer implements Server {
     }
 
     @Override
-    public DatagramPacket receivePacket() {
+    public Packet receivePacket() {
         byte[] bufToReceive = new byte[256];
-        DatagramPacket receivedPacket = new DatagramPacket(bufToReceive, bufToReceive.length);
+        DatagramPacket receivedDatagramPacket = new DatagramPacket(bufToReceive, bufToReceive.length);
         try {
-            socket.receive(receivedPacket);
+            socket.receive(receivedDatagramPacket);
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return receivedPacket;
+        return new Packet(receivedDatagramPacket.getData(),new ConnectionData(receivedDatagramPacket.getAddress(), receivedDatagramPacket.getPort()));
     }
 
     private void registerUser(Registration registration) {
