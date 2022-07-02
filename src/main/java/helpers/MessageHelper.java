@@ -14,24 +14,23 @@ public class MessageHelper {
     }
 
     //REGISTER
-    public byte[] registeredSuccessfully = "Registered Successfully!".getBytes(StandardCharsets.UTF_8);
-    public byte[] nicknameAlreadyTaken = "Something went wrong or nickname is already taken. :(".getBytes(StandardCharsets.UTF_8);
+    public String registeredSuccessfully = "Registered Successfully!";
+    public String nicknameAlreadyTaken = "Something went wrong or nickname is already taken. :(";
 
     //LOGIN
-    public byte[] failedLogin = "Something went wrong. Try again".getBytes(StandardCharsets.UTF_8);
-    public byte[] successfullyLoggedIn(String name) {
-        String message = "Hello again " + name + "!";
-        return message.getBytes(StandardCharsets.UTF_8);
+    public String failedLogin = "Something went wrong. Try again";
+    public String successfullyLoggedIn(String name) {
+        return  "Hello again " + name + "!";
     }
 
     //LOGOUT
-    public byte[] loggedOut = "Successfully logged out. See you soon!".getBytes(StandardCharsets.UTF_8);
+    public String loggedOut = "Successfully logged out. See you soon!";
 
     //MESSAGES
-    public byte[] failedToSendMessage = "Message wasn't sent. The user you are trying to reach is offline or does not exist.".getBytes(StandardCharsets.UTF_8);
+    public String failedToSendMessage = "Message wasn't sent. The user you are trying to reach is offline or does not exist.";
 
     //ALLUSERS
-    public byte[] clientList() {
-        return users.keySet().toString().getBytes(StandardCharsets.UTF_8);
+    public String clientList() {
+        return users.keySet().toString();
     }
 }

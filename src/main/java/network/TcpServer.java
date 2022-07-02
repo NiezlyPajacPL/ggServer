@@ -81,7 +81,7 @@ public class TcpServer implements Server {
                 users.put(registration.name, connectionData);
                 subtitlesPrinter.printLogGeneratedPassword();
                 subtitlesPrinter.printLogClientRegistered(registration.name, connectionData.getInetAddress(), connectionData.getPort());
-                Packet packetToSend = new Packet(messageHelper.registeredSuccessfully, connectionData);
+                Packet packetToSend = new Packet(messageHelper.registeredSuccessfully.getBytes(StandardCharsets.UTF_8), connectionData);
                 sendPacket(packetToSend);
 
             } else {
@@ -90,7 +90,7 @@ public class TcpServer implements Server {
                 } else {
                     subtitlesPrinter.printLogClientFailedRegistration(registration.name, connectionData.getInetAddress(), connectionData.getPort());
                 }
-                Packet packetToSend = new Packet(messageHelper.nicknameAlreadyTaken, connectionData);
+                Packet packetToSend = new Packet(messageHelper.nicknameAlreadyTaken.getBytes(StandardCharsets.UTF_8), connectionData);
                 sendPacket(packetToSend);
             }
         } catch (IOException e) {
@@ -102,7 +102,7 @@ public class TcpServer implements Server {
     private void sendUsersList(UsersListSender usersListSender) {
         subtitlesPrinter.printLogUsersListRequest();
 
-        Packet packetToSend = new Packet(messageHelper.clientList(), new ConnectionData(usersListSender.inetAddress, usersListSender.port));
+        Packet packetToSend = new Packet(messageHelper.clientList().getBytes(StandardCharsets.UTF_8), new ConnectionData(usersListSender.inetAddress, usersListSender.port));
         sendPacket(packetToSend);
     }
 
@@ -117,7 +117,7 @@ public class TcpServer implements Server {
                 sendPacket(packetToSend);
             } else {
                 subtitlesPrinter.printLogMessageNotSent(messenger.sender, messenger.receiver);
-                sendPacket(new Packet(messageHelper.failedToSendMessage, new ConnectionData(messenger.destinationInetAddress, messenger.destinationPort)));
+                sendPacket(new Packet(messageHelper.failedToSendMessage.getBytes(StandardCharsets.UTF_8), new ConnectionData(messenger.destinationInetAddress, messenger.destinationPort)));
             }
         } catch (IOException e) {
             e.printStackTrace();
@@ -133,13 +133,13 @@ public class TcpServer implements Server {
                 if (passwordHasher.checkIfPasswordMatches(login.name, login.password) && login.name != null) {
                     subtitlesPrinter.printLogClientLoggedIn(login.name);
                     users.put(login.name, connectionData);
-                    Packet packetToSend = new Packet(messageHelper.successfullyLoggedIn(login.name), connectionData);
+                    Packet packetToSend = new Packet(messageHelper.successfullyLoggedIn(login.name).getBytes(StandardCharsets.UTF_8), connectionData);
                     sendPacket(packetToSend);
                 } else {
-                    sendPacket(new Packet(messageHelper.failedLogin, connectionData));
+                    sendPacket(new Packet(messageHelper.failedLogin.getBytes(StandardCharsets.UTF_8), connectionData));
                 }
             } else {
-                sendPacket(new Packet(messageHelper.failedLogin, connectionData));
+                sendPacket(new Packet(messageHelper.failedLogin.getBytes(StandardCharsets.UTF_8), connectionData));
                 subtitlesPrinter.printLogClientDoesNotExist(login.name);
             }
         } catch (IOException e) {
@@ -150,7 +150,7 @@ public class TcpServer implements Server {
     private void logoutUser(Logout logout) {
         subtitlesPrinter.printLogClientLoggedOut(logout.name);
         users.remove(logout.name);
-        Packet packetToSend = new Packet(messageHelper.loggedOut, new ConnectionData(logout.inetAddress, logout.port));
+        Packet packetToSend = new Packet(messageHelper.loggedOut.getBytes(StandardCharsets.UTF_8), new ConnectionData(logout.inetAddress, logout.port));
         sendPacket(packetToSend);
     }
 
