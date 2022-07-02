@@ -22,11 +22,24 @@ public class TcpServer implements Server {
     private BufferedReader input;
     SubtitlesPrinter subtitlesPrinter;
     Map<String, ConnectionData> users = new HashMap<>();
+    Map<String, PrintWriter> tcpUsers;
     MessageHelper messageHelper = new MessageHelper(users);
     PasswordHasher passwordHasher = new PasswordHasher();
+    DataBaseManager dataBaseManager;
 
-    public TcpServer(Socket clientSocket) {
+    {
+        try {
+            dataBaseManager = new DataBaseManager();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public TcpServer(Socket clientSocket,SubtitlesPrinter subtitlesPrinter, Map<String, PrintWriter> tcpUsers) {
         this.clientSocket = clientSocket;
+        this.subtitlesPrinter = subtitlesPrinter;
+        this.tcpUsers = tcpUsers;
+
         try {
             input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
             output = new PrintWriter(clientSocket.getOutputStream(), true);
@@ -58,7 +71,7 @@ public class TcpServer implements Server {
 
     @Override
     public void sendPacket(Packet packetToSend) {
-
+        output.println(new String(packetToSend.getData()));
     }
 
     @Override
@@ -79,6 +92,7 @@ public class TcpServer implements Server {
             if (!dataBaseManager.clientExistInDB(registration.name) && registration.name != null) {
                 dataBaseManager.saveClient(registration.name, registration.securedPassword);
                 users.put(registration.name, connectionData);
+                tcpUsers.put(registration.name,output);
                 subtitlesPrinter.printLogGeneratedPassword();
                 subtitlesPrinter.printLogClientRegistered(registration.name, connectionData.getInetAddress(), connectionData.getPort());
                 Packet packetToSend = new Packet(messageHelper.registeredSuccessfully.getBytes(StandardCharsets.UTF_8), connectionData);
@@ -107,20 +121,14 @@ public class TcpServer implements Server {
     }
 
     private void sendMessage(Messenger messenger) {
-        try {
-            DataBaseManager dataBaseManager = new DataBaseManager();
-
-            if (dataBaseManager.clientExistInDB(messenger.receiver)) {
-                byte[] messageToSend = stringToSendHelper(messenger.message, messenger.sender);
-                subtitlesPrinter.printLogSuccessfullySentMessage(messenger.sender, messenger.receiver, messenger.message);
-                Packet packetToSend = new Packet(messageToSend, new ConnectionData(messenger.destinationInetAddress, messenger.destinationPort));
-                sendPacket(packetToSend);
-            } else {
-                subtitlesPrinter.printLogMessageNotSent(messenger.sender, messenger.receiver);
-                sendPacket(new Packet(messageHelper.failedToSendMessage.getBytes(StandardCharsets.UTF_8), new ConnectionData(messenger.destinationInetAddress, messenger.destinationPort)));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (dataBaseManager.clientExistInDB(messenger.receiver)) {
+            byte[] messageToSend = stringToSendHelper(messenger.message, messenger.sender);
+            subtitlesPrinter.printLogSuccessfullySentMessage(messenger.sender, messenger.receiver, messenger.message);
+            Packet packetToSend = new Packet(messageToSend, new ConnectionData(messenger.destinationInetAddress, messenger.destinationPort));
+            sendPacket(packetToSend);
+        } else {
+            subtitlesPrinter.printLogMessageNotSent(messenger.sender, messenger.receiver);
+            sendPacket(new Packet(messageHelper.failedToSendMessage.getBytes(StandardCharsets.UTF_8), new ConnectionData(messenger.destinationInetAddress, messenger.destinationPort)));
         }
     }
 

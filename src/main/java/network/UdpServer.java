@@ -22,6 +22,15 @@ public class UdpServer implements Server {
     SubtitlesPrinter subtitlesPrinter;
     Map<String, ConnectionData> users = new HashMap<>();
     MessageHelper messageHelper = new MessageHelper(users);
+    DataBaseManager dataBaseManager;
+    {
+        try {
+            dataBaseManager = new DataBaseManager();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
     public UdpServer(SubtitlesPrinter subtitlesPrinter, int port) throws SocketException {
         socket = new DatagramSocket(port);
         this.subtitlesPrinter = subtitlesPrinter;
@@ -78,27 +87,22 @@ public class UdpServer implements Server {
 
     private void registerUser(Registration registration) {
         ConnectionData connectionData = new ConnectionData(registration.inetAddress, registration.port);
-        try {
-            DataBaseManager dataBaseManager = new DataBaseManager();
-            if (!dataBaseManager.clientExistInDB(registration.name) && registration.name != null) {
-                dataBaseManager.saveClient(registration.name, registration.securedPassword);
-                users.put(registration.name, connectionData);
-                subtitlesPrinter.printLogGeneratedPassword();
-                subtitlesPrinter.printLogClientRegistered(registration.name, connectionData.getInetAddress(), connectionData.getPort());
-                Packet packetToSend = new Packet(messageHelper.registeredSuccessfully.getBytes(StandardCharsets.UTF_8), connectionData);
-                sendPacket(packetToSend);
+        if (!dataBaseManager.clientExistInDB(registration.name) && registration.name != null) {
+            dataBaseManager.saveClient(registration.name, registration.securedPassword);
+            users.put(registration.name, connectionData);
+            subtitlesPrinter.printLogGeneratedPassword();
+            subtitlesPrinter.printLogClientRegistered(registration.name, connectionData.getInetAddress(), connectionData.getPort());
+            Packet packetToSend = new Packet(messageHelper.registeredSuccessfully.getBytes(StandardCharsets.UTF_8), connectionData);
+            sendPacket(packetToSend);
 
+        } else {
+            if (registration.name == null) {
+                subtitlesPrinter.printLogClientRegistrationFailedCommand(registration.inetAddress, registration.port);
             } else {
-                if (registration.name == null) {
-                    subtitlesPrinter.printLogClientRegistrationFailedCommand(registration.inetAddress, registration.port);
-                } else {
-                    subtitlesPrinter.printLogClientFailedRegistration(registration.name, connectionData.getInetAddress(), connectionData.getPort());
-                }
-                Packet packetToSend = new Packet(messageHelper.nicknameAlreadyTaken.getBytes(StandardCharsets.UTF_8), connectionData);
-                sendPacket(packetToSend);
+                subtitlesPrinter.printLogClientFailedRegistration(registration.name, connectionData.getInetAddress(), connectionData.getPort());
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+            Packet packetToSend = new Packet(messageHelper.nicknameAlreadyTaken.getBytes(StandardCharsets.UTF_8), connectionData);
+            sendPacket(packetToSend);
         }
 
     }
@@ -111,43 +115,33 @@ public class UdpServer implements Server {
     }
 
     private void sendMessage(Messenger messenger) {
-        try {
-            DataBaseManager dataBaseManager = new DataBaseManager();
 
-            if (dataBaseManager.clientExistInDB(messenger.receiver)) {
-                byte[] messageToSend = stringToSendHelper(messenger.message, messenger.sender);
-                subtitlesPrinter.printLogSuccessfullySentMessage(messenger.sender, messenger.receiver, messenger.message);
-                Packet packetToSend = new Packet(messageToSend, new ConnectionData(messenger.destinationInetAddress, messenger.destinationPort));
-                sendPacket(packetToSend);
-            } else {
-                subtitlesPrinter.printLogMessageNotSent(messenger.sender, messenger.receiver);
-                sendPacket(new Packet(messageHelper.failedToSendMessage.getBytes(StandardCharsets.UTF_8), new ConnectionData(messenger.destinationInetAddress, messenger.destinationPort)));
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        if (dataBaseManager.clientExistInDB(messenger.receiver)) {
+            byte[] messageToSend = stringToSendHelper(messenger.message, messenger.sender);
+            subtitlesPrinter.printLogSuccessfullySentMessage(messenger.sender, messenger.receiver, messenger.message);
+            Packet packetToSend = new Packet(messageToSend, new ConnectionData(messenger.destinationInetAddress, messenger.destinationPort));
+            sendPacket(packetToSend);
+        } else {
+            subtitlesPrinter.printLogMessageNotSent(messenger.sender, messenger.receiver);
+            sendPacket(new Packet(messageHelper.failedToSendMessage.getBytes(StandardCharsets.UTF_8), new ConnectionData(messenger.destinationInetAddress, messenger.destinationPort)));
         }
     }
 
     private void loginUser(Login login) {
         ConnectionData connectionData = new ConnectionData(login.inetAddress, login.port);
-        try {
-            DataBaseManager dataBaseManager = new DataBaseManager();
-            if (dataBaseManager.clientExistInDB(login.name)) {
-                subtitlesPrinter.printLogClientFoundInDB(login.name);
-                if (passwordHasher.checkIfPasswordMatches(login.name, login.password) && login.name != null) {
-                    subtitlesPrinter.printLogClientLoggedIn(login.name);
-                    users.put(login.name, connectionData);
-                    Packet packetToSend = new Packet(messageHelper.successfullyLoggedIn(login.name).getBytes(StandardCharsets.UTF_8), connectionData);
-                    sendPacket(packetToSend);
-                } else {
-                    sendPacket(new Packet(messageHelper.failedLogin.getBytes(StandardCharsets.UTF_8), connectionData));
-                }
+        if (dataBaseManager.clientExistInDB(login.name)) {
+            subtitlesPrinter.printLogClientFoundInDB(login.name);
+            if (passwordHasher.checkIfPasswordMatches(login.name, login.password) && login.name != null) {
+                subtitlesPrinter.printLogClientLoggedIn(login.name);
+                users.put(login.name, connectionData);
+                Packet packetToSend = new Packet(messageHelper.successfullyLoggedIn(login.name).getBytes(StandardCharsets.UTF_8), connectionData);
+                sendPacket(packetToSend);
             } else {
                 sendPacket(new Packet(messageHelper.failedLogin.getBytes(StandardCharsets.UTF_8), connectionData));
-                subtitlesPrinter.printLogClientDoesNotExist(login.name);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+        } else {
+            sendPacket(new Packet(messageHelper.failedLogin.getBytes(StandardCharsets.UTF_8), connectionData));
+            subtitlesPrinter.printLogClientDoesNotExist(login.name);
         }
     }
 

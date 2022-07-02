@@ -4,14 +4,18 @@ import helpers.Packet;
 import managers.SubtitlesPrinter;
 
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TcpServerConnector implements Runnable{
     private ServerSocket serverSocket;
     private Socket clientSocket;
     private SubtitlesPrinter subtitlesPrinter;
     private int port;
+    Map<String, PrintWriter> tcpUsers = new HashMap<>();
     Socket socket;
 
     public TcpServerConnector(SubtitlesPrinter subtitlesPrinter, int port) throws IOException {
@@ -25,7 +29,7 @@ public class TcpServerConnector implements Runnable{
         try {
             while (true) {
                 socket = serverSocket.accept();
-                Thread thread = new Thread(new TcpServer(socket));
+                Thread thread = new Thread(new TcpServer(socket,subtitlesPrinter,tcpUsers));
                 thread.start();
             }
         } catch (IOException e) {
