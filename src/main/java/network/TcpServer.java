@@ -1,38 +1,58 @@
 package network;
 
+import helpers.DataBaseManager;
+import helpers.MessageHelper;
 import helpers.Packet;
+import helpers.PasswordHasher;
+import managers.ConnectionData;
 import managers.SubtitlesPrinter;
+import managers.commands.CommandMapperImpl;
+import managers.commands.messageTypes.*;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.DatagramPacket;
-import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
+import java.util.HashMap;
+import java.util.Map;
 
 public class TcpServer implements Server {
-    private ServerSocket serverSocket;
-    private Socket clientSocket;
-    private SubtitlesPrinter subtitlesPrinter;
-    private int port;
-    Socket socket;
+    protected Socket clientSocket;
+    private PrintWriter output;
+    private BufferedReader input;
+    SubtitlesPrinter subtitlesPrinter;
+    Map<String, ConnectionData> users = new HashMap<>();
+    MessageHelper messageHelper = new MessageHelper(users);
+    PasswordHasher passwordHasher = new PasswordHasher();
 
-    public TcpServer(SubtitlesPrinter subtitlesPrinter, int port) throws IOException {
-        this.subtitlesPrinter = subtitlesPrinter;
-        this.port = port;
-        serverSocket = new ServerSocket(port);
-    }
-
-    @Override
-    public void run() {
+    public TcpServer(Socket clientSocket) {
+        this.clientSocket = clientSocket;
         try {
-            while (true) {
-                socket = serverSocket.accept();
-                new TcpClientThread(socket).start();
-            }
+            input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
+            output = new PrintWriter(clientSocket.getOutputStream(), true);
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    public void run() {
+        while (true) {
+            CommandMapperImpl commandMapper = new CommandMapperImpl(users);
+            MessageType messageType;
+            Packet receivedPacket = receivePacket();
+            messageType = commandMapper.mapCommand(receivedPacket);
+
+            if (messageType instanceof Registration) {
+                registerUser((Registration) messageType);
+            } else if (messageType instanceof UsersListSender) {
+                sendUsersList((UsersListSender) messageType);
+            } else if (messageType instanceof Messenger) {
+                sendMessage((Messenger) messageType);
+            } else if (messageType instanceof Login) {
+                loginUser((Login) messageType);
+            } else if (messageType instanceof Logout) {
+                logoutUser((Logout) messageType);
+            }
         }
     }
 
@@ -43,62 +63,99 @@ public class TcpServer implements Server {
 
     @Override
     public Packet receivePacket() {
-        return null;
-    }
-
-
-/*
-    private String receiveMessage() throws IOException {
-        input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-        String message = input.readLine();
-        System.out.println(message);
-        //     output.println(message);
-        return message;
-    }
-
-    private void sendMsg(String message) throws IOException {
-        output = new PrintWriter(clientSocket.getOutputStream(), true);
-        output.println(message);//
-    }
-
-    public void start(int port) {
+        String message = "UNKNOWN";
         try {
-            serverSocket = new ServerSocket(port);
-            clientSocket = serverSocket.accept();
-            System.out.println("Client connected");
-            output = new PrintWriter(clientSocket.getOutputStream(), true);
-            input = new BufferedReader(new InputStreamReader(clientSocket.getInputStream()));
-            String greeting = input.readLine();
-            if ("hello server".equals(greeting)) {
-                output.println("hello client");
+            message = input.readLine();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return new Packet(message.getBytes(StandardCharsets.UTF_8), new ConnectionData(clientSocket.getInetAddress(), clientSocket.getPort()));
+    }
+
+    private void registerUser(Registration registration) {
+        ConnectionData connectionData = new ConnectionData(registration.inetAddress, registration.port);
+        try {
+            DataBaseManager dataBaseManager = new DataBaseManager();
+            if (!dataBaseManager.clientExistInDB(registration.name) && registration.name != null) {
+                dataBaseManager.saveClient(registration.name, registration.securedPassword);
+                users.put(registration.name, connectionData);
+                subtitlesPrinter.printLogGeneratedPassword();
+                subtitlesPrinter.printLogClientRegistered(registration.name, connectionData.getInetAddress(), connectionData.getPort());
+                Packet packetToSend = new Packet(messageHelper.registeredSuccessfully, connectionData);
+                sendPacket(packetToSend);
+
             } else {
-                output.println("unrecognised greeting");
+                if (registration.name == null) {
+                    subtitlesPrinter.printLogClientRegistrationFailedCommand(registration.inetAddress, registration.port);
+                } else {
+                    subtitlesPrinter.printLogClientFailedRegistration(registration.name, connectionData.getInetAddress(), connectionData.getPort());
+                }
+                Packet packetToSend = new Packet(messageHelper.nicknameAlreadyTaken, connectionData);
+                sendPacket(packetToSend);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+    }
+
+    private void sendUsersList(UsersListSender usersListSender) {
+        subtitlesPrinter.printLogUsersListRequest();
+
+        Packet packetToSend = new Packet(messageHelper.clientList(), new ConnectionData(usersListSender.inetAddress, usersListSender.port));
+        sendPacket(packetToSend);
+    }
+
+    private void sendMessage(Messenger messenger) {
+        try {
+            DataBaseManager dataBaseManager = new DataBaseManager();
+
+            if (dataBaseManager.clientExistInDB(messenger.receiver)) {
+                byte[] messageToSend = stringToSendHelper(messenger.message, messenger.sender);
+                subtitlesPrinter.printLogSuccessfullySentMessage(messenger.sender, messenger.receiver, messenger.message);
+                Packet packetToSend = new Packet(messageToSend, new ConnectionData(messenger.destinationInetAddress, messenger.destinationPort));
+                sendPacket(packetToSend);
+            } else {
+                subtitlesPrinter.printLogMessageNotSent(messenger.sender, messenger.receiver);
+                sendPacket(new Packet(messageHelper.failedToSendMessage, new ConnectionData(messenger.destinationInetAddress, messenger.destinationPort)));
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
     }
 
-    public String sendMessage(String msg) {
-        String resp = null;
+    private void loginUser(Login login) {
+        ConnectionData connectionData = new ConnectionData(login.inetAddress, login.port);
         try {
-            output.println(msg);
-            resp = input.readLine();
+            DataBaseManager dataBaseManager = new DataBaseManager();
+            if (dataBaseManager.clientExistInDB(login.name)) {
+                subtitlesPrinter.printLogClientFoundInDB(login.name);
+                if (passwordHasher.checkIfPasswordMatches(login.name, login.password) && login.name != null) {
+                    subtitlesPrinter.printLogClientLoggedIn(login.name);
+                    users.put(login.name, connectionData);
+                    Packet packetToSend = new Packet(messageHelper.successfullyLoggedIn(login.name), connectionData);
+                    sendPacket(packetToSend);
+                } else {
+                    sendPacket(new Packet(messageHelper.failedLogin, connectionData));
+                }
+            } else {
+                sendPacket(new Packet(messageHelper.failedLogin, connectionData));
+                subtitlesPrinter.printLogClientDoesNotExist(login.name);
+            }
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return resp;
     }
 
-    public void stopConnection() {
-        try {
-            input.close();
-            output.close();
-            clientSocket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+    private void logoutUser(Logout logout) {
+        subtitlesPrinter.printLogClientLoggedOut(logout.name);
+        users.remove(logout.name);
+        Packet packetToSend = new Packet(messageHelper.loggedOut, new ConnectionData(logout.inetAddress, logout.port));
+        sendPacket(packetToSend);
     }
-*/
+
+    private byte[] stringToSendHelper(String text, String sender) {
+        String textToSend = sender + ": " + text;
+        return textToSend.getBytes(StandardCharsets.UTF_8);
+    }
 }
-
