@@ -15,7 +15,6 @@ public class Main {
     public static void main(String[] args) {
         UdpServer server;
         SubtitlesPrinter subtitlesPrinter = new SubtitlesPrinter();
-        ArrayList<TcpServer> threadArrayList = new ArrayList<>();
         Map<String,TcpServer> threadMap = new HashMap<>();
         InputHelper inputHelper = new InputHelper();
         {

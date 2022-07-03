@@ -36,15 +36,10 @@ public class TcpServer extends Thread {
             //reading the input from client
             BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
-            //returning output to the client
-            output = new PrintWriter(socket.getOutputStream(),true);
-
             while(true){
                 String inputString = input.readLine();
-                if (inputString.contains("/register")) {
-                    String sender = inputHelper.defineSecondWord(inputString);
-               //     threadMap.put(sender,tcpServer);
-                }else if(inputString.contains("/msg")){
+
+               if(inputString.contains("/msg")){
                     String receiver = inputHelper.defineSecondWord(inputString);
                     String message = inputHelper.defineMessageFromInput(inputString);
 
