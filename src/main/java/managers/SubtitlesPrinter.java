@@ -1,7 +1,6 @@
 package managers;
 
 import helpers.DateAndTime;
-import java.net.InetAddress;
 
 
 public class SubtitlesPrinter {
@@ -12,7 +11,7 @@ public class SubtitlesPrinter {
     public void printLogServerStarted(){println(dateAndTime.getCurrentTime() + ": SERVER HAS STARTED.");}
 
     //REGISTRATION
-    public void printLogClientRegistered(String nickname,ConnectionData connectionData){println(dateAndTime.getCurrentTime() +
+    public void printLogClientRegistered(String nickname, ConnectionData connectionData){println(dateAndTime.getCurrentTime() +
             ": Registered client " + nickname + " -- IP: " + connectionData.getInetAddress() + ":" + connectionData.getPort());}
 
     public void printLogClientFailedRegistration(String nickname,ConnectionData connectionData){println(dateAndTime.getCurrentTime() +

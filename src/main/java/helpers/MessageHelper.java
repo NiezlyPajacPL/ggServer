@@ -2,8 +2,6 @@ package helpers;
 
 import managers.ConnectionData;
 
-import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 
 public class MessageHelper {

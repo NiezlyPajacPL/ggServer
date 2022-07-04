@@ -1,16 +1,11 @@
 package network;
 
 import helpers.*;
-import managers.ConnectionData;
 import managers.SubtitlesPrinter;
-import managers.commands.CommandMapperImpl;
-import managers.commands.messageTypes.*;
 
 import java.io.*;
-import java.net.DatagramPacket;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -32,10 +27,10 @@ public class TcpServer implements Server {
         try(ServerSocket serverSocket = new ServerSocket(port)) {
             while (true){
                 Socket socket = serverSocket.accept();
-                ClientSocket serverThread = new ClientSocket(socket,threadMap,subtitlesPrinter,inputHelper);
-                serverThread.start();
-                String clientName = serverThread.getClientName();
-                threadMap.put(clientName,serverThread);
+                ClientSocket clientSocket = new ClientSocket(socket,threadMap,subtitlesPrinter,inputHelper);
+                clientSocket.start();
+                String clientName = clientSocket.getClientName();
+                threadMap.put(clientName,clientSocket);
                 System.out.println("registered client: " + clientName);
             }
         } catch (IOException e) {

@@ -17,7 +17,7 @@ public class ClientSocket extends Thread {
     Map<String, ClientSocket> threadMap;
     Map<ConnectionData, PrintWriter> tcpUsers = new HashMap<>();
     Socket socket;
-    private PrintWriter output;
+    private PrintWriter messageSender;
     InputHelper inputHelper;
 
     public ClientSocket(Socket socket, Map<String, ClientSocket> threadMap, SubtitlesPrinter subtitlesPrinter, InputHelper inputHelper) throws IOException {
@@ -31,22 +31,22 @@ public class ClientSocket extends Thread {
     public void run() {
         try {
             //reading the input from client
-            BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            BufferedReader receivedBufferReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
 
             while(true){
-                String inputString = input.readLine();
+                String receivedString = receivedBufferReader.readLine();
 
-               if(inputString.contains("/msg")){
-                    String receiver = inputHelper.getFirstArgument(inputString);
-                    String message = inputHelper.defineMessageFromInput(inputString);
+               if(receivedString.contains("/msg")){
+                    String receiver = inputHelper.getFirstArgument(receivedString);
+                    String message = inputHelper.defineMessageFromInput(receivedString);
 
-                    output = new PrintWriter(threadMap.get(receiver).socket.getOutputStream(),true);
-                    output.println(message);
-                } else if(inputString.equals("/exit")){
+                    messageSender = new PrintWriter(threadMap.get(receiver).socket.getOutputStream(),true);
+                    messageSender.println(message);
+                } else if(receivedString.equals("/exit")){
                     break;
                 }
              //   printToAllClients(outputString);
-                System.out.println("Server received " + inputString);
+                System.out.println("Server received " + receivedString);
             }
         } catch (IOException e) {
             e.printStackTrace();

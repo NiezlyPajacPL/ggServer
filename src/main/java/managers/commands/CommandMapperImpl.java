@@ -38,14 +38,14 @@ public class CommandMapperImpl implements CommandMapper {
             String password = inputHelper.definePasswordFromInput(input).replaceAll("[\\s\u0000]+", "");
             SecuredPassword securedPassword = passwordHasher.generateSecuredPassword(password);
 
-            if(receivedPacket.getConnectionData().getClientInputStream() == null) {
+            if(receivedPacket.getConnectionData().getReceivingStream() == null) {
                 return new Registration(name,
                         securedPassword,
                        new ConnectionData(receivedPacket.getAddress(), receivedPacket.getPort()));
             }else{
                 return new Registration(name,
                         securedPassword,
-                        new ConnectionData(receivedPacket.getConnectionData().getClientInputStream()));
+                        new ConnectionData(receivedPacket.getConnectionData().getReceivingStream(),receivedPacket.getConnectionData().getSendingStream()));
             }
         } else if (input.contains(ALLUSERS)) {
             return new UsersListSender(receivedPacket.getAddress(), receivedPacket.getPort());

@@ -3,8 +3,6 @@ package managers.commands.messageTypes;
 import helpers.SecuredPassword;
 import managers.ConnectionData;
 
-import java.net.InetAddress;
-
 public class Registration extends MessageType {
 
     public String name;

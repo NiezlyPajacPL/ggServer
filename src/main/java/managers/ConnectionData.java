@@ -1,25 +1,31 @@
 package managers;
 
 import java.io.InputStreamReader;
+import java.io.OutputStream;
 import java.net.InetAddress;
-import java.net.Socket;
 
 public class ConnectionData {
     private InetAddress inetAddress;
     private int port;
-    private InputStreamReader clientInputStream;
+    private InputStreamReader receivingStream;
+    private OutputStream sendingStream;
 
     public ConnectionData(InetAddress inetAddress, int port) {
         this.inetAddress = inetAddress;
         this.port = port;
     }
 
-    public ConnectionData(InputStreamReader clientInputStream){
-        this.clientInputStream = clientInputStream;
+    public ConnectionData(InputStreamReader clientInputStream,OutputStream clientSendingStream){
+        this.receivingStream = clientInputStream;
+        this.sendingStream = clientSendingStream;
     }
 
-    public InputStreamReader getClientInputStream() {
-        return clientInputStream;
+    public InputStreamReader getReceivingStream() {
+        return receivingStream;
+    }
+
+    public OutputStream getSendingStream() {
+        return sendingStream;
     }
 
     public InetAddress getInetAddress(){

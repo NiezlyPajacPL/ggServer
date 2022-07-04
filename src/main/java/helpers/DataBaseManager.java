@@ -1,12 +1,6 @@
 package helpers;
 
-import managers.ConnectionData;
-
 import java.io.*;
-import java.net.InetAddress;
-import java.net.UnknownHostException;
-import java.nio.charset.StandardCharsets;
-import java.util.ArrayList;
 import java.util.Scanner;
 
 public class DataBaseManager {
