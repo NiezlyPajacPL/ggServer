@@ -17,6 +17,7 @@ public class TcpServer implements Server {
     InputHelper inputHelper;
     Map<String, ConnectionData> threadMap = new HashMap<>();
 
+
     public TcpServer(int port,SubtitlesPrinter subtitlesPrinter,InputHelper inputHelper){
         this.port = port;
         this.subtitlesPrinter = subtitlesPrinter;
@@ -29,10 +30,13 @@ public class TcpServer implements Server {
             while (true){
                 Socket socket = serverSocket.accept();
                 ClientSocket clientSocket = new ClientSocket(socket,threadMap,subtitlesPrinter,inputHelper);
-                clientSocket.start();
+                Thread clientThread = new Thread(clientSocket);
+                clientThread.start();
+           /*
                 String clientName = clientSocket.getClientName();
                 threadMap.put(clientName,new ConnectionData(socket.getInputStream(),socket.getOutputStream()));
                 System.out.println("registered client: " + clientName);
+            */
             }
         } catch (IOException e) {
             e.printStackTrace();

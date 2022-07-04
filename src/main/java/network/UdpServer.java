@@ -110,7 +110,7 @@ public class UdpServer implements Server {
     private void sendUsersList(UsersListSender usersListSender) {
         subtitlesPrinter.printLogUsersListRequest();
 
-        Packet packetToSend = new Packet(messageHelper.clientList().getBytes(StandardCharsets.UTF_8), new ConnectionData(usersListSender.inetAddress, usersListSender.port));
+        Packet packetToSend = new Packet(messageHelper.clientList().getBytes(StandardCharsets.UTF_8), usersListSender.connectionData);
         sendPacket(packetToSend);
     }
 

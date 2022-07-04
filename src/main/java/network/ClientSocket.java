@@ -1,27 +1,35 @@
 package network;
 
 import helpers.InputHelper;
+import helpers.MessageHelper;
+import helpers.Packet;
 import managers.ConnectionData;
 import managers.SubtitlesPrinter;
+import managers.commands.CommandMapperImpl;
+import managers.commands.messageTypes.MessageType;
+import managers.commands.messageTypes.Registration;
+import managers.commands.messageTypes.UsersListSender;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
+import java.net.ServerSocket;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
-public class ClientSocket extends Thread {
+public class ClientSocket implements Server {
     private SubtitlesPrinter subtitlesPrinter;
-    Map<String, ConnectionData> threadMap;
+    Map<String, ConnectionData> users;
     Map<ConnectionData, PrintWriter> tcpUsers = new HashMap<>();
     Socket socket;
     private PrintWriter messageSender;
     InputHelper inputHelper;
 
-    public ClientSocket(Socket socket, Map<String, ConnectionData> threadMap, SubtitlesPrinter subtitlesPrinter, InputHelper inputHelper) throws IOException {
-        this.threadMap = threadMap;
+    public ClientSocket(Socket socket, Map<String, ConnectionData> users, SubtitlesPrinter subtitlesPrinter, InputHelper inputHelper) throws IOException {
+        this.users = users;
         this.socket = socket;
         this.subtitlesPrinter = subtitlesPrinter;
         this.inputHelper = inputHelper;
@@ -29,41 +37,74 @@ public class ClientSocket extends Thread {
 
     @Override
     public void run() {
-        try {
-            //reading the input from client
-            BufferedReader receivedBufferReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+        //reading the input from client
 
-            while(true){
-                String receivedString = receivedBufferReader.readLine();
 
-               if(receivedString.contains("/msg")){
-                    String receiver = inputHelper.getFirstArgument(receivedString);
-                    String message = inputHelper.defineMessageFromInput(receivedString);
+        while (true) {
+            CommandMapperImpl commandMapper = new CommandMapperImpl(users);
+            MessageType messageType;
+            Packet receivedPacket = receivePacket();
+            messageType = commandMapper.mapCommand(receivedPacket);
 
-                    messageSender = new PrintWriter(threadMap.get(receiver).getSendingStream(),true);
-                    messageSender.println(message);
-                } else if(receivedString.equals("/exit")){
-                    break;
-                }
-             //   printToAllClients(outputString);
-                System.out.println("Server received " + receivedString);
+            if (messageType instanceof Registration) {
+                registerUser((Registration) messageType);
+            } else if (messageType instanceof UsersListSender) {
+                sendUsersList((UsersListSender) messageType);
             }
-        } catch (IOException e) {
-            e.printStackTrace();
+
+   /*        if(receivedString.contains("/msg")){
+                String receiver = inputHelper.getFirstArgument(receivedString);
+                String message = inputHelper.defineMessageFromInput(receivedString);
+
+                messageSender = new PrintWriter(users.get(receiver).getSendingStream(),true);
+                messageSender.println(message);
+            } else if(receivedString.equals("/exit")){
+                break;
+            }
+         //   printToAllClients(outputString);
+            System.out.println("Server received " + receivedString);
+
+    */
         }
 
     }
 
-    public String getClientName() {
+    @Override
+    public void sendPacket(Packet packetToSend) {
+        messageSender = new PrintWriter(packetToSend.getConnectionData().getSendingStream(),true);
+        messageSender.println(new String (packetToSend.getData()));
+    }
+
+    @Override
+    public Packet receivePacket() {
         try {
-            BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
-            String inputString = input.readLine();
-            return  inputHelper.getFirstArgument(inputString);
+            BufferedReader receivedBufferReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
+            String receivedString = receivedBufferReader.readLine();
+
+            return new Packet(receivedString.getBytes(StandardCharsets.UTF_8), new ConnectionData(socket.getInputStream(), socket.getOutputStream()));
         } catch (IOException e) {
             e.printStackTrace();
         }
-        return "asd";
+        return null;
     }
+
+    private void registerUser(Registration registration) {
+        users.put(registration.name, registration.connectionData);
+        MessageHelper messageHelper = new MessageHelper(users);
+        subtitlesPrinter.printLogGeneratedPassword();
+        subtitlesPrinter.printLogClientRegistered(registration.name, registration.connectionData);
+
+        Packet packetToSend = new Packet(messageHelper.registeredSuccessfully.getBytes(StandardCharsets.UTF_8), registration.connectionData);
+        sendPacket(packetToSend);
+    }
+    private void sendUsersList(UsersListSender usersListSender) {
+        MessageHelper messageHelper = new MessageHelper(users);
+        subtitlesPrinter.printLogUsersListRequest();
+
+        Packet packetToSend = new Packet(messageHelper.clientList().getBytes(StandardCharsets.UTF_8), usersListSender.connectionData);
+        sendPacket(packetToSend);
+    }
+
 }
     /*
     @Override

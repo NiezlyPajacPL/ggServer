@@ -1,17 +1,16 @@
 package managers.commands.messageTypes;
 
+import managers.ConnectionData;
 import managers.commands.messageTypes.MessageType;
 
 import java.net.InetAddress;
 
 public class UsersListSender extends MessageType {
 
-    public InetAddress inetAddress;
-    public int port;
+    public ConnectionData connectionData;
 
-    public UsersListSender(InetAddress inetAddress, int port) {
-        this.inetAddress = inetAddress;
-        this.port = port;
+    public UsersListSender(ConnectionData connectionData) {
+        this.connectionData = connectionData;
     }
 
 }

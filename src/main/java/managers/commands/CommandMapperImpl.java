@@ -22,8 +22,8 @@ public class CommandMapperImpl implements CommandMapper {
     private final String LOGOUT = "/logout";
     private final String UNKNOWN = "UNKNOWN";
 
-    public CommandMapperImpl(Map<String, ConnectionData> clients) {
-        this.clients = clients;
+    public CommandMapperImpl(Map<String, ConnectionData> users) {
+        this.clients = users;
     }
 
     @Override
@@ -38,18 +38,9 @@ public class CommandMapperImpl implements CommandMapper {
             String password = inputHelper.definePasswordFromInput(input).replaceAll("[\\s\u0000]+", "");
             SecuredPassword securedPassword = passwordHasher.generateSecuredPassword(password);
 
-            if(receivedPacket.getConnectionData().getReceivingStream() == null) {
-                return new Registration(name,
-                        securedPassword,
-                       new ConnectionData(receivedPacket.getAddress(), receivedPacket.getPort()));
-            }else{
-                return new Registration(name,
-                        securedPassword,
-                        new ConnectionData(receivedPacket.getConnectionData().getReceivingStream(),receivedPacket.getConnectionData().getSendingStream()));
-            }
+            return new Registration(name, securedPassword, receivedPacket.getConnectionData());
         } else if (input.contains(ALLUSERS)) {
-            return new UsersListSender(receivedPacket.getAddress(), receivedPacket.getPort());
-
+            return new UsersListSender(receivedPacket.getConnectionData());
         } else if (input.contains(MESSAGE)) {
             String sender = getSender(receivedPacket.getConnectionData(), clients);
             String receiver = inputHelper.getFirstArgument(input);
@@ -82,8 +73,10 @@ public class CommandMapperImpl implements CommandMapper {
 
     private String getSender(ConnectionData senderConnectionData, Map<String, ConnectionData> clients) {
         for (Map.Entry<String, ConnectionData> entry : clients.entrySet()) {
+            if(senderConnectionData.getInetAddress()!=null){
             if ((Objects.equals(entry.getValue().getInetAddress(), senderConnectionData.getInetAddress())) && Objects.equals(entry.getValue().getPort(), senderConnectionData.getPort())) {
                 return entry.getKey();
+            }
             }
         }
         return UNKNOWN;
