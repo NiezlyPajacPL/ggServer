@@ -1,5 +1,6 @@
 package network;
 
+import helpers.DataBaseManager;
 import helpers.InputHelper;
 import helpers.MessageHelper;
 import helpers.Packet;
@@ -7,6 +8,7 @@ import managers.ConnectionData;
 import managers.SubtitlesPrinter;
 import managers.commands.CommandMapperImpl;
 import managers.commands.messageTypes.MessageType;
+import managers.commands.messageTypes.Messenger;
 import managers.commands.messageTypes.Registration;
 import managers.commands.messageTypes.UsersListSender;
 
@@ -27,6 +29,16 @@ public class ClientSocket implements Server {
     Socket socket;
     private PrintWriter messageSender;
     InputHelper inputHelper;
+
+    DataBaseManager dataBaseManager;
+    {
+        try {
+            dataBaseManager = new DataBaseManager();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
 
     public ClientSocket(Socket socket, Map<String, ConnectionData> users, SubtitlesPrinter subtitlesPrinter, InputHelper inputHelper) throws IOException {
         this.users = users;
@@ -50,6 +62,8 @@ public class ClientSocket implements Server {
                 registerUser((Registration) messageType);
             } else if (messageType instanceof UsersListSender) {
                 sendUsersList((UsersListSender) messageType);
+            } else if (messageType instanceof Messenger) {
+                sendMessage((Messenger) messageType);
             }
 
    /*        if(receivedString.contains("/msg")){
@@ -71,8 +85,8 @@ public class ClientSocket implements Server {
 
     @Override
     public void sendPacket(Packet packetToSend) {
-        messageSender = new PrintWriter(packetToSend.getConnectionData().getSendingStream(),true);
-        messageSender.println(new String (packetToSend.getData()));
+        messageSender = new PrintWriter(packetToSend.getConnectionData().getSendingStream(), true);
+        messageSender.println(new String(packetToSend.getData()));
     }
 
     @Override
@@ -97,6 +111,7 @@ public class ClientSocket implements Server {
         Packet packetToSend = new Packet(messageHelper.registeredSuccessfully.getBytes(StandardCharsets.UTF_8), registration.connectionData);
         sendPacket(packetToSend);
     }
+
     private void sendUsersList(UsersListSender usersListSender) {
         MessageHelper messageHelper = new MessageHelper(users);
         subtitlesPrinter.printLogUsersListRequest();
@@ -105,6 +120,17 @@ public class ClientSocket implements Server {
         sendPacket(packetToSend);
     }
 
+    private void sendMessage(Messenger messenger) {
+        byte[] messageToSend = stringToSendHelper(messenger.message, messenger.sender);
+        subtitlesPrinter.printLogSuccessfullySentMessage(messenger.sender, messenger.receiver, messenger.message);
+        Packet packetToSend = new Packet(messageToSend,messenger.connectionData);
+        sendPacket(packetToSend);
+    }
+
+    private byte[] stringToSendHelper(String text, String sender) {
+        String textToSend = sender + ": " + text;
+        return textToSend.getBytes(StandardCharsets.UTF_8);
+    }
 }
     /*
     @Override

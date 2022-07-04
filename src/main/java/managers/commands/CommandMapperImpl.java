@@ -49,9 +49,7 @@ public class CommandMapperImpl implements CommandMapper {
 
             return new Messenger(sender,
                     receiver,
-                    message,
-                    receiverData.getInetAddress(),
-                    receiverData.getPort());
+                    message,receiverData);
         } else if (input.contains(LOGIN)) {
             String name = inputHelper.getFirstArgument(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
             String password = inputHelper.definePasswordFromInput(input).replaceAll("[\\s\u0000]+", "");
@@ -73,10 +71,14 @@ public class CommandMapperImpl implements CommandMapper {
 
     private String getSender(ConnectionData senderConnectionData, Map<String, ConnectionData> clients) {
         for (Map.Entry<String, ConnectionData> entry : clients.entrySet()) {
-            if(senderConnectionData.getInetAddress()!=null){
-            if ((Objects.equals(entry.getValue().getInetAddress(), senderConnectionData.getInetAddress())) && Objects.equals(entry.getValue().getPort(), senderConnectionData.getPort())) {
-                return entry.getKey();
-            }
+            if (senderConnectionData.getInetAddress() != null) {
+                if ((Objects.equals(entry.getValue().getInetAddress(), senderConnectionData.getInetAddress())) && Objects.equals(entry.getValue().getPort(), senderConnectionData.getPort())) {
+                    return entry.getKey();
+                }
+            }else{
+                if ((Objects.equals(entry.getValue().getSendingStream(), senderConnectionData.getSendingStream()))) {
+                    return entry.getKey();
+                }
             }
         }
         return UNKNOWN;

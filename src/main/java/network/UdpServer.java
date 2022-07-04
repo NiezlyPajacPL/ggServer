@@ -119,11 +119,11 @@ public class UdpServer implements Server {
         if (dataBaseManager.clientExistInDB(messenger.receiver)) {
             byte[] messageToSend = stringToSendHelper(messenger.message, messenger.sender);
             subtitlesPrinter.printLogSuccessfullySentMessage(messenger.sender, messenger.receiver, messenger.message);
-            Packet packetToSend = new Packet(messageToSend, new ConnectionData(messenger.destinationInetAddress, messenger.destinationPort));
+            Packet packetToSend = new Packet(messageToSend, messenger.connectionData);
             sendPacket(packetToSend);
         } else {
             subtitlesPrinter.printLogMessageNotSent(messenger.sender, messenger.receiver);
-            sendPacket(new Packet(messageHelper.failedToSendMessage.getBytes(StandardCharsets.UTF_8), new ConnectionData(messenger.destinationInetAddress, messenger.destinationPort)));
+            sendPacket(new Packet(messageHelper.failedToSendMessage.getBytes(StandardCharsets.UTF_8), messenger.connectionData));
         }
     }
 

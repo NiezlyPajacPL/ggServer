@@ -17,7 +17,6 @@ public class TcpServer implements Server {
     InputHelper inputHelper;
     Map<String, ConnectionData> threadMap = new HashMap<>();
 
-
     public TcpServer(int port,SubtitlesPrinter subtitlesPrinter,InputHelper inputHelper){
         this.port = port;
         this.subtitlesPrinter = subtitlesPrinter;
