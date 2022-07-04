@@ -1,5 +1,6 @@
 package managers;
 
+import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.net.InetAddress;
@@ -7,7 +8,7 @@ import java.net.InetAddress;
 public class ConnectionData {
     private InetAddress inetAddress;
     private int port;
-    private InputStreamReader receivingStream;
+    private InputStream receivingStream;
     private OutputStream sendingStream;
 
     public ConnectionData(InetAddress inetAddress, int port) {
@@ -15,12 +16,12 @@ public class ConnectionData {
         this.port = port;
     }
 
-    public ConnectionData(InputStreamReader clientInputStream,OutputStream clientSendingStream){
+    public ConnectionData(InputStream clientInputStream, OutputStream clientSendingStream){
         this.receivingStream = clientInputStream;
         this.sendingStream = clientSendingStream;
     }
 
-    public InputStreamReader getReceivingStream() {
+    public InputStream getReceivingStream() {
         return receivingStream;
     }
 

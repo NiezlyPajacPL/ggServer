@@ -1,6 +1,7 @@
 package network;
 
 import helpers.*;
+import managers.ConnectionData;
 import managers.SubtitlesPrinter;
 
 import java.io.*;
@@ -14,7 +15,7 @@ public class TcpServer implements Server {
     int port;
     SubtitlesPrinter subtitlesPrinter;
     InputHelper inputHelper;
-    Map<String, ClientSocket> threadMap = new HashMap<>();
+    Map<String, ConnectionData> threadMap = new HashMap<>();
 
     public TcpServer(int port,SubtitlesPrinter subtitlesPrinter,InputHelper inputHelper){
         this.port = port;
@@ -30,7 +31,7 @@ public class TcpServer implements Server {
                 ClientSocket clientSocket = new ClientSocket(socket,threadMap,subtitlesPrinter,inputHelper);
                 clientSocket.start();
                 String clientName = clientSocket.getClientName();
-                threadMap.put(clientName,clientSocket);
+                threadMap.put(clientName,new ConnectionData(socket.getInputStream(),socket.getOutputStream()));
                 System.out.println("registered client: " + clientName);
             }
         } catch (IOException e) {

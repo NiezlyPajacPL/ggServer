@@ -14,13 +14,13 @@ import java.util.Map;
 
 public class ClientSocket extends Thread {
     private SubtitlesPrinter subtitlesPrinter;
-    Map<String, ClientSocket> threadMap;
+    Map<String, ConnectionData> threadMap;
     Map<ConnectionData, PrintWriter> tcpUsers = new HashMap<>();
     Socket socket;
     private PrintWriter messageSender;
     InputHelper inputHelper;
 
-    public ClientSocket(Socket socket, Map<String, ClientSocket> threadMap, SubtitlesPrinter subtitlesPrinter, InputHelper inputHelper) throws IOException {
+    public ClientSocket(Socket socket, Map<String, ConnectionData> threadMap, SubtitlesPrinter subtitlesPrinter, InputHelper inputHelper) throws IOException {
         this.threadMap = threadMap;
         this.socket = socket;
         this.subtitlesPrinter = subtitlesPrinter;
@@ -40,7 +40,7 @@ public class ClientSocket extends Thread {
                     String receiver = inputHelper.getFirstArgument(receivedString);
                     String message = inputHelper.defineMessageFromInput(receivedString);
 
-                    messageSender = new PrintWriter(threadMap.get(receiver).socket.getOutputStream(),true);
+                    messageSender = new PrintWriter(threadMap.get(receiver).getSendingStream(),true);
                     messageSender.println(message);
                 } else if(receivedString.equals("/exit")){
                     break;
