@@ -37,7 +37,7 @@ public class ClientSocket extends Thread {
                 String inputString = input.readLine();
 
                if(inputString.contains("/msg")){
-                    String receiver = inputHelper.defineSecondWord(inputString);
+                    String receiver = inputHelper.getFirstArgument(inputString);
                     String message = inputHelper.defineMessageFromInput(inputString);
 
                     output = new PrintWriter(threadMap.get(receiver).socket.getOutputStream(),true);
@@ -58,7 +58,7 @@ public class ClientSocket extends Thread {
         try {
             BufferedReader input = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String inputString = input.readLine();
-            return  inputHelper.defineSecondWord(inputString);
+            return  inputHelper.getFirstArgument(inputString);
         } catch (IOException e) {
             e.printStackTrace();
         }

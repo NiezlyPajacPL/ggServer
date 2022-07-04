@@ -86,22 +86,22 @@ public class UdpServer implements Server {
     }
 
     private void registerUser(Registration registration) {
-        ConnectionData connectionData = new ConnectionData(registration.inetAddress, registration.port);
+     //   ConnectionData connectionData = new ConnectionData(registration.inetAddress, registration.port);
         if (!dataBaseManager.clientExistInDB(registration.name) && registration.name != null) {
             dataBaseManager.saveClient(registration.name, registration.securedPassword);
-            users.put(registration.name, connectionData);
+            users.put(registration.name, registration.connectionData);
             subtitlesPrinter.printLogGeneratedPassword();
-            subtitlesPrinter.printLogClientRegistered(registration.name, connectionData.getInetAddress(), connectionData.getPort());
-            Packet packetToSend = new Packet(messageHelper.registeredSuccessfully.getBytes(StandardCharsets.UTF_8), connectionData);
+            subtitlesPrinter.printLogClientRegistered(registration.name, registration.connectionData);
+            Packet packetToSend = new Packet(messageHelper.registeredSuccessfully.getBytes(StandardCharsets.UTF_8), registration.connectionData);
             sendPacket(packetToSend);
 
         } else {
             if (registration.name == null) {
-                subtitlesPrinter.printLogClientRegistrationFailedCommand(registration.inetAddress, registration.port);
+                subtitlesPrinter.printLogClientRegistrationFailedCommand(registration.connectionData);
             } else {
-                subtitlesPrinter.printLogClientFailedRegistration(registration.name, connectionData.getInetAddress(), connectionData.getPort());
+                subtitlesPrinter.printLogClientFailedRegistration(registration.name, registration.connectionData);
             }
-            Packet packetToSend = new Packet(messageHelper.nicknameAlreadyTaken.getBytes(StandardCharsets.UTF_8), connectionData);
+            Packet packetToSend = new Packet(messageHelper.nicknameAlreadyTaken.getBytes(StandardCharsets.UTF_8), registration.connectionData);
             sendPacket(packetToSend);
         }
 

@@ -12,14 +12,14 @@ public class SubtitlesPrinter {
     public void printLogServerStarted(){println(dateAndTime.getCurrentTime() + ": SERVER HAS STARTED.");}
 
     //REGISTRATION
-    public void printLogClientRegistered(String nickname, InetAddress inetAddress, int port){println(dateAndTime.getCurrentTime() +
-            ": Registered client " + nickname + " -- IP: " + inetAddress + ":" + port);}
+    public void printLogClientRegistered(String nickname,ConnectionData connectionData){println(dateAndTime.getCurrentTime() +
+            ": Registered client " + nickname + " -- IP: " + connectionData.getInetAddress() + ":" + connectionData.getPort());}
 
-    public void printLogClientFailedRegistration(String nickname, InetAddress inetAddress, int port){println(dateAndTime.getCurrentTime() +
-            ": Someone with IP:   "  + inetAddress + ":" + port + " -- tried to register on used nickname " + "(" + nickname + ")");}
+    public void printLogClientFailedRegistration(String nickname,ConnectionData connectionData){println(dateAndTime.getCurrentTime() +
+            ": Someone with IP:   "  + connectionData.getInetAddress() + ":" + connectionData.getPort() + " -- tried to register on used nickname " + "(" + nickname + ")");}
 
-    public void printLogClientRegistrationFailedCommand(InetAddress inetAddress, int port){println(dateAndTime.getCurrentTime() +
-            ": Someone with IP:   "  + inetAddress + ":" + port + " -- tried to register but used command wrongly.");}
+    public void printLogClientRegistrationFailedCommand(ConnectionData connectionData){println(dateAndTime.getCurrentTime() +
+            ": Someone with IP:   "  + connectionData.getInetAddress() + ":" + connectionData.getPort() + " -- tried to register but used command wrongly.");}
 
     public void printLogGeneratedPassword(){println(dateAndTime.getCurrentTime() + ": Generated secured password.");}
 

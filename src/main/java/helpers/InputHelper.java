@@ -2,7 +2,7 @@ package helpers;
 
 public class InputHelper {
 
-    public String defineSecondWord(String input) {
+    public String getFirstArgument(String input) {
         String[] words = input.split(" ");
         return words[1];
     }

@@ -8,8 +8,6 @@ import managers.ConnectionData;
 import managers.commands.messageTypes.*;
 
 import java.io.IOException;
-import java.net.DatagramPacket;
-import java.nio.charset.StandardCharsets;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -36,20 +34,25 @@ public class CommandMapperImpl implements CommandMapper {
         PasswordHasher passwordHasher = new PasswordHasher();
 
         if (input.contains(REGISTER)) {
-            String name = inputHelper.defineSecondWord(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
+            String name = inputHelper.getFirstArgument(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
             String password = inputHelper.definePasswordFromInput(input).replaceAll("[\\s\u0000]+", "");
             SecuredPassword securedPassword = passwordHasher.generateSecuredPassword(password);
-            return new Registration(name,
-                    securedPassword,
-                    receivedPacket.getAddress(),
-                    receivedPacket.getPort());
 
+            if(receivedPacket.getConnectionData().getClientInputStream() == null) {
+                return new Registration(name,
+                        securedPassword,
+                       new ConnectionData(receivedPacket.getAddress(), receivedPacket.getPort()));
+            }else{
+                return new Registration(name,
+                        securedPassword,
+                        new ConnectionData(receivedPacket.getConnectionData().getClientInputStream()));
+            }
         } else if (input.contains(ALLUSERS)) {
             return new UsersListSender(receivedPacket.getAddress(), receivedPacket.getPort());
 
         } else if (input.contains(MESSAGE)) {
             String sender = getSender(receivedPacket.getConnectionData(), clients);
-            String receiver = inputHelper.defineSecondWord(input);
+            String receiver = inputHelper.getFirstArgument(input);
             String message = inputHelper.defineMessageFromInput(input);
             ConnectionData receiverData = clients.get(receiver);
 
@@ -59,7 +62,7 @@ public class CommandMapperImpl implements CommandMapper {
                     receiverData.getInetAddress(),
                     receiverData.getPort());
         } else if (input.contains(LOGIN)) {
-            String name = inputHelper.defineSecondWord(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
+            String name = inputHelper.getFirstArgument(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
             String password = inputHelper.definePasswordFromInput(input).replaceAll("[\\s\u0000]+", "");
             try {
                 return new Login(name,
