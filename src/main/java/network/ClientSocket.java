@@ -56,7 +56,13 @@ public class ClientSocket implements Server {
                sendPacket(commands.loginUser((Login) messageType));
             } else if (messageType instanceof Logout) {
                sendPacket(commands.logoutUser((Logout) messageType));
+               break;
             }
+        }
+        try {
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
         }
     }
 

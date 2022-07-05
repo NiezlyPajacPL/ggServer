@@ -25,7 +25,7 @@ public class SubtitlesPrinter {
     //LOGIN
     public void printLogClientLoggedIn(String nickname){println(dateAndTime.getCurrentTime() + ": Client - " + nickname + " successfully logged in." );}
 
-    public void printLogClientLoggedOut(String nickname){println(dateAndTime.getCurrentTime() + ": Client: " + nickname + "logged out.");}
+    public void printLogClientLoggedOut(String nickname){println(dateAndTime.getCurrentTime() + ": Client: " + nickname + " has logged out.");}
 
     public void printLogClientDoesNotExist(String name){ println(dateAndTime.getCurrentTime() +" " +  name + " does NOT exist in DB");}
 

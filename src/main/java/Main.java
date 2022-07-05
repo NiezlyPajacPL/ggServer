@@ -16,7 +16,6 @@ public class Main {
     public static void main(String[] args) throws SocketException {
         SubtitlesPrinter subtitlesPrinter = new SubtitlesPrinter();
         Map<String, ClientSocket> threadMap = new HashMap<>();
-        InputHelper inputHelper = new InputHelper();
         {
             //To change network protocol,
             // just change the Server implementation to TcpServer / UdpServer
