@@ -21,12 +21,4 @@ public class Packet {
         return connectionData;
     }
 
-    public InetAddress getAddress(){
-        return connectionData.getInetAddress();
-    }
-
-    public int getPort(){
-        return connectionData.getPort();
-    }
-
 }

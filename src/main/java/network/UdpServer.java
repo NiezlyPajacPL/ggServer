@@ -22,17 +22,13 @@ public class UdpServer implements Server {
     SubtitlesPrinter subtitlesPrinter;
     Map<String, ConnectionData> users = new HashMap<>();
     MessageHelper messageHelper = new MessageHelper(users);
-    DataBaseManager dataBaseManager;
-    {
+
+    public UdpServer(int port,SubtitlesPrinter subtitlesPrinter) {
         try {
-            dataBaseManager = new DataBaseManager();
-        } catch (IOException e) {
+            socket = new DatagramSocket(port);
+        } catch (SocketException e) {
             e.printStackTrace();
         }
-    }
-
-    public UdpServer(SubtitlesPrinter subtitlesPrinter, int port) throws SocketException {
-        socket = new DatagramSocket(port);
         this.subtitlesPrinter = subtitlesPrinter;
     }
 
@@ -41,20 +37,21 @@ public class UdpServer implements Server {
     public void run() {
         while (true) {
             CommandMapperImpl commandMapper = new CommandMapperImpl(users);
+            Commands commands = new Commands(subtitlesPrinter, messageHelper, users);
             MessageType messageType;
             Packet receivedPacket = receivePacket();
             messageType = commandMapper.mapCommand(receivedPacket);
 
             if (messageType instanceof Registration) {
-                registerUser((Registration) messageType);
+                sendPacket(commands.registerUser((Registration) messageType));
             } else if (messageType instanceof UsersListSender) {
-                sendUsersList((UsersListSender) messageType);
+                sendPacket(commands.sendUsersList((UsersListSender) messageType));
             } else if (messageType instanceof Messenger) {
-                sendMessage((Messenger) messageType);
-            } else if (messageType instanceof Login) {
-                loginUser((Login) messageType);
+                sendPacket(commands.sendMessage((Messenger) messageType));
+            }else if (messageType instanceof Login) {
+                sendPacket(commands.loginUser((Login) messageType));
             } else if (messageType instanceof Logout) {
-                logoutUser((Logout) messageType);
+                sendPacket(commands.logoutUser((Logout) messageType));
             }
         }
     }
@@ -85,76 +82,5 @@ public class UdpServer implements Server {
         return new Packet(receivedDatagramPacket.getData(),new ConnectionData(receivedDatagramPacket.getAddress(), receivedDatagramPacket.getPort()));
     }
 
-    private void registerUser(Registration registration) {
-     //   ConnectionData connectionData = new ConnectionData(registration.inetAddress, registration.port);
-        if (!dataBaseManager.clientExistInDB(registration.name) && registration.name != null) {
-            dataBaseManager.saveClient(registration.name, registration.securedPassword);
-            users.put(registration.name, registration.connectionData);
-            subtitlesPrinter.printLogGeneratedPassword();
-            subtitlesPrinter.printLogClientRegistered(registration.name, registration.connectionData);
-            Packet packetToSend = new Packet(messageHelper.registeredSuccessfully.getBytes(StandardCharsets.UTF_8), registration.connectionData);
-            sendPacket(packetToSend);
-
-        } else {
-            if (registration.name == null) {
-                subtitlesPrinter.printLogClientRegistrationFailedCommand(registration.connectionData);
-            } else {
-                subtitlesPrinter.printLogClientFailedRegistration(registration.name, registration.connectionData);
-            }
-            Packet packetToSend = new Packet(messageHelper.nicknameAlreadyTaken.getBytes(StandardCharsets.UTF_8), registration.connectionData);
-            sendPacket(packetToSend);
-        }
-
-    }
-
-    private void sendUsersList(UsersListSender usersListSender) {
-        subtitlesPrinter.printLogUsersListRequest();
-
-        Packet packetToSend = new Packet(messageHelper.clientList().getBytes(StandardCharsets.UTF_8), usersListSender.connectionData);
-        sendPacket(packetToSend);
-    }
-
-    private void sendMessage(Messenger messenger) {
-
-        if (dataBaseManager.clientExistInDB(messenger.receiver)) {
-            byte[] messageToSend = stringToSendHelper(messenger.message, messenger.sender);
-            subtitlesPrinter.printLogSuccessfullySentMessage(messenger.sender, messenger.receiver, messenger.message);
-            Packet packetToSend = new Packet(messageToSend, messenger.connectionData);
-            sendPacket(packetToSend);
-        } else {
-            subtitlesPrinter.printLogMessageNotSent(messenger.sender, messenger.receiver);
-            sendPacket(new Packet(messageHelper.failedToSendMessage.getBytes(StandardCharsets.UTF_8), messenger.connectionData));
-        }
-    }
-
-    private void loginUser(Login login) {
-        ConnectionData connectionData = new ConnectionData(login.inetAddress, login.port);
-        if (dataBaseManager.clientExistInDB(login.name)) {
-            subtitlesPrinter.printLogClientFoundInDB(login.name);
-            if (passwordHasher.checkIfPasswordMatches(login.name, login.password) && login.name != null) {
-                subtitlesPrinter.printLogClientLoggedIn(login.name);
-                users.put(login.name, connectionData);
-                Packet packetToSend = new Packet(messageHelper.successfullyLoggedIn(login.name).getBytes(StandardCharsets.UTF_8), connectionData);
-                sendPacket(packetToSend);
-            } else {
-                sendPacket(new Packet(messageHelper.failedLogin.getBytes(StandardCharsets.UTF_8), connectionData));
-            }
-        } else {
-            sendPacket(new Packet(messageHelper.failedLogin.getBytes(StandardCharsets.UTF_8), connectionData));
-            subtitlesPrinter.printLogClientDoesNotExist(login.name);
-        }
-    }
-
-    private void logoutUser(Logout logout) {
-        subtitlesPrinter.printLogClientLoggedOut(logout.name);
-        users.remove(logout.name);
-        Packet packetToSend = new Packet(messageHelper.loggedOut.getBytes(StandardCharsets.UTF_8),new ConnectionData(logout.inetAddress, logout.port));
-        sendPacket(packetToSend);
-    }
-
-    private byte[] stringToSendHelper(String text, String sender) {
-        String textToSend = sender + ": " + text;
-        return textToSend.getBytes(StandardCharsets.UTF_8);
-    }
 }
 

@@ -37,34 +37,27 @@ public class CommandMapperImpl implements CommandMapper {
             String name = inputHelper.getFirstArgument(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
             String password = inputHelper.definePasswordFromInput(input).replaceAll("[\\s\u0000]+", "");
             SecuredPassword securedPassword = passwordHasher.generateSecuredPassword(password);
-
             return new Registration(name, securedPassword, receivedPacket.getConnectionData());
+
         } else if (input.contains(ALLUSERS)) {
             return new UsersListSender(receivedPacket.getConnectionData());
+
         } else if (input.contains(MESSAGE)) {
             String sender = getSender(receivedPacket.getConnectionData(), clients);
             String receiver = inputHelper.getFirstArgument(input);
             String message = inputHelper.defineMessageFromInput(input);
             ConnectionData receiverData = clients.get(receiver);
-
             return new Messenger(sender,
                     receiver,
                     message,receiverData);
+
         } else if (input.contains(LOGIN)) {
             String name = inputHelper.getFirstArgument(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
             String password = inputHelper.definePasswordFromInput(input).replaceAll("[\\s\u0000]+", "");
-            try {
-                return new Login(name,
-                        password,
-                        receivedPacket.getAddress(),
-                        receivedPacket.getPort());
-            } catch (IOException e) {
-                e.printStackTrace();
-            }
+            return new Login(name, password, receivedPacket.getConnectionData());
+
         } else if (input.contains(LOGOUT)) {
-            return new Logout(getSender(receivedPacket.getConnectionData(), clients),
-                    receivedPacket.getAddress(),
-                    receivedPacket.getPort());
+            return new Logout(getSender(receivedPacket.getConnectionData(), clients), receivedPacket.getConnectionData());
         }
         return null;
     }

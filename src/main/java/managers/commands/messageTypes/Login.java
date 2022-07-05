@@ -1,20 +1,17 @@
 package managers.commands.messageTypes;
 
-import java.io.IOException;
-import java.net.InetAddress;
+import managers.ConnectionData;
 
 public class Login extends MessageType {
 
     public String name;
     public String password;
-    public InetAddress inetAddress;
-    public int port;
+    public ConnectionData connectionData;
 
-    public Login(String name,String password ,InetAddress inetAddress, int port) throws IOException {
+    public Login(String name,String password,ConnectionData connectionData){
         this.name = name;
         this.password = password;
-        this.inetAddress = inetAddress;
-        this.port = port;
+        this.connectionData = connectionData;
     }
 
 }

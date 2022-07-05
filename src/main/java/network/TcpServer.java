@@ -14,13 +14,12 @@ public class TcpServer implements Server {
     ServerSocket serverSocket;
     int port;
     SubtitlesPrinter subtitlesPrinter;
-    InputHelper inputHelper;
-    Map<String, ConnectionData> threadMap = new HashMap<>();
+    Map<String, ConnectionData> users = new HashMap<>();
+    MessageHelper messageHelper = new MessageHelper(users);
 
-    public TcpServer(int port,SubtitlesPrinter subtitlesPrinter,InputHelper inputHelper){
+    public TcpServer(int port,SubtitlesPrinter subtitlesPrinter){
         this.port = port;
         this.subtitlesPrinter = subtitlesPrinter;
-        this.inputHelper = inputHelper;
     }
 
     @Override
@@ -28,7 +27,7 @@ public class TcpServer implements Server {
         try(ServerSocket serverSocket = new ServerSocket(port)) {
             while (true){
                 Socket socket = serverSocket.accept();
-                ClientSocket clientSocket = new ClientSocket(socket,threadMap,subtitlesPrinter,inputHelper);
+                ClientSocket clientSocket = new ClientSocket(socket, users,subtitlesPrinter,messageHelper);
                 Thread clientThread = new Thread(clientSocket);
                 clientThread.start();
            /*
