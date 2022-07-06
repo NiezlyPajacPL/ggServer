@@ -10,7 +10,6 @@ import managers.commands.messageTypes.*;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 
 public class Commands {

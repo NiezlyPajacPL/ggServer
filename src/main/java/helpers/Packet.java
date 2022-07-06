@@ -2,8 +2,6 @@ package helpers;
 
 import managers.ConnectionData;
 
-import java.net.InetAddress;
-
 public class Packet {
     private byte[] data;
     private ConnectionData connectionData;

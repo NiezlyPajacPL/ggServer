@@ -1,8 +1,6 @@
 package network;
 
-import helpers.DataBaseManager;
 import helpers.MessageHelper;
-import helpers.PasswordHasher;
 import helpers.Packet;
 import managers.ConnectionData;
 import managers.SubtitlesPrinter;
@@ -13,7 +11,6 @@ import java.io.IOException;
 import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
-import java.nio.charset.StandardCharsets;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -36,7 +33,7 @@ public class UdpServer implements Server {
 
     public void run() {
         while (true) {
-            CommandMapperImpl commandMapper = new CommandMapperImpl(users);
+            CommandMapperImpl commandMapper = new CommandMapperImpl();
             Commands commands = new Commands(subtitlesPrinter, messageHelper, users);
             MessageType messageType;
             Packet receivedPacket = receivePacket();

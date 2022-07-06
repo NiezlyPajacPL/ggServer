@@ -1,7 +1,5 @@
 package network;
 
-import helpers.DataBaseManager;
-import helpers.InputHelper;
 import helpers.MessageHelper;
 import helpers.Packet;
 import managers.ConnectionData;
@@ -14,18 +12,16 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.io.PrintWriter;
-import java.net.ServerSocket;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
-import java.util.HashMap;
 import java.util.Map;
 
 public class ClientSocket implements Server {
     private SubtitlesPrinter subtitlesPrinter;
-    Map<String, ConnectionData> users;
-    Socket socket;
+    private Map<String, ConnectionData> users;
+    private Socket socket;
     private PrintWriter messageSender;
-    MessageHelper messageHelper;
+    private MessageHelper messageHelper;
 
 
     public ClientSocket(Socket socket, Map<String, ConnectionData> users, SubtitlesPrinter subtitlesPrinter,MessageHelper messageHelper) throws IOException {
@@ -38,9 +34,8 @@ public class ClientSocket implements Server {
     @Override
     public void run() {
 
-
         while (true) {
-            CommandMapperImpl commandMapper = new CommandMapperImpl(users);
+            CommandMapperImpl commandMapper = new CommandMapperImpl();
             Commands commands = new Commands(subtitlesPrinter, messageHelper, users);
             MessageType messageType;
             Packet receivedPacket = receivePacket();

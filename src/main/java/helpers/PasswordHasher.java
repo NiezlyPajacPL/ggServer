@@ -9,9 +9,6 @@ import java.util.Objects;
 
 public class PasswordHasher {
 
-    public PasswordHasher() {
-    }
-
     public SecuredPassword generateSecuredPassword(String passwordToHash) {
         String salt = getSalt();
         String securePassword = getSecurePassword(passwordToHash, salt);

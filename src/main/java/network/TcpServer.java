@@ -11,7 +11,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TcpServer implements Server {
-    ServerSocket serverSocket;
     int port;
     SubtitlesPrinter subtitlesPrinter;
     Map<String, ConnectionData> users = new HashMap<>();
@@ -30,11 +29,6 @@ public class TcpServer implements Server {
                 ClientSocket clientSocket = new ClientSocket(socket, users,subtitlesPrinter,messageHelper);
                 Thread clientThread = new Thread(clientSocket);
                 clientThread.start();
-           /*
-                String clientName = clientSocket.getClientName();
-                threadMap.put(clientName,new ConnectionData(socket.getInputStream(),socket.getOutputStream()));
-                System.out.println("registered client: " + clientName);
-            */
             }
         } catch (IOException e) {
             e.printStackTrace();

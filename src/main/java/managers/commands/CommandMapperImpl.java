@@ -7,7 +7,7 @@ import helpers.SecuredPassword;
 import managers.ConnectionData;
 import managers.commands.messageTypes.*;
 
-import java.io.IOException;
+
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -21,10 +21,6 @@ public class CommandMapperImpl implements CommandMapper {
     private final String LOGIN = "/login";
     private final String LOGOUT = "/logout";
     private final String UNKNOWN = "UNKNOWN";
-
-    public CommandMapperImpl(Map<String, ConnectionData> users) {
-        this.clients = users;
-    }
 
     @Override
     public MessageType mapCommand(Packet receivedPacket) {
