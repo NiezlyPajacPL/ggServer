@@ -32,7 +32,7 @@ public class UdpServer implements Server {
         this.subtitlesPrinter = subtitlesPrinter;
     }
 
-    PasswordHasher passwordHasher = new PasswordHasher();
+ //   PasswordHasher passwordHasher = new PasswordHasher();
 
     public void run() {
         while (true) {
