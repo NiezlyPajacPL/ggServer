@@ -1,8 +1,7 @@
 package network;
 
 import helpers.*;
-import managers.ConnectionData;
-import managers.SubtitlesPrinter;
+import managers.Logger;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -12,13 +11,11 @@ import java.util.Map;
 
 public class TcpServer implements Server {
     int port;
-    SubtitlesPrinter subtitlesPrinter;
-    Map<String, ConnectionData> users = new HashMap<>();
-    MessageHelper messageHelper = new MessageHelper(users);
+    Map<String, Socket> users = new HashMap<String, Socket>();
+    MessageHelper messageHelper = new MessageHelper();
 
-    public TcpServer(int port,SubtitlesPrinter subtitlesPrinter){
+    public TcpServer(int port){
         this.port = port;
-        this.subtitlesPrinter = subtitlesPrinter;
     }
 
     @Override
@@ -26,7 +23,13 @@ public class TcpServer implements Server {
         try(ServerSocket serverSocket = new ServerSocket(port)) {
             while (true){
                 Socket socket = serverSocket.accept();
-                ClientSocket clientSocket = new ClientSocket(socket, users,subtitlesPrinter,messageHelper);
+                UserRegistrationListener userRegistrationListener = new UserRegistrationListener() {
+                    @Override
+                    public void onClientRegistered(String nickname) {
+                        users.put(nickname,socket);
+                    }
+                };
+                ClientSocket clientSocket = new ClientSocket(socket,messageHelper,userRegistrationListener);
                 Thread clientThread = new Thread(clientSocket);
                 clientThread.start();
             }

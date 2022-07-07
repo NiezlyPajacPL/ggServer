@@ -6,12 +6,12 @@ import managers.ConnectionData;
 public class Registration extends MessageType {
 
     public String name;
-    public SecuredPassword securedPassword;
-    public ConnectionData connectionData;
+    public String password;
+//    public SecuredPassword securedPassword;
+//    public ConnectionData connectionData;
 
-    public Registration(String name, SecuredPassword password,ConnectionData connectionData) {
+    public Registration(String name, String password) {
         this.name = name;
-        this.securedPassword = password;
-        this.connectionData = connectionData;
+        this.password = password;
     }
 }

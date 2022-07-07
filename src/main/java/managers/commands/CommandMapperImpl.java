@@ -32,8 +32,8 @@ public class CommandMapperImpl implements CommandMapper {
         if (input.contains(REGISTER)) {
             String name = inputHelper.getFirstArgument(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
             String password = inputHelper.definePasswordFromInput(input).replaceAll("[\\s\u0000]+", "");
-            SecuredPassword securedPassword = passwordHasher.generateSecuredPassword(password);
-            return new Registration(name, securedPassword, receivedPacket.getConnectionData());
+          //  SecuredPassword securedPassword = passwordHasher.generateSecuredPassword(password);
+            return new Registration(name, password);
 
         } else if (input.contains(ALLUSERS)) {
             return new UsersListSender(receivedPacket.getConnectionData());

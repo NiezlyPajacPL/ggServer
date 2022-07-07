@@ -3,9 +3,7 @@ package network;
 import helpers.MessageHelper;
 import helpers.Packet;
 import managers.ConnectionData;
-import managers.SubtitlesPrinter;
-import managers.commands.*;
-import managers.commands.messageTypes.*;
+import managers.Logger;
 
 import java.io.IOException;
 import java.net.DatagramPacket;
@@ -16,41 +14,43 @@ import java.util.Map;
 
 public class UdpServer implements Server {
     private DatagramSocket socket;
-    SubtitlesPrinter subtitlesPrinter;
+    Logger logger;
     Map<String, ConnectionData> users = new HashMap<>();
-    MessageHelper messageHelper = new MessageHelper(users);
+    MessageHelper messageHelper = new MessageHelper();
 
-    public UdpServer(int port,SubtitlesPrinter subtitlesPrinter) {
+    public UdpServer(int port, Logger logger) {
         try {
             socket = new DatagramSocket(port);
         } catch (SocketException e) {
             e.printStackTrace();
         }
-        this.subtitlesPrinter = subtitlesPrinter;
+        this.logger = logger;
     }
 
  //   PasswordHasher passwordHasher = new PasswordHasher();
 
     public void run() {
-        while (true) {
+    /*    while (true) {
             CommandMapperImpl commandMapper = new CommandMapperImpl();
-            Commands commands = new Commands(subtitlesPrinter, messageHelper, users);
+            CommandHandler commandHandler = new CommandHandler(logger, messageHelper, users);
             MessageType messageType;
             Packet receivedPacket = receivePacket();
             messageType = commandMapper.mapCommand(receivedPacket);
 
             if (messageType instanceof Registration) {
-                sendPacket(commands.registerUser((Registration) messageType));
+                commandHandler.registerUser((Registration) messageType,receivedPacket.getConnectionData());
+                sendPacket(commandHandler.registerUser((Registration) messageType),receivedPacket.getConnectionData());
             } else if (messageType instanceof UsersListSender) {
-                sendPacket(commands.sendUsersList((UsersListSender) messageType));
+                sendPacket(commandHandler.sendUsersList((UsersListSender) messageType));
             } else if (messageType instanceof Messenger) {
-                sendPacket(commands.sendMessage((Messenger) messageType));
+                sendPacket(commandHandler.sendMessage((Messenger) messageType));
             }else if (messageType instanceof Login) {
-                sendPacket(commands.loginUser((Login) messageType));
+                sendPacket(commandHandler.loginUser((Login) messageType));
             } else if (messageType instanceof Logout) {
-                sendPacket(commands.logoutUser((Logout) messageType));
+                sendPacket(commandHandler.logoutUser((Logout) messageType));
             }
         }
+     */
     }
 
     @Override
