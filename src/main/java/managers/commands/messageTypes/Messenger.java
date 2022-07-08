@@ -7,13 +7,10 @@ public class Messenger extends MessageType {
     public String sender;
     public String receiver;
     public String message;
-    public ConnectionData connectionData;
 
-    public Messenger(String sender, String receiver, String message, ConnectionData connectionData) {
-        this.sender = sender;
+    public Messenger(String receiver, String message) {
         this.receiver = receiver;
         this.message = message;
-        this.connectionData = connectionData;
     }
 
 }

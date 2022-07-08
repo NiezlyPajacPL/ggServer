@@ -6,8 +6,10 @@ import helpers.InputHelper;
 import helpers.SecuredPassword;
 import managers.ConnectionData;
 import managers.commands.messageTypes.*;
+import network.TcpServer;
 
 
+import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
 import java.util.Objects;
@@ -39,13 +41,12 @@ public class CommandMapperImpl implements CommandMapper {
             return new UsersListSender(receivedPacket.getConnectionData());
 
         } else if (input.contains(MESSAGE)) {
-            String sender = getSender(receivedPacket.getConnectionData(), clients);
+            //   String sender = TcpServer.getSender(receivedPacket.getConnectionData());
+            //  String sender = getSender(receivedPacket.getConnectionData(), clients);
             String receiver = inputHelper.getFirstArgument(input);
             String message = inputHelper.defineMessageFromInput(input);
-            ConnectionData receiverData = clients.get(receiver);
-            return new Messenger(sender,
-                    receiver,
-                    message,receiverData);
+         //   ConnectionData receiverData = clients.get(receiver);
+            return new Messenger(receiver, message);
 
         } else if (input.contains(LOGIN)) {
             String name = inputHelper.getFirstArgument(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);

@@ -1,6 +1,7 @@
 package network;
 
 import helpers.*;
+import helpers.Listeners.MessageListener;
 import helpers.Listeners.UserRegistrationListener;
 import managers.ConnectionData;
 import managers.Logger;
@@ -19,14 +20,15 @@ public class ClientSocket implements Server {
     private PrintWriter messageSender;
     private MessageHelper messageHelper;
     PasswordHasher passwordHasher = new PasswordHasher();
-    DataBaseManager dataBaseManager = new DataBaseManager();
     UserRegistrationListener userRegistrationListener;
+    MessageListener messageListener;
+    DataBaseManager dataBaseManager;
 
-
-    public ClientSocket(Socket socket, MessageHelper messageHelper, UserRegistrationListener userRegistrationListener) throws IOException {
+    public ClientSocket(Socket socket, MessageHelper messageHelper, UserRegistrationListener userRegistrationListener, MessageListener messageListener) throws IOException {
         this.socket = socket;
         this.messageHelper = messageHelper;
         this.userRegistrationListener = userRegistrationListener;
+        this.messageListener = messageListener;
     }
 
     @Override
@@ -37,9 +39,13 @@ public class ClientSocket implements Server {
             MessageType messageType;
             Packet receivedPacket = receivePacket();
             messageType = commandMapper.mapCommand(receivedPacket);
-
+            try {
+                dataBaseManager = new DataBaseManager();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
             if (messageType instanceof Registration) {
-                if (dataBaseManager.clientExistInDB(((Registration) messageType).name)) {
+                if (!dataBaseManager.clientExistInDB(((Registration) messageType).name)) {
                     registerUser((Registration) messageType);
                     userRegistrationListener.onClientRegistered(((Registration) messageType).name);
                     sendPacket(new Packet(MessageHelper.REGISTERED_SUCCESSFULLY.getBytes(StandardCharsets.UTF_8), receivedPacket.getConnectionData()));
@@ -51,12 +57,16 @@ public class ClientSocket implements Server {
             } else if (messageType instanceof UsersListSender) {
                 //send userslist
             } else if (messageType instanceof Messenger) {
-                String sender =  ((Messenger) messageType).sender;
+                String sender = messageListener.onMessageReceivedGetSender(receivedPacket.getConnectionData());
                 String receiver = ((Messenger) messageType).receiver;
                 String messageReceived = ((Messenger) messageType).message;
                 if (dataBaseManager.clientExistInDB(receiver)) {
-                    byte[] messageToSend = prepareStringToSend((Messenger) messageType);
-                    sendPacket(new Packet(messageToSend,receivedPacket.getConnectionData()));
+                    byte[] messageToSend = prepareStringToSend(sender, messageReceived);
+                    try {
+                        sendPacket(new Packet(messageToSend,new ConnectionData(messageListener.onMessageReceivedGetReceiverSocket(receiver).getOutputStream())));
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
                     Logger.printLogSuccessfullySentMessage(sender, receiver, messageReceived);
                 } else {
                     Logger.printLogMessageNotSent(sender, receiver);
@@ -102,7 +112,7 @@ public class ClientSocket implements Server {
             BufferedReader receivedBufferReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String receivedString = receivedBufferReader.readLine();
 
-            return new Packet(receivedString.getBytes(StandardCharsets.UTF_8), new ConnectionData(socket.getInputStream(), socket.getOutputStream()));
+            return new Packet(receivedString.getBytes(StandardCharsets.UTF_8), new ConnectionData(socket.getOutputStream()));
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -115,8 +125,8 @@ public class ClientSocket implements Server {
         dataBaseManager.saveClient(registration.name, securedPassword);
     }
 
-    private byte[] prepareStringToSend(Messenger messenger) {
-        String textToSend = messenger.sender + ": " + messenger.message;
+    private byte[] prepareStringToSend(String sender, String message) {
+        String textToSend = sender + ": " + message;
         return textToSend.getBytes(StandardCharsets.UTF_8);
     }
 

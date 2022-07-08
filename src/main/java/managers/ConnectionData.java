@@ -7,7 +7,7 @@ import java.net.InetAddress;
 public class ConnectionData {
     private InetAddress inetAddress;
     private int port;
-    private InputStream receivingStream;
+ //   private InputStream receivingStream;
     private OutputStream sendingStream;
 
     public ConnectionData(InetAddress inetAddress, int port) {
@@ -15,14 +15,13 @@ public class ConnectionData {
         this.port = port;
     }
 
-    public ConnectionData(InputStream clientInputStream, OutputStream clientSendingStream){
-        this.receivingStream = clientInputStream;
+    public ConnectionData(OutputStream clientSendingStream){
         this.sendingStream = clientSendingStream;
     }
 
-    public InputStream getReceivingStream() {
-        return receivingStream;
-    }
+ //   public InputStream getReceivingStream() {
+  //      return receivingStream;
+  //  }
 
     public OutputStream getSendingStream() {
         return sendingStream;
