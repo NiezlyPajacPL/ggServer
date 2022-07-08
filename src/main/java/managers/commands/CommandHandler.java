@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.Map;
 
 public class CommandHandler {
-    Logger logger;
+   /* Logger logger;
     MessageHelper messageHelper;
     Map<String, ConnectionData> users;
     PasswordHasher passwordHasher = new PasswordHasher();
@@ -92,4 +92,6 @@ public class CommandHandler {
         String textToSend = sender + ": " + text;
         return textToSend.getBytes(StandardCharsets.UTF_8);
     }
+
+    */
 }

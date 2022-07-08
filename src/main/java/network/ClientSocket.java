@@ -1,6 +1,7 @@
 package network;
 
 import helpers.*;
+import helpers.Listeners.UserRegistrationListener;
 import managers.ConnectionData;
 import managers.Logger;
 import managers.commands.CommandMapperImpl;
@@ -16,13 +17,13 @@ import java.nio.charset.StandardCharsets;
 public class ClientSocket implements Server {
     private Socket socket;
     private PrintWriter messageSender;
-       private MessageHelper messageHelper;
+    private MessageHelper messageHelper;
     PasswordHasher passwordHasher = new PasswordHasher();
     DataBaseManager dataBaseManager = new DataBaseManager();
     UserRegistrationListener userRegistrationListener;
 
 
-    public ClientSocket(Socket socket,MessageHelper messageHelper,UserRegistrationListener userRegistrationListener) throws IOException {
+    public ClientSocket(Socket socket, MessageHelper messageHelper, UserRegistrationListener userRegistrationListener) throws IOException {
         this.socket = socket;
         this.messageHelper = messageHelper;
         this.userRegistrationListener = userRegistrationListener;
@@ -43,18 +44,42 @@ public class ClientSocket implements Server {
                     userRegistrationListener.onClientRegistered(((Registration) messageType).name);
                     sendPacket(new Packet(MessageHelper.REGISTERED_SUCCESSFULLY.getBytes(StandardCharsets.UTF_8), receivedPacket.getConnectionData()));
                 } else {
-                    //print log
+                    Logger.printLogClientFailedRegistration(((Registration) messageType).name);
                     sendPacket(new Packet(MessageHelper.NICKNAME_TAKEN.getBytes(StandardCharsets.UTF_8), receivedPacket.getConnectionData()));
                 }
-                //      sendPacket(commandHandler.registerUser((Registration) messageType));
+
             } else if (messageType instanceof UsersListSender) {
-                sendPacket(commandHandler.sendUsersList((UsersListSender) messageType));
+                //send userslist
             } else if (messageType instanceof Messenger) {
-                sendPacket(commandHandler.sendMessage((Messenger) messageType));
+                String sender =  ((Messenger) messageType).sender;
+                String receiver = ((Messenger) messageType).receiver;
+                String messageReceived = ((Messenger) messageType).message;
+                if (dataBaseManager.clientExistInDB(receiver)) {
+                    byte[] messageToSend = prepareStringToSend((Messenger) messageType);
+                    sendPacket(new Packet(messageToSend,receivedPacket.getConnectionData()));
+                    Logger.printLogSuccessfullySentMessage(sender, receiver, messageReceived);
+                } else {
+                    Logger.printLogMessageNotSent(sender, receiver);
+                }
             } else if (messageType instanceof Login) {
-                sendPacket(commandHandler.loginUser((Login) messageType));
+                String name = ((Login) messageType).name;
+                if (dataBaseManager.clientExistInDB(name)) {
+                    Logger.printLogClientFoundInDB(name);
+                    if (passwordHasher.checkIfPasswordMatches((name), ((Login) messageType).password) && (name != null)) {
+                        Logger.printLogClientLoggedIn(name);
+                        userRegistrationListener.onClientRegistered(name);
+                        sendPacket(new Packet(MessageHelper.successfullyLoggedIn(name).getBytes(StandardCharsets.UTF_8),
+                                receivedPacket.getConnectionData()));
+                    } else {
+                        sendPacket(new Packet(MessageHelper.FAILED_LOGIN.getBytes(StandardCharsets.UTF_8),
+                                receivedPacket.getConnectionData()));
+                    }
+                } else {
+                    sendPacket(new Packet(MessageHelper.FAILED_LOGIN.getBytes(StandardCharsets.UTF_8),
+                            receivedPacket.getConnectionData()));
+                }
             } else if (messageType instanceof Logout) {
-                sendPacket(commandHandler.logoutUser((Logout) messageType));
+                //   sendPacket(commandHandler.logoutUser((Logout) messageType));
                 break;
             }
         }
@@ -83,11 +108,17 @@ public class ClientSocket implements Server {
         }
         return null;
     }
-    public void registerUser(Registration registration) {
+
+    private void registerUser(Registration registration) {
         SecuredPassword securedPassword = passwordHasher.generateSecuredPassword(registration.password);
         Logger.printLogGeneratedPassword();
         dataBaseManager.saveClient(registration.name, securedPassword);
     }
-}
 
+    private byte[] prepareStringToSend(Messenger messenger) {
+        String textToSend = messenger.sender + ": " + messenger.message;
+        return textToSend.getBytes(StandardCharsets.UTF_8);
+    }
+
+}
 

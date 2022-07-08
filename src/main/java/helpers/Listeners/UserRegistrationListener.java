@@ -1,4 +1,4 @@
-package network;
+package helpers.Listeners;
 
 public interface UserRegistrationListener {
 

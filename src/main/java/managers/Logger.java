@@ -12,8 +12,7 @@ public final class Logger {
     public static void printLogClientRegistered(String nickname, ConnectionData connectionData){println(DateAndTime.getCurrentTime() +
             ": Registered client " + nickname + " -- IP: " + connectionData.getInetAddress() + ":" + connectionData.getPort());}
 
-    public static void printLogClientFailedRegistration(String nickname,ConnectionData connectionData){println(DateAndTime.getCurrentTime() +
-            ": Someone with IP:   "  + connectionData.getInetAddress() + ":" + connectionData.getPort() + " -- tried to register on used nickname " + "(" + nickname + ")");}
+    public static void printLogClientFailedRegistration(String nickname){println(DateAndTime.getCurrentTime() + " Someone tried to register on used nickname " + "(" + nickname + ")");}
 
     public static void printLogClientRegistrationFailedCommand(ConnectionData connectionData){println(DateAndTime.getCurrentTime() +
             ": Someone with IP:   "  + connectionData.getInetAddress() + ":" + connectionData.getPort() + " -- tried to register but used command wrongly.");}

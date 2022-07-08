@@ -14,7 +14,7 @@ public class Main {
             //To change network protocol,
             // just change the Server implementation to TcpServer / UdpServer
 
-            Server server = new TcpServer(4445);
+            TcpServer server = new TcpServer(4445);
             Thread thread = new Thread(server);
             thread.start();
             Logger.printLogServerStarted();
