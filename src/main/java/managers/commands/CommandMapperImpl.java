@@ -50,11 +50,11 @@ public class CommandMapperImpl implements CommandMapper {
             return new Login(name, password, receivedPacket.getConnectionData());
 
         } else if (input.contains(LOGOUT)) {
-            return new Logout(getSender(receivedPacket.getConnectionData(), clients), receivedPacket.getConnectionData());
+            return new Logout(receivedPacket.getConnectionData());
         }
         return null;
     }
-
+/*
     private String getSender(ConnectionData senderConnectionData, Map<String, ConnectionData> clients) {
         for (Map.Entry<String, ConnectionData> entry : clients.entrySet()) {
             if (senderConnectionData.getInetAddress() != null) {
@@ -70,6 +70,8 @@ public class CommandMapperImpl implements CommandMapper {
         return UNKNOWN;
     }
 
+
+ */
 }
 
 

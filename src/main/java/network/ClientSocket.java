@@ -93,11 +93,13 @@ public class ClientSocket implements Server {
                             receivedPacket.getConnectionData()));
                 }
             } else if (messageType instanceof Logout) {
-                //   sendPacket(commandHandler.logoutUser((Logout) messageType));
+                messageListener.onClientLoggedOut(clientName);
+                   sendPacket(new Packet(MessageHelper.LOGGED_OUT.getBytes(StandardCharsets.UTF_8), receivedPacket.getConnectionData()));
                 break;
             }
         }
         try {
+            System.out.println("Client: " + clientName + "successfully logged out. Socket has been closed.");
             socket.close();
         } catch (IOException e) {
             e.printStackTrace();

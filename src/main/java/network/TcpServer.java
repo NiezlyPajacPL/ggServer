@@ -2,16 +2,12 @@ package network;
 
 import helpers.*;
 import helpers.Listeners.MessageListener;
-import helpers.Listeners.UserRegistrationListener;
-import managers.ConnectionData;
 
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Objects;
 
 public class TcpServer implements Runnable {
     int port;
@@ -36,6 +32,11 @@ public class TcpServer implements Runnable {
                     @Override
                     public void onClientLoggingIn(String nickname) {
                         users.put(nickname, socket);
+                    }
+
+                    @Override
+                    public void onClientLoggedOut(String nickname) {
+                        users.remove(nickname);
                     }
 
                     @Override
