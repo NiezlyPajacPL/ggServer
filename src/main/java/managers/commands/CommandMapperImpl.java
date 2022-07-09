@@ -34,18 +34,14 @@ public class CommandMapperImpl implements CommandMapper {
         if (input.contains(REGISTER)) {
             String name = inputHelper.getFirstArgument(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
             String password = inputHelper.definePasswordFromInput(input).replaceAll("[\\s\u0000]+", "");
-          //  SecuredPassword securedPassword = passwordHasher.generateSecuredPassword(password);
             return new Registration(name, password);
 
         } else if (input.contains(ALLUSERS)) {
             return new UsersListSender(receivedPacket.getConnectionData());
 
         } else if (input.contains(MESSAGE)) {
-            //   String sender = TcpServer.getSender(receivedPacket.getConnectionData());
-            //  String sender = getSender(receivedPacket.getConnectionData(), clients);
             String receiver = inputHelper.getFirstArgument(input);
             String message = inputHelper.defineMessageFromInput(input);
-         //   ConnectionData receiverData = clients.get(receiver);
             return new Messenger(receiver, message);
 
         } else if (input.contains(LOGIN)) {

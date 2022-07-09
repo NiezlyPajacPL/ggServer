@@ -8,6 +8,7 @@ import managers.ConnectionData;
 import java.io.*;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
@@ -26,48 +27,28 @@ public class TcpServer implements Runnable {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             while (true) {
                 Socket socket = serverSocket.accept();
-                UserRegistrationListener userRegistrationListener = new UserRegistrationListener() {
-                    @Override
-                    public void onClientRegistered(String nickname) {
-                        users.put(nickname, socket);
-                    }
-                };
                 MessageListener messageListener = new MessageListener() {
-                    @Override
-                    public String onMessageReceivedGetSender(ConnectionData senderConnectionData) {
-                        return getSender(senderConnectionData);
-                    }
-
                     @Override
                     public Socket onMessageReceivedGetReceiverSocket(String receiver) {
                         return users.get(receiver);
                     }
+
+                    @Override
+                    public void onClientLoggingIn(String nickname) {
+                        users.put(nickname, socket);
+                    }
+
+                    @Override
+                    public String onUsersListRequest() {
+                        return users.keySet().toString();
+                    }
                 };
-                ClientSocket clientSocket = new ClientSocket(socket, messageHelper, userRegistrationListener,messageListener);
+                ClientSocket clientSocket = new ClientSocket(socket, messageHelper,messageListener);
                 Thread clientThread = new Thread(clientSocket);
                 clientThread.start();
             }
         } catch (IOException e) {
             e.printStackTrace();
         }
-    }
-
-    public String getSender(ConnectionData senderConnectionData) {
-        for (Map.Entry<String, Socket> entry : users.entrySet()) {
-            if (senderConnectionData.getInetAddress() != null) {
-                if ((Objects.equals(entry.getValue().getInetAddress(), senderConnectionData.getInetAddress())) && Objects.equals(entry.getValue().getPort(), senderConnectionData.getPort())) {
-                    return entry.getKey();
-                }
-            } else {
-                try {
-                    if ((Objects.equals(entry.getValue().getOutputStream(), senderConnectionData.getSendingStream()))) {
-                        return entry.getKey();
-                    }
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-        return "UNKNOWN";
     }
 }

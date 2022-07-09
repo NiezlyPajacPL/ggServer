@@ -2,7 +2,6 @@ package network;
 
 import helpers.*;
 import helpers.Listeners.MessageListener;
-import helpers.Listeners.UserRegistrationListener;
 import managers.ConnectionData;
 import managers.Logger;
 import managers.commands.CommandMapperImpl;
@@ -20,14 +19,13 @@ public class ClientSocket implements Server {
     private PrintWriter messageSender;
     private MessageHelper messageHelper;
     PasswordHasher passwordHasher = new PasswordHasher();
-    UserRegistrationListener userRegistrationListener;
     MessageListener messageListener;
     DataBaseManager dataBaseManager;
+    String clientName;
 
-    public ClientSocket(Socket socket, MessageHelper messageHelper, UserRegistrationListener userRegistrationListener, MessageListener messageListener) throws IOException {
+    public ClientSocket(Socket socket, MessageHelper messageHelper, MessageListener messageListener) throws IOException {
         this.socket = socket;
         this.messageHelper = messageHelper;
-        this.userRegistrationListener = userRegistrationListener;
         this.messageListener = messageListener;
     }
 
@@ -47,7 +45,8 @@ public class ClientSocket implements Server {
             if (messageType instanceof Registration) {
                 if (!dataBaseManager.clientExistInDB(((Registration) messageType).name)) {
                     registerUser((Registration) messageType);
-                    userRegistrationListener.onClientRegistered(((Registration) messageType).name);
+                    clientName = ((Registration) messageType).name;
+                    messageListener.onClientLoggingIn(((Registration) messageType).name);
                     sendPacket(new Packet(MessageHelper.REGISTERED_SUCCESSFULLY.getBytes(StandardCharsets.UTF_8), receivedPacket.getConnectionData()));
                 } else {
                     Logger.printLogClientFailedRegistration(((Registration) messageType).name);
@@ -55,29 +54,34 @@ public class ClientSocket implements Server {
                 }
 
             } else if (messageType instanceof UsersListSender) {
-                //send userslist
+                byte[] message = messageListener.onUsersListRequest().getBytes(StandardCharsets.UTF_8);
+                try {
+                    sendPacket(new Packet(message, new ConnectionData(socket.getOutputStream())));
+                } catch (IOException e) {
+                    e.printStackTrace();
+                }
             } else if (messageType instanceof Messenger) {
-                String sender = messageListener.onMessageReceivedGetSender(receivedPacket.getConnectionData());
                 String receiver = ((Messenger) messageType).receiver;
                 String messageReceived = ((Messenger) messageType).message;
                 if (dataBaseManager.clientExistInDB(receiver)) {
-                    byte[] messageToSend = prepareStringToSend(sender, messageReceived);
+                    byte[] messageToSend = prepareStringToSend(clientName, messageReceived);
                     try {
                         sendPacket(new Packet(messageToSend,new ConnectionData(messageListener.onMessageReceivedGetReceiverSocket(receiver).getOutputStream())));
                     } catch (IOException e) {
                         e.printStackTrace();
                     }
-                    Logger.printLogSuccessfullySentMessage(sender, receiver, messageReceived);
+                    Logger.printLogSuccessfullySentMessage(clientName, receiver, messageReceived);
                 } else {
-                    Logger.printLogMessageNotSent(sender, receiver);
+                    Logger.printLogMessageNotSent(clientName, receiver);
                 }
             } else if (messageType instanceof Login) {
                 String name = ((Login) messageType).name;
                 if (dataBaseManager.clientExistInDB(name)) {
                     Logger.printLogClientFoundInDB(name);
                     if (passwordHasher.checkIfPasswordMatches((name), ((Login) messageType).password) && (name != null)) {
+                        clientName = name;
                         Logger.printLogClientLoggedIn(name);
-                        userRegistrationListener.onClientRegistered(name);
+                        messageListener.onClientLoggingIn(name);
                         sendPacket(new Packet(MessageHelper.successfullyLoggedIn(name).getBytes(StandardCharsets.UTF_8),
                                 receivedPacket.getConnectionData()));
                     } else {

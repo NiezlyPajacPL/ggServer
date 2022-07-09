@@ -3,10 +3,13 @@ package helpers.Listeners;
 import managers.ConnectionData;
 
 import java.net.Socket;
+import java.util.ArrayList;
 
 public interface MessageListener {
 
-    String onMessageReceivedGetSender(ConnectionData senderConnectionData);
-
     Socket onMessageReceivedGetReceiverSocket(String receiver);
+
+    void onClientLoggingIn(String nickname);
+
+    String onUsersListRequest();
 }
