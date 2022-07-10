@@ -2,7 +2,7 @@ package managers.commands;
 
 import helpers.Packet;
 import helpers.InputHelper;
-import managers.ConnectionData;
+import helpers.ConnectionData;
 import managers.commands.messageTypes.*;
 
 import java.util.Locale;

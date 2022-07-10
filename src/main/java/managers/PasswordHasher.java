@@ -1,4 +1,7 @@
-package helpers;
+package managers;
+
+import helpers.SecuredPassword;
+import managers.DataBaseImpl;
 
 import java.io.IOException;
 import java.security.MessageDigest;
@@ -13,20 +16,6 @@ public class PasswordHasher {
         String salt = getSalt();
         String securePassword = getSecurePassword(passwordToHash, salt);
         return new SecuredPassword(securePassword, salt);
-    }
-
-    public boolean checkIfPasswordMatches(String nickname,String password){
-        try {
-            DataBaseManager dataBaseManager = new DataBaseManager();
-            SecuredPassword passwordFromDB = dataBaseManager.getHashedPassword(nickname);
-
-            if(Objects.equals(getSecurePassword(password, passwordFromDB.salt), passwordFromDB.password)){
-                return true;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-        return false;
     }
 
     private static String getSecurePassword(String passwordToHash, String salt) {
@@ -70,6 +59,20 @@ public class PasswordHasher {
             e.printStackTrace();
         }
         return "UNKNOWN";
+    }
+
+    public boolean checkIfPasswordMatches(String nickname,String password){
+        try {
+            DataBaseImpl dataBaseImpl = new DataBaseImpl();
+            SecuredPassword passwordFromDB = dataBaseImpl.getClient(nickname).getSecuredPassword();
+
+            if(Objects.equals(getSecurePassword(password, passwordFromDB.salt), passwordFromDB.password)){
+                return true;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return false;
     }
 
     private static int randomPosition() {

@@ -1,12 +1,9 @@
 package network;
 
 import helpers.MessageHelper;
-import helpers.Packet;
-import managers.ConnectionData;
-import managers.Logger;
+import helpers.ConnectionData;
+import helpers.Logger;
 
-import java.io.IOException;
-import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.SocketException;
 import java.util.HashMap;
@@ -86,11 +83,11 @@ public class UdpServer {
     MessageHelper messageHelper;
     Map<String, ConnectionData> users;
     PasswordHasher passwordHasher = new PasswordHasher();
-    DataBaseManager dataBaseManager;
+    DataBaseImpl dataBaseImpl;
 
     {
         try {
-            dataBaseManager = new DataBaseManager();
+            dataBaseImpl = new DataBaseImpl();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -109,13 +106,13 @@ public class UdpServer {
 
     public void registerUser(Registration registration, ConnectionData userConnectionData) {
         SecuredPassword securedPassword = passwordHasher.generateSecuredPassword(registration.password);
-        dataBaseManager.saveClient(registration.name, securedPassword);
+        dataBaseImpl.saveClient(registration.name, securedPassword);
 
         users.put(registration.name, userConnectionData);
         logger.printLogGeneratedPassword();
         logger.printLogClientRegistered(registration.name, userConnectionData);
     }
-    // if (!dataBaseManager.clientExistInDB(registration.name) && registration.name != null) {
+    // if (!dataBaseImpl.clientExistInDB(registration.name) && registration.name != null) {
     // }
     public Packet sendUsersList(UsersListSender usersListSender) {
         logger.printLogUsersListRequest();
@@ -125,7 +122,7 @@ public class UdpServer {
 
     public Packet sendMessage(Messenger messenger) {
         Packet packetToSend;
-        if (dataBaseManager.clientExistInDB(messenger.receiver)) {
+        if (dataBaseImpl.clientExistInDB(messenger.receiver)) {
             byte[] messageToSend = stringToSendHelper(messenger.message, messenger.sender);
             logger.printLogSuccessfullySentMessage(messenger.sender, messenger.receiver, messenger.message);
             packetToSend = new Packet(messageToSend, messenger.connectionData);
@@ -138,7 +135,7 @@ public class UdpServer {
 
     public Packet loginUser(Login login) {
         Packet packetToSend;
-        if (dataBaseManager.clientExistInDB(login.name)) {
+        if (dataBaseImpl.clientExistInDB(login.name)) {
             logger.printLogClientFoundInDB(login.name);
             if (passwordHasher.checkIfPasswordMatches(login.name, login.password) && login.name != null) {
                 logger.printLogClientLoggedIn(login.name);

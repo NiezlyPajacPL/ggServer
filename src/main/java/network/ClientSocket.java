@@ -1,9 +1,10 @@
 package network;
 
 import helpers.*;
-import helpers.Listeners.MessageListener;
-import managers.ConnectionData;
-import managers.Logger;
+import helpers.MessageListener;
+import managers.DataBaseImpl;
+import helpers.Logger;
+import managers.PasswordHasher;
 import managers.commands.CommandMapperImpl;
 import managers.commands.messageTypes.*;
 
@@ -17,7 +18,7 @@ public class ClientSocket implements Server {
     private MessageHelper messageHelper;
     PasswordHasher passwordHasher = new PasswordHasher();
     MessageListener messageListener;
-    DataBaseManager dataBaseManager;
+    DataBaseImpl dataBaseImpl;
     String clientName;
 
     public ClientSocket(Socket socket, MessageHelper messageHelper, MessageListener messageListener) throws IOException {
@@ -35,12 +36,12 @@ public class ClientSocket implements Server {
             Packet receivedPacket = receivePacket();
             messageType = commandMapper.mapCommand(receivedPacket);
             try {
-                dataBaseManager = new DataBaseManager();
+                dataBaseImpl = new DataBaseImpl();
             } catch (IOException e) {
                 e.printStackTrace();
             }
             if (messageType instanceof Registration) {
-                if (!dataBaseManager.clientExistInDB(((Registration) messageType).name)) {
+                if (dataBaseImpl.getClient(((Registration) messageType).name) == null) {
                     registerUser((Registration) messageType);
                     clientName = ((Registration) messageType).name;
                     messageListener.onClientLoggingIn(((Registration) messageType).name);
@@ -57,7 +58,7 @@ public class ClientSocket implements Server {
             } else if (messageType instanceof Messenger) {
                 String receiver = ((Messenger) messageType).receiver;
                 String messageReceived = ((Messenger) messageType).message;
-                if (dataBaseManager.clientExistInDB(receiver)) {
+                if (dataBaseImpl.getClient(receiver) != null) {
                     byte[] messageToSend = prepareStringToSend(clientName, messageReceived);
                     sendPacket(new Packet(messageToSend, messageListener.onMessageReceivedGetReceiverSocket(receiver)));
                     Logger.printLogSuccessfullySentMessage(clientName, receiver, messageReceived);
@@ -66,7 +67,7 @@ public class ClientSocket implements Server {
                 }
             } else if (messageType instanceof Login) {
                 String name = ((Login) messageType).name;
-                if (dataBaseManager.clientExistInDB(name)) {
+                if (dataBaseImpl.getClient(name) != null) {
                     Logger.printLogClientFoundInDB(name);
                     if (passwordHasher.checkIfPasswordMatches((name), ((Login) messageType).password) && (name != null)) {
                         clientName = name;
@@ -120,7 +121,7 @@ public class ClientSocket implements Server {
     private void registerUser(Registration registration) {
         SecuredPassword securedPassword = passwordHasher.generateSecuredPassword(registration.password);
         Logger.printLogGeneratedPassword();
-        dataBaseManager.saveClient(registration.name, securedPassword);
+        dataBaseImpl.saveClient(registration.name, securedPassword);
     }
 
     private byte[] prepareStringToSend(String sender, String message) {

@@ -1,4 +1,6 @@
-package helpers;
+package managers;
+
+import helpers.ClientLoginInfo;
 
 public interface DataBase {
 

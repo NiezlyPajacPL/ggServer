@@ -1,7 +1,5 @@
 package helpers;
 
-import managers.ConnectionData;
-
 import java.net.Socket;
 
 public class Packet {

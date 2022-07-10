@@ -1,9 +1,5 @@
 package helpers;
 
-import managers.ConnectionData;
-
-import java.util.Map;
-
 public final class MessageHelper {
     public static String REGISTERED_SUCCESSFULLY = "Registered Successfully!";
     public static String NICKNAME_TAKEN = "Something went wrong or nickname is already taken. :(";
