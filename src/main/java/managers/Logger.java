@@ -2,6 +2,7 @@ package managers;
 
 import helpers.DateAndTime;
 
+import java.net.Socket;
 
 public final class Logger {
 
@@ -9,22 +10,27 @@ public final class Logger {
     public static void printLogServerStarted(){println(DateAndTime.getCurrentTime() + ": SERVER HAS STARTED.");}
 
     //REGISTRATION
-    public static void printLogClientRegistered(String nickname, ConnectionData connectionData){println(DateAndTime.getCurrentTime() +
-            ": Registered client " + nickname + " -- IP: " + connectionData.getInetAddress() + ":" + connectionData.getPort());}
+    public static void printLogClientRegistered(String nickname, Socket socket){println(DateAndTime.getCurrentTime() +
+            ": Registered client " + nickname + " -- IP: " + socket.getInetAddress() + ":" + socket.getPort());}
 
-    public static void printLogClientFailedRegistration(String nickname){println(DateAndTime.getCurrentTime() + " Someone tried to register on used nickname " + "(" + nickname + ")");}
+    public static void printLogClientFailedRegistration(String nickname, Socket socket){println(DateAndTime.getCurrentTime() +
+            "Someone with ip: " + socket.getInetAddress() + ":" + socket.getPort()+ "tried to register on used nickname " + "(" + nickname + ")");}
 
-    public static void printLogClientRegistrationFailedCommand(ConnectionData connectionData){println(DateAndTime.getCurrentTime() +
-            ": Someone with IP:   "  + connectionData.getInetAddress() + ":" + connectionData.getPort() + " -- tried to register but used command wrongly.");}
+    public static void printLogClientRegistrationFailedCommand(Socket socket){println(DateAndTime.getCurrentTime() +
+            ": Someone with IP:   "  + socket.getInetAddress() + ":" + socket.getPort() + " -- tried to register but used command wrongly.");}
 
     public static void printLogGeneratedPassword(){println(DateAndTime.getCurrentTime() + ": Generated secured password.");}
 
     //LOGIN
-    public static void printLogClientLoggedIn(String nickname){println(DateAndTime.getCurrentTime() + ": Client - " + nickname + " successfully logged in." );}
+    public static void printLogClientLoggedIn(String nickname, Socket socket){println(DateAndTime.getCurrentTime() +
+            ": Client - " + nickname + " successfully logged in. IP: " + socket.getInetAddress() + ":" + socket.getPort() );}
 
-    public static void printLogClientLoggedOut(String nickname){println(DateAndTime.getCurrentTime() + ": Client: " + nickname + " has logged out.");}
+    public static void printLogClientLoggedOut(String nickname){println(DateAndTime.getCurrentTime() + ": Client: " + nickname + " has logged out. Socket has been closed.");}
 
-    public static void printLogClientDoesNotExist(String name){ println(DateAndTime.getCurrentTime() +" " +  name + " does NOT exist in DB");}
+    public static void printLogClientDoesNotExist(String name){ println(DateAndTime.getCurrentTime() + ": " +  name + " does NOT exist in DB");}
+
+    public static void printLogClientFailedLogin(String name, Socket socket){ println(DateAndTime.getCurrentTime() +
+            ": " +"IP -- " + socket.getInetAddress() + ":" + socket.getPort() + " unsuccessfully tried to login on account with name "+ "[" + name + "]" );}
 
     public static void printLogClientFoundInDB(String nickname){println(DateAndTime.getCurrentTime() + " Client " + nickname + " found in data base");}
 

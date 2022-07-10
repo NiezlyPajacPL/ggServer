@@ -7,10 +7,7 @@ import managers.Logger;
 import managers.commands.CommandMapperImpl;
 import managers.commands.messageTypes.*;
 
-import java.io.BufferedReader;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.PrintWriter;
+import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
@@ -47,29 +44,22 @@ public class ClientSocket implements Server {
                     registerUser((Registration) messageType);
                     clientName = ((Registration) messageType).name;
                     messageListener.onClientLoggingIn(((Registration) messageType).name);
-                    sendPacket(new Packet(MessageHelper.REGISTERED_SUCCESSFULLY.getBytes(StandardCharsets.UTF_8), receivedPacket.getConnectionData()));
+                    sendPacket(new Packet(MessageHelper.REGISTERED_SUCCESSFULLY.getBytes(StandardCharsets.UTF_8), socket));
                 } else {
-                    Logger.printLogClientFailedRegistration(((Registration) messageType).name);
-                    sendPacket(new Packet(MessageHelper.NICKNAME_TAKEN.getBytes(StandardCharsets.UTF_8), receivedPacket.getConnectionData()));
+                    Logger.printLogClientFailedRegistration(((Registration) messageType).name,socket);
+                    sendPacket(new Packet(MessageHelper.NICKNAME_TAKEN.getBytes(StandardCharsets.UTF_8), socket));
                 }
 
             } else if (messageType instanceof UsersListSender) {
                 byte[] message = messageListener.onUsersListRequest().getBytes(StandardCharsets.UTF_8);
-                try {
-                    sendPacket(new Packet(message, new ConnectionData(socket.getOutputStream())));
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
+                sendPacket(new Packet(message, socket));
+
             } else if (messageType instanceof Messenger) {
                 String receiver = ((Messenger) messageType).receiver;
                 String messageReceived = ((Messenger) messageType).message;
                 if (dataBaseManager.clientExistInDB(receiver)) {
                     byte[] messageToSend = prepareStringToSend(clientName, messageReceived);
-                    try {
-                        sendPacket(new Packet(messageToSend,new ConnectionData(messageListener.onMessageReceivedGetReceiverSocket(receiver).getOutputStream())));
-                    } catch (IOException e) {
-                        e.printStackTrace();
-                    }
+                    sendPacket(new Packet(messageToSend, messageListener.onMessageReceivedGetReceiverSocket(receiver)));
                     Logger.printLogSuccessfullySentMessage(clientName, receiver, messageReceived);
                 } else {
                     Logger.printLogMessageNotSent(clientName, receiver);
@@ -80,26 +70,24 @@ public class ClientSocket implements Server {
                     Logger.printLogClientFoundInDB(name);
                     if (passwordHasher.checkIfPasswordMatches((name), ((Login) messageType).password) && (name != null)) {
                         clientName = name;
-                        Logger.printLogClientLoggedIn(name);
+                        Logger.printLogClientLoggedIn(name,socket);
                         messageListener.onClientLoggingIn(name);
-                        sendPacket(new Packet(MessageHelper.successfullyLoggedIn(name).getBytes(StandardCharsets.UTF_8),
-                                receivedPacket.getConnectionData()));
+                        sendPacket(new Packet(MessageHelper.successfullyLoggedIn(name).getBytes(StandardCharsets.UTF_8), socket));
                     } else {
-                        sendPacket(new Packet(MessageHelper.FAILED_LOGIN.getBytes(StandardCharsets.UTF_8),
-                                receivedPacket.getConnectionData()));
+                        Logger.printLogClientFailedLogin(name, socket);
+                        sendPacket(new Packet(MessageHelper.FAILED_LOGIN.getBytes(StandardCharsets.UTF_8), socket));
                     }
                 } else {
-                    sendPacket(new Packet(MessageHelper.FAILED_LOGIN.getBytes(StandardCharsets.UTF_8),
-                            receivedPacket.getConnectionData()));
+                    sendPacket(new Packet(MessageHelper.FAILED_LOGIN.getBytes(StandardCharsets.UTF_8),socket));
                 }
             } else if (messageType instanceof Logout) {
                 messageListener.onClientLoggedOut(clientName);
-                   sendPacket(new Packet(MessageHelper.LOGGED_OUT.getBytes(StandardCharsets.UTF_8), receivedPacket.getConnectionData()));
+                sendPacket(new Packet(MessageHelper.LOGGED_OUT.getBytes(StandardCharsets.UTF_8), socket));
                 break;
             }
         }
         try {
-            System.out.println("Client: " + clientName + "successfully logged out. Socket has been closed.");
+            Logger.printLogClientLoggedOut(clientName);
             socket.close();
         } catch (IOException e) {
             e.printStackTrace();
@@ -108,8 +96,12 @@ public class ClientSocket implements Server {
 
     @Override
     public void sendPacket(Packet packetToSend) {
-        messageSender = new PrintWriter(packetToSend.getConnectionData().getSendingStream(), true);
-        messageSender.println(new String(packetToSend.getData()));
+        try {
+            messageSender = new PrintWriter(packetToSend.getSocket().getOutputStream(), true);
+            messageSender.println(new String(packetToSend.getData()));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 
     @Override
@@ -118,7 +110,7 @@ public class ClientSocket implements Server {
             BufferedReader receivedBufferReader = new BufferedReader(new InputStreamReader(socket.getInputStream()));
             String receivedString = receivedBufferReader.readLine();
 
-            return new Packet(receivedString.getBytes(StandardCharsets.UTF_8), new ConnectionData(socket.getOutputStream()));
+            return new Packet(receivedString.getBytes(StandardCharsets.UTF_8), socket);
         } catch (IOException e) {
             e.printStackTrace();
         }

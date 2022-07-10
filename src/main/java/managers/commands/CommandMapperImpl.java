@@ -1,18 +1,12 @@
 package managers.commands;
 
 import helpers.Packet;
-import helpers.PasswordHasher;
 import helpers.InputHelper;
-import helpers.SecuredPassword;
 import managers.ConnectionData;
 import managers.commands.messageTypes.*;
-import network.TcpServer;
 
-
-import java.io.IOException;
 import java.util.Locale;
 import java.util.Map;
-import java.util.Objects;
 
 public class CommandMapperImpl implements CommandMapper {
 
@@ -22,14 +16,12 @@ public class CommandMapperImpl implements CommandMapper {
     private final String MESSAGE = "/msg";
     private final String LOGIN = "/login";
     private final String LOGOUT = "/logout";
-    private final String UNKNOWN = "UNKNOWN";
 
     @Override
     public MessageType mapCommand(Packet receivedPacket) {
 
         String input = new String(receivedPacket.getData());
         InputHelper inputHelper = new InputHelper();
-        PasswordHasher passwordHasher = new PasswordHasher();
 
         if (input.contains(REGISTER)) {
             String name = inputHelper.getFirstArgument(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
@@ -37,7 +29,7 @@ public class CommandMapperImpl implements CommandMapper {
             return new Registration(name, password);
 
         } else if (input.contains(ALLUSERS)) {
-            return new UsersListSender(receivedPacket.getConnectionData());
+            return new UsersListSender();
 
         } else if (input.contains(MESSAGE)) {
             String receiver = inputHelper.getFirstArgument(input);
@@ -47,31 +39,14 @@ public class CommandMapperImpl implements CommandMapper {
         } else if (input.contains(LOGIN)) {
             String name = inputHelper.getFirstArgument(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);
             String password = inputHelper.definePasswordFromInput(input).replaceAll("[\\s\u0000]+", "");
-            return new Login(name, password, receivedPacket.getConnectionData());
+            return new Login(name, password);
 
         } else if (input.contains(LOGOUT)) {
-            return new Logout(receivedPacket.getConnectionData());
+            return new Logout();
         }
         return null;
     }
-/*
-    private String getSender(ConnectionData senderConnectionData, Map<String, ConnectionData> clients) {
-        for (Map.Entry<String, ConnectionData> entry : clients.entrySet()) {
-            if (senderConnectionData.getInetAddress() != null) {
-                if ((Objects.equals(entry.getValue().getInetAddress(), senderConnectionData.getInetAddress())) && Objects.equals(entry.getValue().getPort(), senderConnectionData.getPort())) {
-                    return entry.getKey();
-                }
-            }else{
-                if ((Objects.equals(entry.getValue().getSendingStream(), senderConnectionData.getSendingStream()))) {
-                    return entry.getKey();
-                }
-            }
-        }
-        return UNKNOWN;
-    }
 
-
- */
 }
 
 

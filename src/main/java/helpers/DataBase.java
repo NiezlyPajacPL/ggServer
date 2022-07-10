@@ -2,7 +2,7 @@ package helpers;
 
 public interface DataBase {
 
-    String getClient(String nickname);
+    ClientLoginInfo getClient(String nickname);
 
-    void saveClient(String nickname, SecuredPassword password);
+    void saveClient(ClientLoginInfo clientLoginInfo);
 }

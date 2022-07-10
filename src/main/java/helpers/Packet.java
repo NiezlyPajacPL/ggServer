@@ -2,21 +2,22 @@ package helpers;
 
 import managers.ConnectionData;
 
+import java.net.Socket;
+
 public class Packet {
     private byte[] data;
-    private ConnectionData connectionData;
+    private Socket socket;
 
-    public Packet(byte[] data, ConnectionData connectionData) {
+    public Packet(byte[] data, Socket socket){
         this.data = data;
-        this.connectionData = connectionData;
+        this.socket = socket;
     }
 
     public byte[] getData(){
         return data;
     }
 
-    public ConnectionData getConnectionData(){
-        return connectionData;
+    public Socket getSocket() {
+        return socket;
     }
-
 }
