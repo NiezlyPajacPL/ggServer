@@ -11,7 +11,6 @@ import java.util.Map;
 public class TcpServer implements Runnable {
     int port;
     Map<String, Socket> users = new HashMap<String, Socket>();
-    MessageHelper messageHelper = new MessageHelper();
 
     public TcpServer(int port) {
         this.port = port;
@@ -22,7 +21,6 @@ public class TcpServer implements Runnable {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             while (true) {
                 Socket socket = serverSocket.accept();
-          //      serverSocket.setSoTimeout(20000);
                 MessageListener messageListener = new MessageListener() {
                     @Override
                     public Socket onMessageReceivedGetReceiverSocket(String receiver) {
@@ -44,7 +42,7 @@ public class TcpServer implements Runnable {
                         return users.keySet().toString();
                     }
                 };
-                ClientSocket clientSocket = new ClientSocket(socket, messageHelper,messageListener);
+                ClientSocket clientSocket = new ClientSocket(socket, messageListener);
                 Thread clientThread = new Thread(clientSocket);
                 clientThread.start();
             }

@@ -13,17 +13,14 @@ import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 
 public class ClientSocket implements Server {
-    private Socket socket;
-    private PrintWriter messageSender;
-    private MessageHelper messageHelper;
-    PasswordHasher passwordHasher = new PasswordHasher();
-    MessageListener messageListener;
-    DataBaseImpl dataBaseImpl;
-    String clientName;
+    private final Socket socket;
+    private final PasswordHasher passwordHasher = new PasswordHasher();
+    private final MessageListener messageListener;
+    private DataBaseImpl dataBaseImpl;
+    private String clientName;
 
-    public ClientSocket(Socket socket, MessageHelper messageHelper, MessageListener messageListener) throws IOException {
+    public ClientSocket(Socket socket, MessageListener messageListener) throws IOException {
         this.socket = socket;
-        this.messageHelper = messageHelper;
         this.messageListener = messageListener;
     }
 
@@ -34,6 +31,9 @@ public class ClientSocket implements Server {
             CommandMapperImpl commandMapper = new CommandMapperImpl();
             MessageType messageType;
             Packet receivedPacket = receivePacket();
+            if(receivedPacket == null){
+                break;
+            }
             messageType = commandMapper.mapCommand(receivedPacket);
             try {
                 dataBaseImpl = new DataBaseImpl();
@@ -64,6 +64,7 @@ public class ClientSocket implements Server {
                     Logger.printLogSuccessfullySentMessage(clientName, receiver, messageReceived);
                 } else {
                     Logger.printLogMessageNotSent(clientName, receiver);
+                    sendPacket(new Packet(MessageHelper.FAILED_TO_SEND_MESSAGE.getBytes(StandardCharsets.UTF_8),socket));
                 }
             } else if (messageType instanceof Login) {
                 String name = ((Login) messageType).name;
@@ -87,18 +88,13 @@ public class ClientSocket implements Server {
                 break;
             }
         }
-        try {
-            Logger.printLogClientLoggedOut(clientName);
-            socket.close();
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        stopConnection();
     }
 
     @Override
     public void sendPacket(Packet packetToSend) {
         try {
-            messageSender = new PrintWriter(packetToSend.getSocket().getOutputStream(), true);
+            PrintWriter messageSender = new PrintWriter(packetToSend.getSocket().getOutputStream(), true);
             messageSender.println(new String(packetToSend.getData()));
         } catch (IOException e) {
             e.printStackTrace();
@@ -113,7 +109,11 @@ public class ClientSocket implements Server {
 
             return new Packet(receivedString.getBytes(StandardCharsets.UTF_8), socket);
         } catch (IOException e) {
-            e.printStackTrace();
+            try {
+                socket.close();
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
         }
         return null;
     }
@@ -129,5 +129,17 @@ public class ClientSocket implements Server {
         return textToSend.getBytes(StandardCharsets.UTF_8);
     }
 
+    private void stopConnection(){
+        if(clientName == null){
+            Logger.printLogConnectionInterrupted(socket.getInetAddress(),socket.getPort());
+        }else{
+            Logger.printLogClientLoggedOut(clientName);
+        }
+        try {
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
 }
 

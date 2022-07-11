@@ -6,12 +6,7 @@ public final class MessageHelper {
     public static String FAILED_LOGIN = "Something went wrong. Try again";
     public static String LOGGED_OUT = "Successfully logged out. See you soon!";
     public static String FAILED_TO_SEND_MESSAGE = "Message wasn't sent. The user you are trying to reach is offline or does not exist.";
-
     public static String successfullyLoggedIn(String name) {
         return "Hello again " + name + "!";
     }
-    //ALLUSERS
-    // public String clientList() {
-    //     return users.keySet().toString();
-    // }
 }

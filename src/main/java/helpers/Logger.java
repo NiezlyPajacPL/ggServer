@@ -2,12 +2,16 @@ package helpers;
 
 import helpers.DateAndTime;
 
+import java.net.InetAddress;
 import java.net.Socket;
 
 public final class Logger {
 
     //SERVER
     public static void printLogServerStarted(){println(DateAndTime.getCurrentTime() + ": SERVER HAS STARTED.");}
+
+    public static void printLogConnectionInterrupted(InetAddress inetAddress, int port){println(DateAndTime.getCurrentTime() +
+            ": Connection interrupted with IP: " + inetAddress + ":" + port + ". Socket has been closed.");}
 
     //REGISTRATION
     public static void printLogClientRegistered(String nickname, Socket socket){println(DateAndTime.getCurrentTime() +
