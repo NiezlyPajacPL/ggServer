@@ -22,6 +22,7 @@ public class TcpServer implements Runnable {
         try (ServerSocket serverSocket = new ServerSocket(port)) {
             while (true) {
                 Socket socket = serverSocket.accept();
+          //      serverSocket.setSoTimeout(20000);
                 MessageListener messageListener = new MessageListener() {
                     @Override
                     public Socket onMessageReceivedGetReceiverSocket(String receiver) {
