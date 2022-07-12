@@ -45,6 +45,7 @@ public class TcpServer implements Runnable {
                 ClientSocket clientSocket = new ClientSocket(socket, messageListener);
                 Thread clientThread = new Thread(clientSocket);
                 clientThread.start();
+
             }
         } catch (IOException e) {
             e.printStackTrace();

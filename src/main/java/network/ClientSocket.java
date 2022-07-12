@@ -70,14 +70,14 @@ public class ClientSocket implements Server {
                 String name = ((Login) messageType).name;
                 if (dataBaseImpl.getClient(name) != null) {
                     Logger.printLogClientFoundInDB(name);
-                    if (passwordHasher.checkIfPasswordMatches((name), ((Login) messageType).password) && (name != null)) {
+                    if (passwordHasher.checkIfPasswordMatches((name), ((Login) messageType).password)) {
                         clientName = name;
                         Logger.printLogClientLoggedIn(name,socket);
                         messageListener.onClientLoggingIn(name);
                         sendPacket(new Packet(MessageHelper.successfullyLoggedIn(name).getBytes(StandardCharsets.UTF_8), socket));
                     } else {
                         Logger.printLogClientFailedLogin(name, socket);
-                        sendPacket(new Packet(MessageHelper.FAILED_LOGIN.getBytes(StandardCharsets.UTF_8), socket));
+                        sendPacket(new Packet(MessageHelper.WRONG_PASSWORD.getBytes(StandardCharsets.UTF_8), socket));
                     }
                 } else {
                     sendPacket(new Packet(MessageHelper.FAILED_LOGIN.getBytes(StandardCharsets.UTF_8),socket));

@@ -3,14 +3,12 @@ package managers;
 import helpers.ClientLoginInfo;
 import helpers.InputHelper;
 import helpers.SecuredPassword;
-import managers.DataBase;
 
 import java.io.*;
 import java.util.Scanner;
 
 public class DataBaseImpl implements DataBase {
     File registeredUsers = new File("src/main/java/managers/commands/RegisteredClients.txt");
-  //  Scanner scanner = new Scanner(registeredUsers);
     Scanner scanner;
     FileWriter fileWriter = new FileWriter(registeredUsers.getAbsoluteFile(), true);
     BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);

@@ -1,7 +1,6 @@
 package managers;
 
 import helpers.SecuredPassword;
-import managers.DataBaseImpl;
 
 import java.io.IOException;
 import java.security.MessageDigest;
@@ -75,7 +74,4 @@ public class PasswordHasher {
         return false;
     }
 
-    private static int randomPosition() {
-        return (int) ((Math.random() * 2) + 1);
-    }
 }
