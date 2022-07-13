@@ -4,11 +4,11 @@ import java.net.Socket;
 
 public interface MessageListener {
 
-    Socket onMessageReceivedGetReceiverSocket(String receiver);
+    Socket onMessageReceived(String receiver);
 
     void onClientLoggingIn(String nickname);
 
     void onClientLoggedOut(String nickname);
 
-    String onUsersListRequest();
+    String getUsersList();
 }

@@ -8,13 +8,22 @@ import java.io.*;
 import java.util.Scanner;
 
 public class DataBaseImpl implements DataBase {
-    File registeredUsers = new File("src/main/java/managers/commands/RegisteredClients.txt");
+    String filePath;
+    File registeredUsersFile;
     Scanner scanner;
-    FileWriter fileWriter = new FileWriter(registeredUsers.getAbsoluteFile(), true);
-    BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
     InputHelper inputHelper = new InputHelper();
+    BufferedWriter bufferedWriter;
 
-    public DataBaseImpl() throws IOException {
+    public DataBaseImpl(String filePath){
+        this.filePath = filePath;
+        registeredUsersFile= new File(filePath);
+        FileWriter fileWriter = null;
+        try {
+            fileWriter = new FileWriter(registeredUsersFile.getAbsoluteFile(), true);
+            bufferedWriter = new BufferedWriter(fileWriter);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
     @Override
     public ClientLoginInfo getClient(String nickname) {
@@ -31,14 +40,9 @@ public class DataBaseImpl implements DataBase {
         overrideDB(data);
     }
 
-    public void saveClient(String nickname, SecuredPassword securedPassword){
-        String data = nickname + " " + securedPassword.password + " " + securedPassword.salt;
-        overrideDB(data);
-    }
-
     private boolean clientExistInDB(String nickname) {
         try {
-            scanner = new Scanner(registeredUsers);
+            scanner = new Scanner(registeredUsersFile);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }
@@ -53,7 +57,7 @@ public class DataBaseImpl implements DataBase {
     }
     private SecuredPassword getHashedPassword(String nickname) {
         try {
-            scanner = new Scanner(registeredUsers);
+            scanner = new Scanner(registeredUsersFile);
         } catch (FileNotFoundException e) {
             e.printStackTrace();
         }

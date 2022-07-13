@@ -2,7 +2,6 @@ package managers;
 
 import helpers.SecuredPassword;
 
-import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
@@ -10,6 +9,12 @@ import java.security.SecureRandom;
 import java.util.Objects;
 
 public class PasswordHasher {
+
+    DataBase dataBase;
+
+    public PasswordHasher(DataBase dataBase){
+        this.dataBase = dataBase;
+    }
 
     public SecuredPassword generateSecuredPassword(String passwordToHash) {
         String salt = getSalt();
@@ -60,16 +65,11 @@ public class PasswordHasher {
         return "UNKNOWN";
     }
 
-    public boolean checkIfPasswordMatches(String nickname,String password){
-        try {
-            DataBaseImpl dataBaseImpl = new DataBaseImpl();
-            SecuredPassword passwordFromDB = dataBaseImpl.getClient(nickname).getSecuredPassword();
+    public boolean isPasswordValid(String nickname, String password){
+        SecuredPassword passwordFromDB = dataBase.getClient(nickname).getSecuredPassword();
 
-            if(Objects.equals(getSecurePassword(password, passwordFromDB.salt), passwordFromDB.password)){
-                return true;
-            }
-        } catch (IOException e) {
-            e.printStackTrace();
+        if(Objects.equals(getSecurePassword(password, passwordFromDB.salt), passwordFromDB.password)){
+            return true;
         }
         return false;
     }

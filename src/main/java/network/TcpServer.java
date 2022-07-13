@@ -1,6 +1,8 @@
 package network;
 
 import helpers.*;
+import managers.DataBase;
+import managers.PasswordHasher;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -9,11 +11,16 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class TcpServer implements Runnable {
-    int port;
-    Map<String, Socket> users = new HashMap<String, Socket>();
+    private final int port;
+    private final Map<String, Socket> users = new HashMap<>();
+    private final DataBase dataBase;
+    private final PasswordHasher passwordHasher;
 
-    public TcpServer(int port) {
+
+    public TcpServer(int port, DataBase dataBase, PasswordHasher passwordHasher) {
         this.port = port;
+        this.dataBase = dataBase;
+        this.passwordHasher = passwordHasher;
     }
 
     @Override
@@ -23,7 +30,7 @@ public class TcpServer implements Runnable {
                 Socket socket = serverSocket.accept();
                 MessageListener messageListener = new MessageListener() {
                     @Override
-                    public Socket onMessageReceivedGetReceiverSocket(String receiver) {
+                    public Socket onMessageReceived(String receiver) {
                         return users.get(receiver);
                     }
 
@@ -38,14 +45,13 @@ public class TcpServer implements Runnable {
                     }
 
                     @Override
-                    public String onUsersListRequest() {
+                    public String getUsersList() {
                         return users.keySet().toString();
                     }
                 };
-                ClientSocket clientSocket = new ClientSocket(socket, messageListener);
+                ClientSocket clientSocket = new ClientSocket(socket, messageListener,dataBase,passwordHasher);
                 Thread clientThread = new Thread(clientSocket);
                 clientThread.start();
-
             }
         } catch (IOException e) {
             e.printStackTrace();
