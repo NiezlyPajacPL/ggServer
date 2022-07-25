@@ -75,7 +75,6 @@ public class DataBaseImpl implements DataBase {
         try {
             bufferedWriter.write(data);
             bufferedWriter.newLine();
-            bufferedWriter.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

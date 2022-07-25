@@ -42,6 +42,7 @@ public class ClientSocket implements Server {
                 if (db.getClient(clientName) == null) {
                     registerUser((Registration) messageType);
                     messageListener.onClientLoggingIn(((Registration) messageType).name);
+                    Logger.printLogClientRegistered(clientName,socket);
                     sendPacket(new Packet(MessageHelper.REGISTERED_SUCCESSFULLY.getBytes(StandardCharsets.UTF_8), socket));
                 } else {
                     Logger.printLogClientFailedRegistration(((Registration) messageType).name,socket);
@@ -49,8 +50,8 @@ public class ClientSocket implements Server {
                 }
 
             } else if (messageType instanceof UsersListSender) {
-                byte[] message = messageListener.getUsersList().getBytes(StandardCharsets.UTF_8);
-                sendPacket(new Packet(message, socket));
+                String message = "Online users list: " +  messageListener.getUsersList();
+                sendPacket(new Packet(message.getBytes(StandardCharsets.UTF_8), socket));
 
             } else if (messageType instanceof Messenger) {
                 String receiver = ((Messenger) messageType).receiver;
