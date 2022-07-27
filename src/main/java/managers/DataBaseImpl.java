@@ -17,14 +17,8 @@ public class DataBaseImpl implements DataBase {
     public DataBaseImpl(String filePath){
         this.filePath = filePath;
         registeredUsersFile= new File(filePath);
-        FileWriter fileWriter = null;
-        try {
-            fileWriter = new FileWriter(registeredUsersFile.getAbsoluteFile(), true);
-            bufferedWriter = new BufferedWriter(fileWriter);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
     }
+
     @Override
     public ClientLoginInfo getClient(String nickname) {
         if(clientExistInDB(nickname)){
@@ -73,8 +67,11 @@ public class DataBaseImpl implements DataBase {
 
     private void overrideDB(String data) {
         try {
+            FileWriter fileWriter = new FileWriter(registeredUsersFile.getAbsoluteFile(), true);
+            bufferedWriter = new BufferedWriter(fileWriter);
             bufferedWriter.write(data);
             bufferedWriter.newLine();
+            bufferedWriter.close();
         } catch (IOException e) {
             e.printStackTrace();
         }

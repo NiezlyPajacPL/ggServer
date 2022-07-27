@@ -86,6 +86,7 @@ public class ClientSocket implements Server {
                 break;
             }
         }
+        messageListener.onClientLoggedOut(clientName);
         stopConnection();
     }
 
