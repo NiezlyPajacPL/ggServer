@@ -1,5 +1,6 @@
 package network;
 
+import com.google.gson.Gson;
 import helpers.*;
 import helpers.MessageListener;
 import managers.DataBase;
@@ -21,6 +22,7 @@ public class ClientSocket implements Server {
     private DataBase db;
     private String clientName;
     private final CommandMapper commandMapper = new CommandMapperImpl();
+    Gson gson = new Gson();
     public ClientSocket(Socket socket, MessageListener messageListener,DataBase db,PasswordHasher passwordHasher) throws IOException {
         this.socket = socket;
         this.messageListener = messageListener;
