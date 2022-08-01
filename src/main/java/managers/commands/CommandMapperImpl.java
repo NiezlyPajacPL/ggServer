@@ -34,7 +34,7 @@ public class CommandMapperImpl implements CommandMapper {
         } else if (input.contains(MESSAGE)) {
             String receiver = inputHelper.getFirstArgument(input);
             String message = inputHelper.defineMessageFromInput(input);
-            return new Messenger(receiver, message);
+            return new Message(receiver, message);
 
         } else if (input.contains(LOGIN)) {
             String name = inputHelper.getFirstArgument(input).replaceAll("[\\s\u0000]+", "").toLowerCase(Locale.ROOT);

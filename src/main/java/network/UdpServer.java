@@ -39,8 +39,8 @@ public class UdpServer {
                 sendPacket(commandHandler.registerUser((Registration) messageType),receivedPacket.getConnectionData());
             } else if (messageType instanceof UsersListSender) {
                 sendPacket(commandHandler.sendUsersList((UsersListSender) messageType));
-            } else if (messageType instanceof Messenger) {
-                sendPacket(commandHandler.sendMessage((Messenger) messageType));
+            } else if (messageType instanceof Message) {
+                sendPacket(commandHandler.sendMessage((Message) messageType));
             }else if (messageType instanceof Login) {
                 sendPacket(commandHandler.loginUser((Login) messageType));
             } else if (messageType instanceof Logout) {
@@ -120,7 +120,7 @@ public class UdpServer {
         return new Packet(messageHelper.clientList().getBytes(StandardCharsets.UTF_8), usersListSender.connectionData);
     }
 
-    public Packet sendMessage(Messenger messenger) {
+    public Packet sendMessage(Message messenger) {
         Packet packetToSend;
         if (dataBaseImpl.clientExistInDB(messenger.receiver)) {
             byte[] messageToSend = stringToSendHelper(messenger.message, messenger.sender);
