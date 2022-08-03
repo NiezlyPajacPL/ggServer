@@ -41,17 +41,19 @@ public class ClientSocket implements Server {
             messageType = commandMapper.mapCommand(receivedPacket);
             if (messageType instanceof Registration) {
                 clientName = ((Registration) messageType).name;
+                RegisterData registerData = null;
                 if (db.getClient(clientName) == null) {
                     registerUser((Registration) messageType);
                     messageListener.onClientLoggingIn(((Registration) messageType).name);
                     Logger.printLogClientRegistered(clientName,socket);
-                    String json = gson.toJson(new RegisterData(Type.REGISTER,MessageHelper.REGISTERED_SUCCESSFULLY));
-                    sendPacket(new Packet(json.getBytes(StandardCharsets.UTF_8),socket));
+                    registerData = new RegisterData(Type.REGISTER,true);
                 //    sendPacket(new Packet(MessageHelper.REGISTERED_SUCCESSFULLY.getBytes(StandardCharsets.UTF_8), socket));
                 } else {
                     Logger.printLogClientFailedRegistration(((Registration) messageType).name,socket);
-                    sendPacket(new Packet(MessageHelper.NICKNAME_TAKEN.getBytes(StandardCharsets.UTF_8), socket));
+                    registerData = new RegisterData(Type.REGISTER,false);
                 }
+                String json = gson.toJson(registerData);
+                sendPacket(new Packet(json.getBytes(StandardCharsets.UTF_8),socket));
 
             } else if (messageType instanceof UsersListSender) {
                 Logger.printLogUsersListRequest();
@@ -69,7 +71,7 @@ public class ClientSocket implements Server {
                     String textToSend = clientName + ": " + messageReceived;
                    String json = gson.toJson(new MessageData(Type.MESSAGE,clientName,textToSend));
                     System.out.println(json);
-                    sendPacket(new Packet(json.getBytes(StandardCharsets.UTF_8), messageListener.onMessageReceived(receiver)));
+                    sendPacket(new Packet(json.getBytes(StandardCharsets.UTF_8), messageListener.onMessageReceivedGetUser(receiver)));
 
                     // sendPacket(new Packet(messageToSend, messageListener.onMessageReceived(receiver)));
                     Logger.printLogSuccessfullySentMessage(clientName, receiver, messageReceived);
@@ -78,6 +80,7 @@ public class ClientSocket implements Server {
                     sendPacket(new Packet(MessageHelper.FAILED_TO_SEND_MESSAGE.getBytes(StandardCharsets.UTF_8),socket));
                 }
             } else if (messageType instanceof Login) {
+                LoginData loginData = null;
                 String name = ((Login) messageType).name;
                 if (db.getClient(name) != null) {
                     Logger.printLogClientFoundInDB(name);
@@ -86,15 +89,14 @@ public class ClientSocket implements Server {
                         Logger.printLogClientLoggedIn(name,socket);
                         messageListener.onClientLoggingIn(name);
 
-                        LoginData loginData = new LoginData(Type.LOGIN,MessageHelper.successfullyLoggedIn(name));
-                        String json = gson.toJson(loginData);
-
-                        sendPacket(new Packet(json.getBytes(StandardCharsets.UTF_8),socket));
+                        loginData = new LoginData("LOGIN",true);
                       //  sendPacket(new Packet(MessageHelper.successfullyLoggedIn(name).getBytes(StandardCharsets.UTF_8), socket));
                     } else {
                         Logger.printLogClientFailedLogin(name, socket);
-                        sendPacket(new Packet(MessageHelper.WRONG_PASSWORD.getBytes(StandardCharsets.UTF_8), socket));
+                        loginData = new LoginData("LOGIN",false);
                     }
+                    String json = gson.toJson(loginData);
+                    sendPacket(new Packet(json.getBytes(StandardCharsets.UTF_8),socket));
                 } else {
                     sendPacket(new Packet(MessageHelper.FAILED_LOGIN.getBytes(StandardCharsets.UTF_8),socket));
                 }

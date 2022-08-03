@@ -1,11 +1,12 @@
 package managers.jsonObj;
 
 public class LoginData {
-    Type type;
-    String message;
-
-    public LoginData(Type type, String messageToSend){
+    String type;
+   // String message;
+    boolean isLoginSuccessful;
+    public LoginData(String type, boolean isLoginSuccessful){
         this.type = type;
-        this.message =messageToSend;
+        this.isLoginSuccessful = isLoginSuccessful;
+     //   this.message =messageToSend;
     }
 }

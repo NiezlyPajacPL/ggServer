@@ -1,11 +1,15 @@
 package managers.jsonObj;
 
 public class RegisterData {
-    Type type;
-    String message;
+    public Type type;
+    private final boolean isRegistrationSuccessful;
 
-    public RegisterData(Type type, String message){
+    public RegisterData(Type type,boolean isRegistrationSuccessful){
         this.type = type;
-        this.message =message;
+        this.isRegistrationSuccessful = isRegistrationSuccessful;
+    }
+
+    public boolean isRegistrationSuccessful() {
+        return isRegistrationSuccessful;
     }
 }

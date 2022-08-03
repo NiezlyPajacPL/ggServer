@@ -30,7 +30,7 @@ public class TcpServer implements Runnable {
                 Socket socket = serverSocket.accept();
                 MessageListener messageListener = new MessageListener() {
                     @Override
-                    public Socket onMessageReceived(String receiver) {
+                    public Socket onMessageReceivedGetUser(String receiver) {
                         return users.get(receiver);
                     }
 

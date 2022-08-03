@@ -4,7 +4,7 @@ import java.net.Socket;
 
 public interface MessageListener {
 
-    Socket onMessageReceived(String receiver);
+    Socket onMessageReceivedGetUser(String receiver);
 
     void onClientLoggingIn(String nickname);
 
