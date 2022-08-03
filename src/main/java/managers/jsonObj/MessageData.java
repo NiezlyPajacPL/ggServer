@@ -5,7 +5,7 @@ public class MessageData {
     private String sender;
     private String message;
 
-    public  MessageData(Type type, String sender, String message){
+    public MessageData(Type type, String sender, String message) {
         this.type = type;
         this.sender = sender;
         this.message = message;

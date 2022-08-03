@@ -23,7 +23,8 @@ public class ClientSocket implements Server {
     private String clientName;
     private final CommandMapper commandMapper = new CommandMapperImpl();
     Gson gson = new Gson();
-    public ClientSocket(Socket socket, MessageListener messageListener,DataBase db,PasswordHasher passwordHasher) throws IOException {
+
+    public ClientSocket(Socket socket, MessageListener messageListener, DataBase db, PasswordHasher passwordHasher) throws IOException {
         this.socket = socket;
         this.messageListener = messageListener;
         this.db = db;
@@ -35,50 +36,27 @@ public class ClientSocket implements Server {
         while (true) {
             MessageType messageType;
             Packet receivedPacket = receivePacket();
-            if(receivedPacket == null){
+            if (receivedPacket == null) {
                 break;
             }
+            String json;
             messageType = commandMapper.mapCommand(receivedPacket);
+
             if (messageType instanceof Registration) {
                 clientName = ((Registration) messageType).name;
                 RegisterData registerData = null;
                 if (db.getClient(clientName) == null) {
                     registerUser((Registration) messageType);
                     messageListener.onClientLoggingIn(((Registration) messageType).name);
-                    Logger.printLogClientRegistered(clientName,socket);
-                    registerData = new RegisterData(Type.REGISTER,true);
-                //    sendPacket(new Packet(MessageHelper.REGISTERED_SUCCESSFULLY.getBytes(StandardCharsets.UTF_8), socket));
-                } else {
-                    Logger.printLogClientFailedRegistration(((Registration) messageType).name,socket);
-                    registerData = new RegisterData(Type.REGISTER,false);
-                }
-                String json = gson.toJson(registerData);
-                sendPacket(new Packet(json.getBytes(StandardCharsets.UTF_8),socket));
+                    Logger.printLogClientRegistered(clientName, socket);
+                    registerData = new RegisterData(Type.REGISTER, true);
 
-            } else if (messageType instanceof UsersListSender) {
-                Logger.printLogUsersListRequest();
-            //    String message = "Online users list: " +  messageListener.getUsersList();
-                String json = gson.toJson(new OnlineUsersData(Type.ONLINE_USERS,messageListener.getUsersList()));
+                } else {
+                    Logger.printLogClientFailedRegistration(((Registration) messageType).name, socket);
+                    registerData = new RegisterData(Type.REGISTER, false);
+                }
+                json = gson.toJson(registerData);
                 sendPacket(new Packet(json.getBytes(StandardCharsets.UTF_8), socket));
-               // sendPacket(new Packet(message.getBytes(StandardCharsets.UTF_8), socket));
-
-            } else if (messageType instanceof Message) {
-                String receiver = ((Message) messageType).receiver;
-                String messageReceived = ((Message) messageType).message;
-                if (db.getClient(receiver) != null) {
-                    byte[] messageToSend = prepareStringToSend(clientName, messageReceived);
-                    //
-                    String textToSend = clientName + ": " + messageReceived;
-                   String json = gson.toJson(new MessageData(Type.MESSAGE,clientName,textToSend));
-                    System.out.println(json);
-                    sendPacket(new Packet(json.getBytes(StandardCharsets.UTF_8), messageListener.onMessageReceivedGetUser(receiver)));
-
-                    // sendPacket(new Packet(messageToSend, messageListener.onMessageReceived(receiver)));
-                    Logger.printLogSuccessfullySentMessage(clientName, receiver, messageReceived);
-                } else {
-                    Logger.printLogMessageNotSent(clientName, receiver);
-                    sendPacket(new Packet(MessageHelper.FAILED_TO_SEND_MESSAGE.getBytes(StandardCharsets.UTF_8),socket));
-                }
             } else if (messageType instanceof Login) {
                 LoginData loginData = null;
                 String name = ((Login) messageType).name;
@@ -86,27 +64,42 @@ public class ClientSocket implements Server {
                     Logger.printLogClientFoundInDB(name);
                     if (passwordHasher.isPasswordValid((name), ((Login) messageType).password)) {
                         clientName = name;
-                        Logger.printLogClientLoggedIn(name,socket);
+                        Logger.printLogClientLoggedIn(name, socket);
                         messageListener.onClientLoggingIn(name);
-
-                        loginData = new LoginData("LOGIN",true);
-                      //  sendPacket(new Packet(MessageHelper.successfullyLoggedIn(name).getBytes(StandardCharsets.UTF_8), socket));
+                        loginData = new LoginData(Type.LOGIN, true);
                     } else {
                         Logger.printLogClientFailedLogin(name, socket);
-                        loginData = new LoginData("LOGIN",false);
+                        loginData = new LoginData(Type.LOGIN, false);
                     }
-                    String json = gson.toJson(loginData);
-                    sendPacket(new Packet(json.getBytes(StandardCharsets.UTF_8),socket));
+                    json = gson.toJson(loginData);
+                    sendPacket(new Packet(json.getBytes(StandardCharsets.UTF_8), socket));
+                }
+            } else if (messageType instanceof UsersListSender) {
+                Logger.printLogUsersListRequest();
+                json = gson.toJson(new OnlineUsersData(Type.ONLINE_USERS, messageListener.getUsersList().keySet().toString()));
+                sendPacket(new Packet(json.getBytes(StandardCharsets.UTF_8), socket));
+            } else if (messageType instanceof Message) {
+                String receiver = ((Message) messageType).receiver;
+                String messageReceived = ((Message) messageType).message;
+                if (messageListener.getUsersList().get(receiver) != null) {
+                    // byte[] messageToSend = prepareStringToSend(clientName, messageReceived);
+                    String textToSend = clientName + ": " + messageReceived;
+                    json = gson.toJson(new MessageData(Type.MESSAGE, clientName, textToSend));
+                    sendPacket(new Packet(json.getBytes(StandardCharsets.UTF_8), messageListener.onMessageReceivedGetUser(receiver)));
+                    Logger.printLogSuccessfullySentMessage(clientName, receiver, messageReceived);
                 } else {
-                    sendPacket(new Packet(MessageHelper.FAILED_LOGIN.getBytes(StandardCharsets.UTF_8),socket));
+                    Logger.printLogMessageNotSent(clientName, receiver);
+                    String message = "User you are trying to reach is currently offline.";
+                    json = gson.toJson(new ServerMessageData(Type.SERVER_MESSAGE,message));
+                    sendPacket(new Packet(json.getBytes(StandardCharsets.UTF_8),socket));
+                  //  sendPacket(new Packet(MessageHelper.FAILED_TO_SEND_MESSAGE.getBytes(StandardCharsets.UTF_8), socket));
                 }
             } else if (messageType instanceof Logout) {
                 messageListener.onClientLoggedOut(clientName);
-                LogoutData logoutData = new LogoutData(Type.LOGOUT,MessageHelper.LOGGED_OUT);
-                String json = gson.toJson(logoutData);
+                LogoutData logoutData = new LogoutData(Type.LOGOUT, MessageHelper.LOGGED_OUT);
+                json = gson.toJson(logoutData);
 
-                sendPacket(new Packet(json.getBytes(StandardCharsets.UTF_8),socket));
-              //  sendPacket(new Packet(MessageHelper.LOGGED_OUT.getBytes(StandardCharsets.UTF_8), socket));
+                sendPacket(new Packet(json.getBytes(StandardCharsets.UTF_8), socket));
                 break;
             }
         }
@@ -152,10 +145,10 @@ public class ClientSocket implements Server {
         return textToSend.getBytes(StandardCharsets.UTF_8);
     }
 
-    private void stopConnection(){
-        if(clientName == null){
-            Logger.printLogConnectionInterrupted(socket.getInetAddress(),socket.getPort());
-        }else{
+    private void stopConnection() {
+        if (clientName == null) {
+            Logger.printLogConnectionInterrupted(socket.getInetAddress(), socket.getPort());
+        } else {
             Logger.printLogClientLoggedOut(clientName);
         }
         try {
@@ -165,4 +158,10 @@ public class ClientSocket implements Server {
         }
     }
 }
+// sendPacket(new Packet(messageToSend, messageListener.onMessageReceived(receiver)));
+//  sendPacket(new Packet(MessageHelper.LOGGED_OUT.getBytes(StandardCharsets.UTF_8), socket));
+//  sendPacket(new Packet(MessageHelper.successfullyLoggedIn(name).getBytes(StandardCharsets.UTF_8), socket));
 
+//    String message = "Online users list: " +  messageListener.getUsersList();
+// sendPacket(new Packet(message.getBytes(StandardCharsets.UTF_8), socket));
+//    sendPacket(new Packet(MessageHelper.REGISTERED_SUCCESSFULLY.getBytes(StandardCharsets.UTF_8), socket));

@@ -1,6 +1,7 @@
 package helpers;
 
 import java.net.Socket;
+import java.util.Map;
 
 public interface MessageListener {
 
@@ -10,5 +11,5 @@ public interface MessageListener {
 
     void onClientLoggedOut(String nickname);
 
-    String getUsersList();
+    Map<String, Socket> getUsersList();
 }

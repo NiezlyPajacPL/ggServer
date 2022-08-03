@@ -45,8 +45,8 @@ public class TcpServer implements Runnable {
                     }
 
                     @Override
-                    public String getUsersList() {
-                        return users.keySet().toString();
+                    public Map<String, Socket> getUsersList() {
+                        return users;
                     }
                 };
                 ClientSocket clientSocket = new ClientSocket(socket, messageListener,dataBase,passwordHasher);

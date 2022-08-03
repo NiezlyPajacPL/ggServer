@@ -5,5 +5,6 @@ public enum Type {
     ONLINE_USERS,
     LOGIN,
     REGISTER,
-    LOGOUT
+    LOGOUT,
+    SERVER_MESSAGE
 }

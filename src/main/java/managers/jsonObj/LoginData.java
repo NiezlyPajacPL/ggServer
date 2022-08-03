@@ -1,10 +1,10 @@
 package managers.jsonObj;
 
 public class LoginData {
-    String type;
+    Type type;
    // String message;
     boolean isLoginSuccessful;
-    public LoginData(String type, boolean isLoginSuccessful){
+    public LoginData(Type type, boolean isLoginSuccessful){
         this.type = type;
         this.isLoginSuccessful = isLoginSuccessful;
      //   this.message =messageToSend;
