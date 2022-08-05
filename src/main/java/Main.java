@@ -5,7 +5,6 @@ import managers.PasswordHasher;
 import network.ClientSocket;
 import network.TcpServer;
 
-import java.io.IOException;
 import java.net.SocketException;
 import java.util.HashMap;
 import java.util.Map;

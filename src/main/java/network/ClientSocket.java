@@ -14,6 +14,7 @@ import managers.jsonObj.*;
 import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 
 public class ClientSocket implements Server {
     private final Socket socket;
@@ -76,7 +77,8 @@ public class ClientSocket implements Server {
                 }
             } else if (messageType instanceof UsersListSender) {
                 Logger.printLogUsersListRequest();
-                json = gson.toJson(new OnlineUsersData(Type.ONLINE_USERS, messageListener.getUsersList().keySet().toString()));
+                ArrayList<String> usersList = new ArrayList<>(messageListener.getUsersList().keySet());
+                json = gson.toJson(new OnlineUsersData(Type.ONLINE_USERS,usersList));
                 sendPacket(new Packet(json.getBytes(StandardCharsets.UTF_8), socket));
             } else if (messageType instanceof Message) {
                 String receiver = ((Message) messageType).receiver;
@@ -90,9 +92,8 @@ public class ClientSocket implements Server {
                 } else {
                     Logger.printLogMessageNotSent(clientName, receiver);
                     String message = "User you are trying to reach is currently offline.";
-                    json = gson.toJson(new ServerMessageData(Type.SERVER_MESSAGE,message));
+                    json = gson.toJson(new MessageData(Type.MESSAGE,receiver,message));
                     sendPacket(new Packet(json.getBytes(StandardCharsets.UTF_8),socket));
-                  //  sendPacket(new Packet(MessageHelper.FAILED_TO_SEND_MESSAGE.getBytes(StandardCharsets.UTF_8), socket));
                 }
             } else if (messageType instanceof Logout) {
                 messageListener.onClientLoggedOut(clientName);

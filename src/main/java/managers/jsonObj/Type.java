@@ -6,5 +6,4 @@ public enum Type {
     LOGIN,
     REGISTER,
     LOGOUT,
-    SERVER_MESSAGE
 }

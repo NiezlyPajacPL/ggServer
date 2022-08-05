@@ -1,11 +1,14 @@
 package managers.jsonObj;
 
+import java.util.ArrayList;
+
 public class OnlineUsersData {
     public Type type;
-    public String users;
+//    public String users;
+    public ArrayList<String> usersList;
 
-    public OnlineUsersData(Type type, String users) {
+    public OnlineUsersData(Type type, ArrayList<String> usersList) {
         this.type = type;
-        this.users = users;
+        this.usersList = usersList;
     }
 }

@@ -3,6 +3,10 @@ package network;
 import helpers.MessageHelper;
 import helpers.ConnectionData;
 import helpers.Logger;
+import helpers.Packet;
+import managers.PasswordHasher;
+import managers.commands.CommandMapperImpl;
+import managers.commands.messageTypes.MessageType;
 
 import java.net.DatagramSocket;
 import java.net.SocketException;
@@ -10,26 +14,25 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class UdpServer {
-    private DatagramSocket socket;
+/*    private DatagramSocket socket;
     Logger logger;
     Map<String, ConnectionData> users = new HashMap<>();
     MessageHelper messageHelper = new MessageHelper();
+    PasswordHasher passwordHasher;
 
-    public UdpServer(int port, Logger logger) {
+    public UdpServer(int port, Logger logger,PasswordHasher passwordHasher) {
         try {
             socket = new DatagramSocket(port);
         } catch (SocketException e) {
             e.printStackTrace();
         }
+        this.passwordHasher = passwordHasher;
         this.logger = logger;
     }
 
-    //   PasswordHasher passwordHasher = new PasswordHasher();
-
     public void run() {
-    /*    while (true) {
+        while (true) {
             CommandMapperImpl commandMapper = new CommandMapperImpl();
-            CommandHandler commandHandler = new CommandHandler(logger, messageHelper, users);
             MessageType messageType;
             Packet receivedPacket = receivePacket();
             messageType = commandMapper.mapCommand(receivedPacket);
@@ -46,9 +49,8 @@ public class UdpServer {
             } else if (messageType instanceof Logout) {
                 sendPacket(commandHandler.logoutUser((Logout) messageType));
             }
-        }
-     */
-//    }
+        }*/
+
 /*
     @Override
     public void sendPacket(Packet packetToSendInformation) {
@@ -162,6 +164,6 @@ public class UdpServer {
         return textToSend.getBytes(StandardCharsets.UTF_8);
     }
 
-    */
-}
 
+}
+*/
