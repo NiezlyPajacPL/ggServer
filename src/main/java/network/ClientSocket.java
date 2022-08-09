@@ -72,9 +72,12 @@ public class ClientSocket implements Server {
                         Logger.printLogClientFailedLogin(name, socket);
                         loginData = new LoginData(Type.LOGIN, false);
                     }
-                    json = gson.toJson(loginData);
-                    sendPacket(new Packet(json.getBytes(StandardCharsets.UTF_8), socket));
+                }else{
+                    Logger.printLogClientFailedLogin(name, socket);
+                    loginData = new LoginData(Type.LOGIN, false);
                 }
+                json = gson.toJson(loginData);
+                sendPacket(new Packet(json.getBytes(StandardCharsets.UTF_8), socket));
             } else if (messageType instanceof UsersListSender) {
                 Logger.printLogUsersListRequest();
                 ArrayList<String> usersList = new ArrayList<>(messageListener.getUsersList().keySet());

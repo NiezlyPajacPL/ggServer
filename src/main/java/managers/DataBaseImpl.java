@@ -5,6 +5,7 @@ import helpers.InputHelper;
 import helpers.SecuredPassword;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 public class DataBaseImpl implements DataBase {
@@ -30,7 +31,7 @@ public class DataBaseImpl implements DataBase {
 
     @Override
     public void saveClient(ClientLoginInfo clientLoginInfo) {
-        String data = clientLoginInfo.getNickname() + " " + clientLoginInfo.getSecuredPassword() + " " + clientLoginInfo.getSecuredPassword().salt;
+        String data = clientLoginInfo.getNickname() + " " + clientLoginInfo.getSecuredPassword().password + " " + clientLoginInfo.getSecuredPassword().salt;
         overrideDB(data);
     }
 
