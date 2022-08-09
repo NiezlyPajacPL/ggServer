@@ -6,11 +6,13 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
+import java.util.Arrays;
 import java.util.Objects;
 
 public class PasswordHasher {
 
-    DataBase dataBase;
+    private final DataBase dataBase;
+    private static final byte[] unWantedByte = "\n".getBytes();
 
     public PasswordHasher(DataBase dataBase){
         this.dataBase = dataBase;
@@ -38,6 +40,8 @@ public class PasswordHasher {
             // Convert it to hexadecimal format
             StringBuilder stringBuilder = new StringBuilder();
 
+            replaceUnwantedBytes(bytes);
+
             for (int i = 0; i < bytes.length; i++) {
                 stringBuilder.append(Integer.toString((bytes[i] & 0xff) + 0x100, 16).substring(1));
             }
@@ -50,21 +54,6 @@ public class PasswordHasher {
         return generatedPassword;
     }
 
-    private String getSalt() {
-        try {
-            SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG", "SUN");
-            // Create array for salt
-            byte[] salt = new byte[16];
-            // Get a random salt
-            secureRandom.nextBytes(salt);
-            // return salt
-            return new String(salt);
-        } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
-            e.printStackTrace();
-        }
-        return "UNKNOWN";
-    }
-
     public boolean isPasswordValid(String nickname, String password){
         SecuredPassword passwordFromDB = dataBase.getClient(nickname).getSecuredPassword();
 
@@ -74,4 +63,31 @@ public class PasswordHasher {
         return false;
     }
 
+
+    private String getSalt() {
+        try {
+            SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG", "SUN");
+            // Create array for salt
+            byte[] salt = new byte[16];
+            // Get a random salt
+            secureRandom.nextBytes(salt);
+            // return salt
+          //  System.out.println(Arrays.toString(salt));
+            replaceUnwantedBytes(salt);
+          //  System.out.println(Arrays.toString(salt));
+            return new String(salt);
+        } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
+            e.printStackTrace();
+        }
+        return "UNKNOWN";
+    }
+
+    private static void replaceUnwantedBytes(byte[] bytes){
+        for(int i = 0; i < bytes.length;i++){
+            if(bytes[i] == unWantedByte[0]){
+                System.out.println("Replacing unwanted byte.");
+                bytes[i] = '2';
+            }
+        }
+    }
 }
