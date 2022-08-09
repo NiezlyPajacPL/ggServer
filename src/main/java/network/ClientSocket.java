@@ -59,7 +59,7 @@ public class ClientSocket implements Server {
                 json = gson.toJson(registerData);
                 sendPacket(new Packet(json.getBytes(StandardCharsets.UTF_8), socket));
             } else if (messageType instanceof Login) {
-                LoginData loginData = null;
+                LoginData loginData;
                 String name = ((Login) messageType).name;
                 if (db.getClient(name) != null) {
                     Logger.printLogClientFoundInDB(name);
@@ -87,7 +87,6 @@ public class ClientSocket implements Server {
                 String receiver = ((Message) messageType).receiver;
                 String messageReceived = ((Message) messageType).message;
                 if (messageListener.getUsersList().get(receiver) != null) {
-                    // byte[] messageToSend = prepareStringToSend(clientName, messageReceived);
                     String textToSend = clientName + ": " + messageReceived;
                     json = gson.toJson(new MessageData(Type.MESSAGE, clientName, textToSend));
                     sendPacket(new Packet(json.getBytes(StandardCharsets.UTF_8), messageListener.onMessageReceivedGetUser(receiver)));
@@ -162,10 +161,3 @@ public class ClientSocket implements Server {
         }
     }
 }
-// sendPacket(new Packet(messageToSend, messageListener.onMessageReceived(receiver)));
-//  sendPacket(new Packet(MessageHelper.LOGGED_OUT.getBytes(StandardCharsets.UTF_8), socket));
-//  sendPacket(new Packet(MessageHelper.successfullyLoggedIn(name).getBytes(StandardCharsets.UTF_8), socket));
-
-//    String message = "Online users list: " +  messageListener.getUsersList();
-// sendPacket(new Packet(message.getBytes(StandardCharsets.UTF_8), socket));
-//    sendPacket(new Packet(MessageHelper.REGISTERED_SUCCESSFULLY.getBytes(StandardCharsets.UTF_8), socket));
