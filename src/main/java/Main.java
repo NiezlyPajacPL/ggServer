@@ -16,4 +16,4 @@ public class Main {
         thread.start();
         Logger.printLogServerStarted();
     }
-}//asd
+}
