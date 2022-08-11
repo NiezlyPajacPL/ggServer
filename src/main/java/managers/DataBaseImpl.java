@@ -5,7 +5,6 @@ import helpers.InputHelper;
 import helpers.SecuredPassword;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
 import java.util.Scanner;
 
 public class DataBaseImpl implements DataBase {

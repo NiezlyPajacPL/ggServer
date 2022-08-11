@@ -143,11 +143,6 @@ public class ClientSocket implements Server {
         db.saveClient(new ClientLoginInfo(registration.name, securedPassword));
     }
 
-    private byte[] prepareStringToSend(String sender, String message) {
-        String textToSend = sender + ": " + message;
-        return textToSend.getBytes(StandardCharsets.UTF_8);
-    }
-
     private void stopConnection() {
         if (clientName == null) {
             Logger.printLogConnectionInterrupted(socket.getInetAddress(), socket.getPort());
