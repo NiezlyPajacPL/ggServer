@@ -6,7 +6,6 @@ import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
-import java.util.Arrays;
 import java.util.Objects;
 
 public class PasswordHasher {
@@ -72,9 +71,7 @@ public class PasswordHasher {
             // Get a random salt
             secureRandom.nextBytes(salt);
             // return salt
-          //  System.out.println(Arrays.toString(salt));
             replaceUnwantedBytes(salt);
-          //  System.out.println(Arrays.toString(salt));
             return new String(salt);
         } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
             e.printStackTrace();
