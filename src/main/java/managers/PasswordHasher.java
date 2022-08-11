@@ -72,9 +72,7 @@ public class PasswordHasher {
             // Get a random salt
             secureRandom.nextBytes(salt);
             // return salt
-          //  System.out.println(Arrays.toString(salt));
             replaceUnwantedBytes(salt);
-          //  System.out.println(Arrays.toString(salt));
             return new String(salt);
         } catch (NoSuchAlgorithmException | NoSuchProviderException e) {
             e.printStackTrace();

@@ -32,7 +32,6 @@ public class DataBaseImpl implements DataBase {
     public void saveClient(ClientLoginInfo clientLoginInfo) {
         String data = clientLoginInfo.getNickname() + " " + clientLoginInfo.getSecuredPassword().password + " " + clientLoginInfo.getSecuredPassword().salt;
         overrideDB(data);
-        System.out.println("asd");
     }
 
     private boolean clientExistInDB(String nickname) {
