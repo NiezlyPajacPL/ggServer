@@ -56,7 +56,7 @@ public class PasswordHasher {
     public boolean isPasswordValid(String nickname, String password){
         SecuredPassword passwordFromDB = dataBase.getClient(nickname).getSecuredPassword();
 
-        if(Objects.equals(getSecurePassword(password, passwordFromDB.salt), passwordFromDB.password)){
+        if(Objects.equals(getSecurePassword(password, passwordFromDB.getSalt()), passwordFromDB.getPassword())){
             return true;
         }
         return false;

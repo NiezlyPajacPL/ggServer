@@ -18,6 +18,6 @@ public class ClientLoginInfo {
     }
 
     public String savePassword(){
-        return securedPassword.password;
+        return securedPassword.getPassword();
     }
 }

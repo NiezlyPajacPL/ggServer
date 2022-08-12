@@ -10,7 +10,6 @@ import java.util.Map;
 
 public class CommandMapperImpl implements CommandMapper {
 
-    Map<String, ConnectionData> clients;
     private final String REGISTER = "/register";
     private final String ALLUSERS = "/allUsers";
     private final String MESSAGE = "/msg";

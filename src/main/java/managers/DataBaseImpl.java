@@ -30,7 +30,7 @@ public class DataBaseImpl implements DataBase {
 
     @Override
     public void saveClient(ClientLoginInfo clientLoginInfo) {
-        String data = clientLoginInfo.getNickname() + " " + clientLoginInfo.getSecuredPassword().password + " " + clientLoginInfo.getSecuredPassword().salt;
+        String data = clientLoginInfo.getNickname() + " " + clientLoginInfo.getSecuredPassword().getPassword() + " " + clientLoginInfo.getSecuredPassword().getSalt();
         overrideDB(data);
     }
 

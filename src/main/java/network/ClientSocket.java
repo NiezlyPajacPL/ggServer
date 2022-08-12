@@ -20,7 +20,7 @@ public class ClientSocket implements Server {
     private final Socket socket;
     private final PasswordHasher passwordHasher;
     private final MessageListener messageListener;
-    private DataBase db;
+    private final DataBase db;
     private String clientName;
     private final CommandMapper commandMapper = new CommandMapperImpl();
     private final Gson gson = new Gson();
