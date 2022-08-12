@@ -10,20 +10,20 @@ import java.util.Scanner;
 public class DataBaseImpl implements DataBase {
     private final String filePath;
     private final File registeredUsersFile;
-    private   Scanner scanner;
-    InputHelper inputHelper = new InputHelper();
-    BufferedWriter bufferedWriter;
+    private Scanner scanner;
+    private InputHelper inputHelper = new InputHelper();
+    private BufferedWriter bufferedWriter;
 
-    public DataBaseImpl(String filePath){
+    public DataBaseImpl(String filePath) {
         this.filePath = filePath;
-        registeredUsersFile= new File(filePath);
+        registeredUsersFile = new File(filePath);
     }
 
     @Override
     public ClientLoginInfo getClient(String nickname) {
-        if(clientExistInDB(nickname)){
-            return new ClientLoginInfo(nickname,getHashedPassword(nickname));
-        }else{
+        if (clientExistInDB(nickname)) {
+            return new ClientLoginInfo(nickname, getHashedPassword(nickname));
+        } else {
             return null;
         }
     }
@@ -49,6 +49,7 @@ public class DataBaseImpl implements DataBase {
         }
         return false;
     }
+
     private SecuredPassword getHashedPassword(String nickname) {
         try {
             scanner = new Scanner(registeredUsersFile);
