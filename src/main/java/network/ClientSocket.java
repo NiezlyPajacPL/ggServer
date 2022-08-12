@@ -23,7 +23,7 @@ public class ClientSocket implements Server {
     private DataBase db;
     private String clientName;
     private final CommandMapper commandMapper = new CommandMapperImpl();
-    Gson gson = new Gson();
+    private final Gson gson = new Gson();
 
     public ClientSocket(Socket socket, MessageListener messageListener, DataBase db, PasswordHasher passwordHasher) throws IOException {
         this.socket = socket;
@@ -72,7 +72,7 @@ public class ClientSocket implements Server {
                         Logger.printLogClientFailedLogin(name, socket);
                         loginData = new LoginData(Type.LOGIN, false);
                     }
-                }else{
+                } else {
                     Logger.printLogClientFailedLogin(name, socket);
                     loginData = new LoginData(Type.LOGIN, false);
                 }
@@ -81,7 +81,7 @@ public class ClientSocket implements Server {
             } else if (messageType instanceof UsersListSender) {
                 Logger.printLogUsersListRequest();
                 ArrayList<String> usersList = new ArrayList<>(messageListener.getUsersList().keySet());
-                json = gson.toJson(new OnlineUsersData(Type.ONLINE_USERS,usersList));
+                json = gson.toJson(new OnlineUsersData(Type.ONLINE_USERS, usersList));
                 sendPacket(new Packet(json.getBytes(StandardCharsets.UTF_8), socket));
             } else if (messageType instanceof Message) {
                 String receiver = ((Message) messageType).receiver;
@@ -94,8 +94,8 @@ public class ClientSocket implements Server {
                 } else {
                     Logger.printLogMessageNotSent(clientName, receiver);
                     String message = "User you are trying to reach is currently offline.";
-                    json = gson.toJson(new MessageData(Type.MESSAGE,receiver,message));
-                    sendPacket(new Packet(json.getBytes(StandardCharsets.UTF_8),socket));
+                    json = gson.toJson(new MessageData(Type.MESSAGE, receiver, message));
+                    sendPacket(new Packet(json.getBytes(StandardCharsets.UTF_8), socket));
                 }
             } else if (messageType instanceof Logout) {
                 messageListener.onClientLoggedOut(clientName);

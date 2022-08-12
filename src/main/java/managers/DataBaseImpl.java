@@ -11,8 +11,8 @@ public class DataBaseImpl implements DataBase {
     private String filePath;
     private File registeredUsersFile;
     private Scanner scanner;
-    InputHelper inputHelper = new InputHelper();
-    BufferedWriter bufferedWriter;
+    private   InputHelper inputHelper = new InputHelper();
+    private   BufferedWriter bufferedWriter;
 
     public DataBaseImpl(String filePath){
         this.filePath = filePath;
