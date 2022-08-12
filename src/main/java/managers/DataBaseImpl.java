@@ -8,9 +8,9 @@ import java.io.*;
 import java.util.Scanner;
 
 public class DataBaseImpl implements DataBase {
-    String filePath;
-    File registeredUsersFile;
-    Scanner scanner;
+    private final String filePath;
+    private final File registeredUsersFile;
+    private   Scanner scanner;
     InputHelper inputHelper = new InputHelper();
     BufferedWriter bufferedWriter;
 
