@@ -8,14 +8,11 @@ import java.io.*;
 import java.util.Scanner;
 
 public class DataBaseImpl implements DataBase {
-    private final String filePath;
     private final File registeredUsersFile;
     private Scanner scanner;
-    private InputHelper inputHelper = new InputHelper();
-    private BufferedWriter bufferedWriter;
+    private final InputHelper inputHelper = new InputHelper();
 
     public DataBaseImpl(String filePath) {
-        this.filePath = filePath;
         registeredUsersFile = new File(filePath);
     }
 
@@ -69,7 +66,7 @@ public class DataBaseImpl implements DataBase {
     private void overrideDB(String data) {
         try {
             FileWriter fileWriter = new FileWriter(registeredUsersFile.getAbsoluteFile(), true);
-            bufferedWriter = new BufferedWriter(fileWriter);
+            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
             bufferedWriter.write(data);
             bufferedWriter.newLine();
             bufferedWriter.close();
