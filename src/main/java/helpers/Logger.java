@@ -25,7 +25,7 @@ public final class Logger {
 
     public static void printLogGeneratedPassword(){println(DateAndTime.getCurrentTime() + ": Generated secured password.");}
 
-    //LOGIN
+    //LOGIN//
     public static void printLogClientLoggedIn(String nickname, Socket socket){println(DateAndTime.getCurrentTime() +
             ": Client - " + nickname + " successfully logged in. IP: " + socket.getInetAddress() + ":" + socket.getPort() );}
 
