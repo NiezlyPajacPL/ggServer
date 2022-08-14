@@ -15,6 +15,7 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.UUID;
 
 public class ClientSocket implements Server {
     private final Socket socket;
@@ -61,21 +62,20 @@ public class ClientSocket implements Server {
                 sendPacket(new Packet(gson.toJson(registerData).getBytes(StandardCharsets.UTF_8), socket));
             } else if (messageType instanceof Login) {
                 LoginData loginData;
-                String name = ((Login) messageType).name;
+                clientName = ((Login) messageType).name;
                 String password = ((Login) messageType).password;
                 if (clientExistInDB()) {
-                    Logger.printLogClientFoundInDB(name);
-                    if (passwordHasher.isPasswordValid(name, password)) {
-                        clientName = name;
-                        messageListener.onClientLoggingIn(name);
-                        Logger.printLogClientLoggedIn(name, socket);
+                    Logger.printLogClientFoundInDB(clientName);
+                    if (passwordHasher.isPasswordValid(clientName, password)) {
+                        messageListener.onClientLoggingIn(clientName);
+                        Logger.printLogClientLoggedIn(clientName, socket);
                         loginData = new LoginData(Type.LOGIN, true);
                     } else {
-                        Logger.printLogClientFailedLogin(name, socket);
+                        Logger.printLogClientFailedLogin(clientName, socket);
                         loginData = new LoginData(Type.LOGIN, false);
                     }
                 } else {
-                    Logger.printLogClientFailedLogin(name, socket);
+                    Logger.printLogClientFailedLogin(clientName, socket);
                     loginData = new LoginData(Type.LOGIN, false);
                 }
 
@@ -144,6 +144,7 @@ public class ClientSocket implements Server {
     private void registerUser(Registration registration) {
         SecuredPassword securedPassword = passwordHasher.generateSecuredPassword(registration.password);
         Logger.printLogGeneratedPassword();
+      //  String uniqueID = UUID.randomUUID().toString();
         db.saveClient(new ClientLoginInfo(registration.name, securedPassword));
     }
 
