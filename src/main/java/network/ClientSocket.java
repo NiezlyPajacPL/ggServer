@@ -20,15 +20,15 @@ public class ClientSocket implements Server {
     private final Socket socket;
     private final PasswordHandler passwordHandler;
     private final MessageListener messageListener;
-    private final DataBase db;
+    private final DataBase dB;
     private String clientName;
     private final CommandMapper commandMapper = new CommandMapperImpl();
     private final Gson gson = new Gson();
 
-    public ClientSocket(Socket socket, MessageListener messageListener, DataBase db, PasswordHandler passwordHandler) throws IOException {
+    public ClientSocket(Socket socket, MessageListener messageListener, DataBase dB, PasswordHandler passwordHandler) throws IOException {
         this.socket = socket;
         this.messageListener = messageListener;
-        this.db = db;
+        this.dB = dB;
         this.passwordHandler = passwordHandler;
     }
 
@@ -143,8 +143,7 @@ public class ClientSocket implements Server {
     private void registerUser(Registration registration) {
         SecuredPassword securedPassword = passwordHandler.generateSecuredPassword(registration.password);
         Logger.printLogGeneratedPassword();
-      //  String uniqueID = UUID.randomUUID().toString();
-        db.saveClient(new ClientLoginInfo(registration.name, securedPassword));
+        dB.saveClient(new ClientLoginInfo(registration.name,securedPassword));
     }
 
     private void stopConnection() {
@@ -161,7 +160,7 @@ public class ClientSocket implements Server {
     }
 
     private boolean clientExistInDB() {
-        return db.getClient(clientName) != null;
+        return dB.getClient(clientName).getSecuredPassword().getPassword() != null;
     }
 
     private boolean userIsOnline(String user) {

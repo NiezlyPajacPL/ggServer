@@ -13,13 +13,13 @@ import java.util.Map;
 public class TcpServer implements Runnable {
     private final int port;
     private final Map<String, Socket> onlineUsers = new HashMap<>();
-    private final DataBase dataBase;
+    private final DataBase dB;
     private final PasswordHandler passwordHandler;
 
 
-    public TcpServer(int port, DataBase dataBase, PasswordHandler passwordHandler) {
+    public TcpServer(int port, DataBase dB, PasswordHandler passwordHandler) {
         this.port = port;
-        this.dataBase = dataBase;
+        this.dB = dB;
         this.passwordHandler = passwordHandler;
     }
 
@@ -49,7 +49,7 @@ public class TcpServer implements Runnable {
                         return onlineUsers;
                     }
                 };
-                ClientSocket clientSocket = new ClientSocket(socket, messageListener,dataBase, passwordHandler);
+                ClientSocket clientSocket = new ClientSocket(socket, messageListener, dB, passwordHandler);
                 Thread clientThread = new Thread(clientSocket);
                 clientThread.start();
             }

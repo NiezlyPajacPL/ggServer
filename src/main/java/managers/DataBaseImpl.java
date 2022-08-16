@@ -1,93 +1,103 @@
 package managers;
 
 import helpers.ClientLoginInfo;
-import helpers.InputHelper;
 import helpers.SecuredPassword;
 
-import java.io.*;
-import java.nio.file.Files;
-import java.nio.file.Paths;
-import java.util.Scanner;
+import java.io.File;
+import java.sql.*;
 
 public class DataBaseImpl implements DataBase {
-    private final File registeredUsersFile;
-    private Scanner scanner;
-    private final InputHelper inputHelper = new InputHelper();
 
-    public DataBaseImpl(String filePath) {
-        registeredUsersFile = new File(filePath);
+    private final String url;
+    private Connection connection;
+    private final String filePath = "src/main/resources/dataBase/dataBase.db";
+
+    public DataBaseImpl(String url) {
+        this.url = url;
+        try {
+            connection = DriverManager.getConnection(url);
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+        File dbFile = new File(filePath);
+        if(!dbFile.exists()){
+            createDataBase();
+            createUsersTable();
+        }
     }
 
     @Override
     public ClientLoginInfo getClient(String nickname) {
-        if (clientExistInDB(nickname)) {
-            return new ClientLoginInfo(nickname, getHashedPassword(nickname));
-        } else {
-            return null;
-        }
+        return new ClientLoginInfo(nickname,getSecuredPassword(nickname));
     }
 
     @Override
     public void saveClient(ClientLoginInfo clientLoginInfo) {
-        String data = clientLoginInfo.getNickname() + " " + clientLoginInfo.getSecuredPassword().getPassword() + " " + clientLoginInfo.getSecuredPassword().getSalt();
-        createChatHistoryFolder(clientLoginInfo.getNickname());
-        overrideDB(data);
+        insertUser(clientLoginInfo);
     }
 
-    private boolean clientExistInDB(String nickname) {
+
+    private void insertUser(ClientLoginInfo clientLoginInfo) {
+        String sql = "INSERT INTO users(name, password,salt) VALUES(?,?,?)";
         try {
-            scanner = new Scanner(registeredUsersFile);
-        } catch (FileNotFoundException e) {
+            PreparedStatement statement = connection.prepareStatement(sql);
+            statement.setString(1, clientLoginInfo.getNickname());
+            statement.setString(2, clientLoginInfo.getSecuredPassword().getPassword());
+            statement.setString(3, clientLoginInfo.getSecuredPassword().getSalt());
+            statement.executeUpdate();
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
+        }
+    }
+
+    private SecuredPassword getSecuredPassword(String nickname){
+        String sql = "SELECT * FROM users";
+        String hashedPassword = null;
+        String salt = null;
+
+        try {
+            Statement stmt = connection.createStatement();
+            ResultSet rs = stmt.executeQuery(sql);
+            while (rs.next()) {
+                if(rs.getString("name").contains(nickname)){
+                    hashedPassword = rs.getString("password");
+                    salt = rs.getString("salt");
+                }
+            }
+        } catch (SQLException e) {
             e.printStackTrace();
         }
-        while (scanner.hasNextLine()) {
-            String string = scanner.nextLine();
-            String nicknameFromString = inputHelper.dataBaseDefineNickname(string);
-            if (nicknameFromString.equals(nickname)) {
-                return true;
-            }
-        }
-        return false;
+        return new SecuredPassword(hashedPassword,salt);
     }
 
-    private SecuredPassword getHashedPassword(String nickname) {
+    private void createDataBase() {
         try {
-            scanner = new Scanner(registeredUsersFile);
-        } catch (FileNotFoundException e) {
-            e.printStackTrace();
-        }
-        while (scanner.hasNextLine()) {
-            String string = scanner.nextLine();
-            String nicknameFromString = inputHelper.dataBaseDefineNickname(string);
-            if (nicknameFromString.equals(nickname)) {
-                return new SecuredPassword(inputHelper.dataBaseDefinePassword(string), inputHelper.getSaltFromDataBase(string));
+            if (connection != null) {
+                DatabaseMetaData meta = connection.getMetaData();
+                System.out.println("The driver name is " + meta.getDriverName());
+                System.out.println("A new database has been created.");
             }
+
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
         }
-        return null;
     }
 
-    private void overrideDB(String data) {
+    private void createUsersTable() {
+        // SQL statement for creating a new table
+        String sql = "CREATE TABLE IF NOT EXISTS users (\n"
+                + " id integer PRIMARY KEY,\n"
+                + " name text NOT NULL,\n"
+                + " password text NOT NULL,\n"
+                + " salt text NOT NULL\n"
+                + ");";
+
         try {
-            FileWriter fileWriter = new FileWriter(registeredUsersFile.getAbsoluteFile(), true);
-            BufferedWriter bufferedWriter = new BufferedWriter(fileWriter);
-            bufferedWriter.write(data);
-            bufferedWriter.newLine();
-            bufferedWriter.close();
-        } catch (IOException e) {
-            e.printStackTrace();
+            Connection conn = DriverManager.getConnection(url);
+            Statement stmt = conn.createStatement();
+            stmt.execute(sql);
+        } catch (SQLException e) {
+            System.out.println(e.getMessage());
         }
     }
-
-    private void createChatHistoryFolder(String nickname){
-        String filePath = "C:\\Users\\Dawid\\IdeaProjects\\ggserver\\src\\main\\resources\\dataBase\\chatHistory" + "/" + nickname;
-        System.out.println("EO E");
-        File chatHistory = new File(filePath);
-    //    chatHistory.mkdirs();
-        if (!chatHistory.exists()) {
-            if(chatHistory.mkdirs()){
-                System.out.println("Created chat history folder for " + nickname);
-            }
-        }
-    }
-
 }
