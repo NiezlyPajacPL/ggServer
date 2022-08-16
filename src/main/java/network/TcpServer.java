@@ -2,7 +2,7 @@ package network;
 
 import helpers.*;
 import managers.DataBase;
-import managers.PasswordHasher;
+import managers.PasswordHandler;
 
 import java.io.*;
 import java.net.ServerSocket;
@@ -14,13 +14,13 @@ public class TcpServer implements Runnable {
     private final int port;
     private final Map<String, Socket> onlineUsers = new HashMap<>();
     private final DataBase dataBase;
-    private final PasswordHasher passwordHasher;
+    private final PasswordHandler passwordHandler;
 
 
-    public TcpServer(int port, DataBase dataBase, PasswordHasher passwordHasher) {
+    public TcpServer(int port, DataBase dataBase, PasswordHandler passwordHandler) {
         this.port = port;
         this.dataBase = dataBase;
-        this.passwordHasher = passwordHasher;
+        this.passwordHandler = passwordHandler;
     }
 
     @Override
@@ -49,7 +49,7 @@ public class TcpServer implements Runnable {
                         return onlineUsers;
                     }
                 };
-                ClientSocket clientSocket = new ClientSocket(socket, messageListener,dataBase,passwordHasher);
+                ClientSocket clientSocket = new ClientSocket(socket, messageListener,dataBase, passwordHandler);
                 Thread clientThread = new Thread(clientSocket);
                 clientThread.start();
             }

@@ -5,6 +5,8 @@ import helpers.InputHelper;
 import helpers.SecuredPassword;
 
 import java.io.*;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.util.Scanner;
 
 public class DataBaseImpl implements DataBase {
@@ -28,6 +30,7 @@ public class DataBaseImpl implements DataBase {
     @Override
     public void saveClient(ClientLoginInfo clientLoginInfo) {
         String data = clientLoginInfo.getNickname() + " " + clientLoginInfo.getSecuredPassword().getPassword() + " " + clientLoginInfo.getSecuredPassword().getSalt();
+        createChatHistoryFolder(clientLoginInfo.getNickname());
         overrideDB(data);
     }
 
@@ -72,6 +75,18 @@ public class DataBaseImpl implements DataBase {
             bufferedWriter.close();
         } catch (IOException e) {
             e.printStackTrace();
+        }
+    }
+
+    private void createChatHistoryFolder(String nickname){
+        String filePath = "C:\\Users\\Dawid\\IdeaProjects\\ggserver\\src\\main\\resources\\dataBase\\chatHistory" + "/" + nickname;
+        System.out.println("EO E");
+        File chatHistory = new File(filePath);
+    //    chatHistory.mkdirs();
+        if (!chatHistory.exists()) {
+            if(chatHistory.mkdirs()){
+                System.out.println("Created chat history folder for " + nickname);
+            }
         }
     }
 

@@ -8,19 +8,28 @@ import java.security.NoSuchProviderException;
 import java.security.SecureRandom;
 import java.util.Objects;
 
-public class PasswordHasher {
+public class PasswordHandler {
 
-    private final DataBase dataBase;
+    private final PasswordListener passwordListener;
     private static final byte[] unWantedByte = "\n".getBytes();
 
-    public PasswordHasher(DataBase dataBase){
-        this.dataBase = dataBase;
+    public PasswordHandler(PasswordListener passwordListener) {
+        this.passwordListener = passwordListener;
     }
 
     public SecuredPassword generateSecuredPassword(String passwordToHash) {
         String salt = getSalt();
         String securePassword = getSecurePassword(passwordToHash, salt);
         return new SecuredPassword(securePassword, salt);
+    }
+
+    public boolean isPasswordValid(String nickname, String password) {
+        SecuredPassword passwordFromDB = passwordListener.getSecuredPassFromDB(nickname);
+
+        if (Objects.equals(getSecurePassword(password, passwordFromDB.getSalt()), passwordFromDB.getPassword())) {
+            return true;
+        }
+        return false;
     }
 
     private static String getSecurePassword(String passwordToHash, String salt) {
@@ -53,16 +62,6 @@ public class PasswordHasher {
         return generatedPassword;
     }
 
-    public boolean isPasswordValid(String nickname, String password){
-        SecuredPassword passwordFromDB = dataBase.getClient(nickname).getSecuredPassword();
-
-        if(Objects.equals(getSecurePassword(password, passwordFromDB.getSalt()), passwordFromDB.getPassword())){
-            return true;
-        }
-        return false;
-    }
-
-
     private String getSalt() {
         try {
             SecureRandom secureRandom = SecureRandom.getInstance("SHA1PRNG", "SUN");
@@ -79,9 +78,9 @@ public class PasswordHasher {
         return "UNKNOWN";
     }
 
-    private static void replaceUnwantedBytes(byte[] bytes){
-        for(int i = 0; i < bytes.length;i++){
-            if(bytes[i] == unWantedByte[0]){
+    private static void replaceUnwantedBytes(byte[] bytes) {
+        for (int i = 0; i < bytes.length; i++) {
+            if (bytes[i] == unWantedByte[0]) {
                 System.out.println("Replacing unwanted byte.");
                 bytes[i] = '2';
             }

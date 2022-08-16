@@ -5,7 +5,7 @@ import helpers.*;
 import helpers.MessageListener;
 import managers.DataBase;
 import helpers.Logger;
-import managers.PasswordHasher;
+import managers.PasswordHandler;
 import managers.commands.CommandMapper;
 import managers.commands.CommandMapperImpl;
 import managers.commands.messageTypes.*;
@@ -15,22 +15,21 @@ import java.io.*;
 import java.net.Socket;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
-import java.util.UUID;
 
 public class ClientSocket implements Server {
     private final Socket socket;
-    private final PasswordHasher passwordHasher;
+    private final PasswordHandler passwordHandler;
     private final MessageListener messageListener;
     private final DataBase db;
     private String clientName;
     private final CommandMapper commandMapper = new CommandMapperImpl();
     private final Gson gson = new Gson();
 
-    public ClientSocket(Socket socket, MessageListener messageListener, DataBase db, PasswordHasher passwordHasher) throws IOException {
+    public ClientSocket(Socket socket, MessageListener messageListener, DataBase db, PasswordHandler passwordHandler) throws IOException {
         this.socket = socket;
         this.messageListener = messageListener;
         this.db = db;
-        this.passwordHasher = passwordHasher;
+        this.passwordHandler = passwordHandler;
     }
 
     @Override
@@ -66,7 +65,7 @@ public class ClientSocket implements Server {
                 String password = ((Login) messageType).password;
                 if (clientExistInDB()) {
                     Logger.printLogClientFoundInDB(clientName);
-                    if (passwordHasher.isPasswordValid(clientName, password)) {
+                    if (passwordHandler.isPasswordValid(clientName, password)) {
                         messageListener.onClientLoggingIn(clientName);
                         Logger.printLogClientLoggedIn(clientName, socket);
                         loginData = new LoginData(Type.LOGIN, true);
@@ -142,7 +141,7 @@ public class ClientSocket implements Server {
     }
 
     private void registerUser(Registration registration) {
-        SecuredPassword securedPassword = passwordHasher.generateSecuredPassword(registration.password);
+        SecuredPassword securedPassword = passwordHandler.generateSecuredPassword(registration.password);
         Logger.printLogGeneratedPassword();
       //  String uniqueID = UUID.randomUUID().toString();
         db.saveClient(new ClientLoginInfo(registration.name, securedPassword));
