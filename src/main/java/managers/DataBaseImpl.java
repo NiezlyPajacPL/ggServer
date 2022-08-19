@@ -20,7 +20,7 @@ public class DataBaseImpl implements DataBase {
             e.printStackTrace();
         }
         File dbFile = new File(filePath);
-        if(!dbFile.exists()){
+        if (!dbFile.exists()) {
             createDataBase();
             createUsersTable();
         }
@@ -28,7 +28,7 @@ public class DataBaseImpl implements DataBase {
 
     @Override
     public ClientLoginInfo getClient(String nickname) {
-        return new ClientLoginInfo(nickname,getSecuredPassword(nickname));
+        return new ClientLoginInfo(nickname, getSecuredPasswordFromDB(nickname));
     }
 
     @Override
@@ -38,7 +38,7 @@ public class DataBaseImpl implements DataBase {
 
 
     private void insertUser(ClientLoginInfo clientLoginInfo) {
-        String sql = "INSERT INTO users(name, password,salt) VALUES(?,?,?)";
+        String sql = "INSERT INTO users(name,password,salt) VALUES(?,?,?)";
         try {
             PreparedStatement statement = connection.prepareStatement(sql);
             statement.setString(1, clientLoginInfo.getNickname());
@@ -50,7 +50,7 @@ public class DataBaseImpl implements DataBase {
         }
     }
 
-    private SecuredPassword getSecuredPassword(String nickname){
+    private SecuredPassword getSecuredPasswordFromDB(String nickname) {
         String sql = "SELECT * FROM users";
         String hashedPassword = null;
         String salt = null;
@@ -59,7 +59,7 @@ public class DataBaseImpl implements DataBase {
             Statement stmt = connection.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
             while (rs.next()) {
-                if(rs.getString("name").contains(nickname)){
+                if (rs.getString("name").contains(nickname)) {
                     hashedPassword = rs.getString("password");
                     salt = rs.getString("salt");
                 }
@@ -67,7 +67,7 @@ public class DataBaseImpl implements DataBase {
         } catch (SQLException e) {
             e.printStackTrace();
         }
-        return new SecuredPassword(hashedPassword,salt);
+        return new SecuredPassword(hashedPassword, salt);
     }
 
     private void createDataBase() {
@@ -77,7 +77,6 @@ public class DataBaseImpl implements DataBase {
                 System.out.println("The driver name is " + meta.getDriverName());
                 System.out.println("A new database has been created.");
             }
-
         } catch (SQLException e) {
             System.out.println(e.getMessage());
         }
@@ -91,7 +90,6 @@ public class DataBaseImpl implements DataBase {
                 + " password text NOT NULL,\n"
                 + " salt text NOT NULL\n"
                 + ");";
-
         try {
             Connection conn = DriverManager.getConnection(url);
             Statement stmt = conn.createStatement();

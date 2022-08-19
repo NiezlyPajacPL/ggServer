@@ -1,11 +1,11 @@
 # Default ignored files
 /shelf/
 /workspace.xml
-# From https://github.com/github/gitignore/blob/master/Gradle.gitignore
 .gradle
-/build/
-**/build/
-!src/**/build/
+build/
+!gradle/wrapper/gradle-wrapper.jar
+!**/src/main/**/build/
+!**/src/test/**/build/
 # Ignore Gradle GUI config
 gradle-app.setting
 
