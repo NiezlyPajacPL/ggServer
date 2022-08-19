@@ -143,7 +143,7 @@ public class ClientSocket implements Server {
     private void registerUser(Registration registration) {
         SecuredPassword securedPassword = passwordHandler.generateSecuredPassword(registration.password);
         Logger.printLogGeneratedPassword();
-        dB.saveClient(new ClientLoginInfo(registration.name,securedPassword));
+        dB.saveClient(new ClientLoginInfo(registration.name, securedPassword));
     }
 
     private void stopConnection() {
